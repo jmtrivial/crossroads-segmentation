@@ -3,6 +3,9 @@
 
 import networkx as nx
 import osmnx as ox
+import pandas as pd
+import random
+import math
 
 class Segmentation:
     label_region = "region"
@@ -16,7 +19,7 @@ class Segmentation:
 
 
     def __init__(self):
-        pass
+        random.seed()
 
     def process(self, G):
         # first set region flags
@@ -43,11 +46,42 @@ class Segmentation:
 
     # return edge colors according to the region label
     def get_regions_attr(self, G):
-        return ox.plot.get_edge_colors_by_attr(G, attr=Segmentation.label_region)
+        return Segmentation.get_edge_random_colors_by_attr(G, Segmentation.label_region)
+
+
+    def random_color():
+        r1 = math.pi * random.random()
+        r2 = math.pi * random.random()
+        coef = 0.5
+        return (coef * abs(math.sin(r1)) * abs(math.sin(r2)), \
+                coef * abs(math.cos(r1)) * abs(math.sin(r2)), \
+                coef * abs(math.sin(r1)) * abs(math.cos(r2)), 
+                1)
+
+    # return edge colors using one random color per label
+    def get_edge_random_colors_by_attr(G, label):
+        values = {}
+        result = {}
+        for e in G.edges:
+            tag = G[e[0]][e[1]][e[2]][label]
+            if not tag in values:
+                values[tag] = Segmentation.random_color()
+            result[e] = values[tag]
+        return pd.Series(result)
+        
+
 
     # return edge colors according to the boundary class
     def get_boundaries_attr(self, G):
-        return ox.plot.get_node_colors_by_attr(G, attr=Segmentation.label_boundary)
+        values = { Segmentation.label_boundary_inside_region: (0, 0, 0, 0), \
+                Segmentation.label_boundary_crossing: (1, 1, 0, 1), \
+                Segmentation.label_boundary_traffic_signals: (1, 0, 0, 1), \
+                Segmentation.label_boundary_deadend: (0, 0, 1, 1)}
+        result = {}
+        for e in G.nodes:
+            tag = G.nodes[e][Segmentation.label_boundary]
+            result[e] = values[tag]
+        return pd.Series(result)
 
     # a function to distinguish between boundary and no boundary edges
     def no_highway_nodes(G, node):
