@@ -15,7 +15,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.77704, 3.07491), dist=50, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # voisinage large du croisement Manon
-#G = ox.graph_from_point((45.77722, 3.07295), dist=300, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_point((45.77722, 3.07295), dist=300, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Jérémy (master)
 #G = ox.graph_from_point((45.77631, 3.09015), dist=200, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -27,7 +27,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.78032, 3.08051), dist=100, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Nicolas
-G = ox.graph_from_point((45.77204, 3.08085), dist=150, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77204, 3.08085), dist=150, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement décalé près du CRDV
 #G = ox.graph_from_point((45.78070, 3.07912), dist=70, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -42,15 +42,15 @@ G = ox.utils_graph.get_undirected(G)
 
 
 print("=== SEGMENTATION ===")
-seg = cs.Segmentation()
+seg = cs.Segmentation(G)
 
-seg.process(G)
+seg.process()
 
 
 print("=== RENDERING ===")
 
-ec = seg.get_regions_attr(G)
-nc = seg.get_boundaries_attr(G)
+ec = seg.get_regions_class_colors()
+nc = seg.get_boundaries_colors(False)
 
 ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
