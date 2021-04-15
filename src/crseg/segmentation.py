@@ -17,13 +17,24 @@ class Region:
     label_region_class = "region_class"
     label_boundary = "boundary"
 
-    label_boundary_inside_region = 0
-    label_boundary_crossing = 5
-    label_boundary_give_way = 6
-    label_boundary_stop = 7
-    label_boundary_traffic_signals = 10
-    label_boundary_deadend = 1
+    boundary_classes = { "inside": 0, 
+                         
+                         "deadend": 1,
+                         "turning_loop": 2,
 
+                         "crossing": 5, 
+                         "give_way": 6, 
+                         "stop": 7, 
+                         "traffic_signals": 8,
+
+                         "mini_roundabout": 20,
+                         "turning_circle": 21,
+                         "motorway_junction": 31,
+
+                         "other": 100
+                        }
+
+    highway_no_boundary = [ "bus_stop", "milestone", "steps", "elevator" ]
 
     label_region_unknown = 0
     label_region_crossroad = 1
@@ -34,17 +45,18 @@ class Region:
         self.G = G
         self.edges = []
         self.boundaries_nodes = []
+        self.inner_nodes = []
     
     def init_attr(G):
         nx.set_edge_attributes(G, values=None, name=Region.label_region)
         nx.set_edge_attributes(G, values=Region.label_region_unknown, name=Region.label_region_class)
-        nx.set_node_attributes(G, values=Region.label_boundary_inside_region, name=Region.label_boundary)
+        nx.set_node_attributes(G, values=Region.boundary_classes["inside"], name=Region.label_boundary)
 
 
     # a basic boundary is a node with highway attribute or a deadend (due to cropping, or real deadend)
     def is_basic_boundary(node, G):
         nbnb = len(list(G.neighbors(node)))
-        highway = "highway" in G.nodes[node]
+        highway = "highway" in G.nodes[node] and not G.nodes[node]["highway"] in Region.highway_no_boundary
         return highway or nbnb == 1
 
     def unknown_region(edge, G):
@@ -61,7 +73,13 @@ class Region:
 
     def add_node(self, n):
         if Region.is_basic_boundary(n, self.G):
-            self.add_boundary_node(n)
+            if not self.add_boundary_node(n):
+                self.add_inner_node(n)
+        else:
+            self.add_inner_node(n)
+    
+    def add_inner_node(self, n):
+        self.inner_nodes.append(n)
 
 
     def add_boundary_node(self, b):
@@ -72,21 +90,20 @@ class Region:
             # set boundary label
             lb = Region.label_boundary
             if "highway" in self.G.nodes[b] and self.G.nodes[b]["highway"] != None:
-                if self.G.nodes[b]["highway"] == "crossing":
-                    self.G.nodes[b][lb] = Region.label_boundary_crossing
-                elif self.G.nodes[b]["highway"] == "stop":
-                    self.G.nodes[b][lb] = Region.label_boundary_stop
-                elif self.G.nodes[b]["highway"] == "give_way":
-                    self.G.nodes[b][lb] = Region.label_boundary_give_way
-                elif self.G.nodes[b]["highway"] == "traffic_signals":
-                    self.G.nodes[b][lb] = Region.label_boundary_traffic_signals
+                if self.G.nodes[b]["highway"] in Region.boundary_classes:
+                    self.G.nodes[b][lb] = Region.boundary_classes[self.G.nodes[b]["highway"]]
                 else:
+                    self.G.nodes[b][lb] = Region.boundary_classes["other"]
                     print("Unknown tag:", self.G.nodes[b]["highway"])
+                return True
 
             elif len(list(self.G.neighbors(b))) == 1:
-                self.G.nodes[b][lb] = Region.label_boundary_deadend
+                self.G.nodes[b][lb] = Region.boundary_classes["deadend"]
+                return True
             else:
-                print("on est au niveau d'un sommet avec comme voisins", list(self.G.neighbors(b)))
+                return False
+        else:
+            return True
 
     def set_region_class(self):
         if self.is_basic_branch():
@@ -96,10 +113,14 @@ class Region:
 
     def is_basic_branch(self):
         # a street with no name shorter than x meters is not a street
-        return len(self.boundaries_nodes) == 2 and self.max_distance_to_closest_boundary() > Region.minimum_basic_street_length
+        return len(self.boundaries_nodes) == 2 and len(self.get_biffurcation_inner_nodes()) == 0 and self.max_distance_to_closest_boundary() > Region.minimum_basic_street_length
 
     def is_basic_crossroad(self):
         return len(self.boundaries_nodes) > 2 and self.max_distance_between_boundary() < Region.maximum_basic_crossroad_diameter
+
+    def get_biffurcation_inner_nodes(self):
+        return [n for n in self.inner_nodes if len(list(self.G.neighbors(n))) > 2]
+        
 
     def max_distance_to_closest_boundary(self):
         max_dist = 0
@@ -177,6 +198,18 @@ class Segmentation:
             r.set_region_class()
 
 
+    ######################### Functions used to prepare the graph ########################
+
+    def remove_footways(G):
+        to_remove = []
+        for u, v, a in G.edges(data = True):
+            if "footway" in a or "highway" in a and a["highway"] in ["footway", "cycleway"]:
+                to_remove.append((u, v))
+        G.remove_edges_from(to_remove)
+        G = ox.utils_graph.remove_isolated_nodes(G)
+        G = ox.utils_graph.get_largest_component(G)
+        return G
+
         
     ######################### Functions related to graph rendering (colors) ########################
 
@@ -215,23 +248,23 @@ class Segmentation:
 
     # return edge colors according to the boundary class
     def get_boundaries_colors(self, full_details=True):
-        values = { Region.label_boundary_inside_region: (0, 0, 0, 0), \
-                Region.label_boundary_crossing: (1, 1, 0, 1), \
-                Region.label_boundary_give_way: (0.6, 0, 0, 1), \
-                Region.label_boundary_stop: (0.7, 0, 0, 1), \
-                Region.label_boundary_traffic_signals: (1, 0, 0, 1), \
-                Region.label_boundary_deadend: (0, 0, 1, 1)}
+        values = { "inside": (0, 0, 0, 0), \
+                "crossing": (1, 1, 0, 1), \
+                "give_way": (0.6, 0, 0, 1), \
+                "stop": (0.7, 0, 0, 1), \
+                "traffic_signals": (1, 0, 0, 1), \
+                "deadend": (0, 0, 1, 1)}
         result = {}
         for e in self.G.nodes:
             tag = self.G.nodes[e][Region.label_boundary]
             if full_details:
                 result[e] = values[tag]
             else:
-                if tag == Region.label_boundary_inside_region:
-                    result[e] = values[tag]
+                if tag == Region.boundary_classes["inside"]:
+                    result[e] = (0, 0, 0, 0)
                 else:
-                    result[e] = values[Region.label_boundary_traffic_signals]
-            
+                    result[e] = (0.5, 0.5, 0.5, 0.5)
+
         return pd.Series(result)
 
 
