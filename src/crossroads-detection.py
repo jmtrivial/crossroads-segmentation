@@ -15,7 +15,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.77704, 3.07491), dist=50, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # voisinage large du croisement Manon
-G = ox.graph_from_point((45.77722, 3.07295), dist=300, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77722, 3.07295), dist=300, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Jérémy (master)
 #G = ox.graph_from_point((45.77631, 3.09015), dist=200, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -27,7 +27,7 @@ G = ox.graph_from_point((45.77722, 3.07295), dist=300, network_type="drive", ret
 #G = ox.graph_from_point((45.78032, 3.08051), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Nicolas
-#G = ox.graph_from_point((45.77204, 3.08085), dist=150, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77204, 3.08085), dist=250, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement décalé près du CRDV
 #G = ox.graph_from_point((45.78070, 3.07912), dist=70, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -35,9 +35,23 @@ G = ox.graph_from_point((45.77722, 3.07295), dist=300, network_type="drive", ret
 # abords jardin Lecoq (sud)
 #G = ox.graph_from_point((45.77162, 3.08946), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
+# détails incohérents
+#G = ox.graph_from_point((45.77717, 3.07861), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77417, 3.07702), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_point((47.26096, -1.55285), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+
+# Centre de Clermont-Ferrand
+#G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Clermont-Ferrand en entier
 #G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+
+# La Chapelle-sur-Erdre
+# G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+
+
+
+print("=== PREPROCESSING ===")
 
 # remove sidewalks, cycleways
 G = cs.Segmentation.remove_footways(G)
@@ -52,6 +66,7 @@ seg.process()
 print("=== RENDERING ===")
 
 ec = seg.get_regions_class_colors()
+#ec = seg.get_regions_colors()
 nc = seg.get_boundaries_colors(False)
 
 ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
