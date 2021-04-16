@@ -201,14 +201,18 @@ class Region:
         return len(self.boundaries_nodes) == 2 and len(self.get_biffurcation_inner_nodes()) == 0 and self.max_distance_to_closest_boundary() > Region.minimum_basic_street_length
 
 
+    def has_junction_edge_attr(self):
+        return self.has_edge_attr("junction")
+
     def has_edge_attr(self, key):
         for e in self.edges:
-            if key in self.G[e[0]][e[1]][e[2]]:
-                return True
-        return False
+            if not key in self.G[e[0]][e[1]][e[2]]:
+                return False
+        return True
 
     def is_basic_crossroad(self):
-        return self.has_edge_attr("junction") or (len(self.boundaries_nodes) > 2 and self.max_distance_between_boundary() < Region.maximum_basic_crossroad_diameter)
+        return (len(self.boundaries_nodes) <= 2 and self.has_junction_edge_attr()) or \
+             (len(self.boundaries_nodes) > 2 and self.max_distance_between_boundary() < Region.maximum_basic_crossroad_diameter)
 
     def get_biffurcation_inner_nodes(self):
         return [n for n in self.inner_nodes if len(list(self.G.neighbors(n))) > 2]
@@ -470,29 +474,53 @@ class Segmentation:
         self.regions += new_regions
 
         # after this process, consolidate crossroads:
-        # for r in self.regions:
-        #     # - if a no-labelled region is a short path and adjacent to crossroad region, it's (part of) a crossroad
-        #     if r.is_unknown() and r.is_small_path() and (r.has_adjacent_crossoroad(self.regions) or r.has_traffic_signals_boundary()):
-        #         r.set_is_crossroad()
-        #     # - if a branch region is adjacent to a crossroad region and has a traffic_signals boundary node with only 2 neighbors at the opposite extremity, it is (part of) a crossroad
-        #     if r.is_branch() and r.is_small_path_between_crossroad_and_traffic_signals(self.regions): 
-        #         r.set_is_crossroad()
+        for r in self.regions:
+            # - if a no-labelled region is a short path and adjacent to crossroad region, it's (part of) a crossroad
+            if r.is_unknown() and r.is_small_path() and (r.has_adjacent_crossoroad(self.regions) or r.has_traffic_signals_boundary()):
+                r.set_is_crossroad()
+            # - if a branch region is adjacent to a crossroad region and has a traffic_signals boundary node with only 2 neighbors at the opposite extremity, it is (part of) a crossroad
+            if r.is_branch() and r.is_small_path_between_crossroad_and_traffic_signals(self.regions): 
+                r.set_is_crossroad()
+            if r.is_branch() and r.has_junction_edge_attr():
+                r.set_is_crossroad()
 
         # finally, merge connected branches in a 2-neighbors boundary
         # TODO
+
+        # merge adjacent crossings if one of them is a simple path
+        # TODO
+
+        # merge two crossings if they are not adjacent, but connected by more than one (small)
+        # TODO
+
+        # merge crossings if they are connecting branches with similar name (3 crossings as a triangle)
+        # TODO
+
+        # a split of streets (for a road island) is not a crossroad. Might be fixed by the branch detection
+        # TODO
+
+        # branch detection: parallel ways connected to a single crossroad are part of the same branch
+        # TODO
+
+        # crossroad detection
+        # hierarchical structure:
+        # - crossroad regions
+        # - adjacent crossroad regions
+        # - weakly connected crossroad regions (see below "merge crossings")
 
 
 
     ######################### Functions used to prepare the graph ########################
 
-    def remove_footways(G):
+    def remove_footways(G, keep_all_components):
         to_remove = []
         for u, v, a in G.edges(data = True):
             if "footway" in a or "highway" in a and a["highway"] in ["footway", "cycleway"]:
                 to_remove.append((u, v))
         G.remove_edges_from(to_remove)
         G = ox.utils_graph.remove_isolated_nodes(G)
-        G = ox.utils_graph.get_largest_component(G)
+        if not keep_all_components:
+            G = ox.utils_graph.get_largest_component(G)
         return G
 
         
