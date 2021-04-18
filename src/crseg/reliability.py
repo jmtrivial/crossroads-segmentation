@@ -163,6 +163,8 @@ class Reliability:
     def is_strong_not_in_crossroad(G, n):
         return G.nodes[n][Reliability.crossroad_reliability] == Reliability.strongly_no
 
+    def is_weakly_in_crossroad_edge(G, e):
+        return G[e[0]][e[1]][0][Reliability.crossroad_reliability] >= Reliability.weakly_yes
 
     def is_strong_in_crossroad_edge(G, e):
         return G[e[0]][e[1]][0][Reliability.crossroad_reliability] == Reliability.strongly_yes

@@ -33,7 +33,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.78070, 3.07912), dist=70, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # abords jardin Lecoq (sud)
-#G = ox.graph_from_point((45.77162, 3.08946), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_point((45.77162, 3.08946), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # détails incohérents
 #G = ox.graph_from_point((45.77717, 3.07861), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -53,7 +53,7 @@ print("=== DOWNLOADING DATA ===")
 
 ### Pour les ronds-points
 # La Chapelle-sur-Erdre
-G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Saint-Herblain
 #G = ox.graph_from_place("Saint-Herblain, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -63,10 +63,12 @@ G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", ret
 
 keep_all_components = False
 
-print("=== PREPROCESSING ===")
+print("=== PREPROCESSING (1) ===")
 
 # remove sidewalks, cycleways
-G = cs.Segmentation.remove_footways(G, keep_all_components)
+G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
+
+print("=== PREPROCESSING (2) ===")
 G = ox.utils_graph.get_undirected(G)
 
 print("=== SEGMENTATION ===")
@@ -81,8 +83,8 @@ print("=== RENDERING ===")
 ec = seg.get_regions_class_colors()
 #ec = seg.get_edges_reliability_colors()
 
-#nc = seg.get_boundaries_colors(False)
-nc = seg.get_nodes_reliability_colors()
+#nc = seg.get_nodes_reliability_colors()
+nc = seg.get_boundary_node_colors()
 
 ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
