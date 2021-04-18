@@ -29,6 +29,15 @@ class Region:
     def is_branch(self):
         return False
 
+    def clear_region(self):
+        # remove edges
+        for e in self.edges:
+            self.G[e[0]][e[1]][0][Region.label_region] = None
+        
+        # then remove nodes
+        for n in self.nodes:
+            self.G.nodes[n][Region.label_region] = None
+    
     def init_attr(G):
         nx.set_edge_attributes(G, values=None, name=Region.label_region)
         nx.set_node_attributes(G, values=None, name=Region.label_region)
@@ -49,9 +58,12 @@ class Region:
         G.nodes[n][Region.label_region] = None
 
     def add_node(self, n):
-        self.nodes.append(n)
-        self.G.nodes[n][Region.label_region] = self.id
+        if self.G.nodes[n][Region.label_region] == None:
+            self.nodes.append(n)
+            self.G.nodes[n][Region.label_region] = self.id
 
     def add_edge(self, e):
-        self.nodes.append(e)
-        self.G[e[0]][e[1]][0][Region.label_region] = self.id
+        if self.G[e[0]][e[1]][0][Region.label_region] == None:
+            self.edges.append(e)
+            self.G[e[0]][e[1]][0][Region.label_region] = self.id
+

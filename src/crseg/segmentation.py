@@ -33,9 +33,9 @@ class Segmentation:
             self.regions[c.id] = c
 
         # then build straight sections
-        branches = b.Branch.build_branches(self.G)
-        for br in branches:
-            self.regions[br.id] = br
+        # branches = b.Branch.build_branches(self.G)
+        # for br in branches:
+        #     self.regions[br.id] = br
 
 
     def in_crossroad_region(self, e):
@@ -82,12 +82,15 @@ class Segmentation:
     # return edge colors according to the region label
     def get_regions_colors(self):
         result = {}
+        color = {}
         for e in self.G.edges:
             tag = self.G[e[0]][e[1]][e[2]][rg.Region.label_region]
             if tag == None:
                 result[e] = (0.5, 0.5, 0.5, 0.5)
             else:
-                result[e] = Segmentation.random_color()
+                if not tag in color:
+                    color[tag] = Segmentation.random_color()
+                result[e] = color[tag]
         return pd.Series(result)
 
     # return edge colors according to the region class label
@@ -173,20 +176,20 @@ class Segmentation:
             if nbnb == nbAdj:
                 if nbnb == 1: # dead end
                     result[n] = (0.5, 0.5, 0.5, 0.1)
-                elif not rg.Region.unknown_region_node_in_graph(self.G, n):
+                elif rg.Region.unknown_region_node_in_graph(self.G, n):
                     result[n] = (0, 0, 0.5, 1) # node not taggued, possibly a missing crossing
                 else:
                     if nb_adj_crossings >= 2:
                         result[n] = (0.6, 0.6, 0, 1) # splitter in a crossroad
                     elif nb_adj_crossings == 0 and self.is_crossroad_node(n):
-                        result[n] = (1, 0, 0, 1) # splitter in a crossroad
+                        result[n] = (1, 0, 0, 1) # single-node crossroad
                     else:
                         result[n] = (0, 0, 0, 0)
             else:
                 if nb_adj_crossings >= 2:
                     result[n] = (0.6, 0.6, 0, 1) # splitter in a crossroad
                 elif nb_adj_crossings == 0 and self.is_crossroad_node(n):
-                    result[n] = (1, 0, 0, 1) # splitter in a crossroad
+                    result[n] = (1, 0, 0, 1) # single-node crossroad
                 else:
                     result[n] = (0, 0, 0, 0)
         return pd.Series(result)

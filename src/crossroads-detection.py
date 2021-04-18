@@ -38,11 +38,12 @@ G = ox.graph_from_point((45.77162, 3.08946), dist=300, network_type="all", retai
 # détails incohérents
 #G = ox.graph_from_point((45.77717, 3.07861), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((45.77417, 3.07702), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
-#G = ox.graph_from_point((47.26096, -1.55285), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((47.26096, -1.55285), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False) # rond-point
 #G = ox.graph_from_point((45.77602, 3.07350), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((45.77563, 3.12478), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((45.76349, 3.12190), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((45.76453, 3.12314), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((47.30319, -1.54586), dist=1000, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Centre de Clermont-Ferrand
 #G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)

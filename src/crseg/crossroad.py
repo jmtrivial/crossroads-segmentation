@@ -8,18 +8,36 @@ from . import utils as u
 class Crossroad(r.Region):
 
     def __init__(self, G, node):
-        super().__init__(G)
+        r.Region.__init__(self, G)
 
-        self.max_distance_boundary_polyline = 15
-        self.max_distance_inner_polyline = 8
+        self.max_distance_boundary_polyline = { "motorway": 50, 
+                                                "trunk": 50,
+                                                "primary": 30, 
+                                                "secondary": 25, 
+                                                "tertiary": 20, 
+                                                "unclassified": 15, 
+                                                "residential": 10,
+                                                "living_street": 10,
+                                                "service": 10,
+                                                "default": 10
+                                                }
+        self.max_distance_inner_polyline = { "motorway": 50, 
+                                                "trunk": 50,
+                                                "primary": 20, 
+                                                "secondary": 15, 
+                                                "tertiary": 10, 
+                                                "unclassified": 9, 
+                                                "residential": 7,
+                                                "living_street": 7,
+                                                "service": 7,
+                                                "default": 7
+                                                }
 
         self.propagate(node)
 
     def is_crossroad(self):
         return True
 
-    def is_branch(self):
-        return False
 
     def build_crossroads(G):
         crossroads = []
@@ -27,12 +45,19 @@ class Crossroad(r.Region):
             if r.Region.unknown_region_node_in_graph(G, n):
                 if Crossroad.is_reliable_crossroad_node(G, n):
                     c = Crossroad(G, n)
-                    if len(c.nodes) == 1 and len(c.edges) == 0 and len(list(G.neighbors(n))) == 2:
-                        r.Region.clear_node_region_in_grah(G, n)
+
+                    if c.is_straight_crossing():
+                        c.clear_region()
                     else:
                         crossroads.append(c)
         return crossroads
 
+    def is_straight_crossing(self):
+        for n in self.nodes:
+            if len(list(self.G.neighbors(n))) > 2:
+                return False
+        
+        return True
 
 
     def is_reliable_crossroad_node(G, n):
@@ -46,6 +71,8 @@ class Crossroad(r.Region):
         return False
 
     def propagate(self, n):
+
+        # TODO: détection des triangles ? Détection des cercles ?
 
         self.add_node(n)
 
@@ -65,33 +92,70 @@ class Crossroad(r.Region):
 
 
     def add_path(self, path):
+        for p in path:
+            self.add_node(p)
         for p1, p2 in zip(path, path[1:]):
             self.add_edge((p1, p2))
 
     def is_correct_inner_node(self, node):
-        return rl.Reliability.is_weakly_in_crossroad(self.G, node)
+        return not rl.Reliability.is_weakly_boundary(self.G, node)
+
+    def get_highway_classification(self, path):
+        edge = self.G[path[0]][path[1]][0]
+        if not "highway" in edge:
+            return "default"
+        highway = edge["highway"]
+        highway_link = highway + "_link"
+        if highway_link in self.max_distance_boundary_polyline:
+            highway = highway_link
+        if not highway in self.max_distance_boundary_polyline:
+            highway = "default"
+        return highway
+
+    def is_inner_path_by_osmdata(self, path):
+        for p1, p2 in zip(path, path[1:]):
+            if not "junction" in self.G[p1][p2][0]:
+                return False
+        return True
+
+    def is_correct_inner_path_with_boundary(self, path):
+
+        # remove loops
+        if path[0] == path[len(path) - 1]:
+            return False
+
+        if self.is_inner_path_by_osmdata(path):
+            return True
+
+        first = path[0]
+        last = path[len(path) - 1]
+        if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_boundary(self.G, last):
+            d =  u.Util.distance(self.G, first, last) # TODO: use path length
+            highway = self.get_highway_classification(path)
+            if d < self.max_distance_boundary_polyline[highway]:
+                return True
+            else:
+                return False
+
+    def is_correct_inner_path_without_boundary(self, path):
+        if self.is_inner_path_by_osmdata(path):
+            return True
+
+        first = path[0]
+        last = path[len(path) - 1]
+        if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_in_crossroad(self.G, last):
+            d =  u.Util.distance(self.G, first, last) # TODO: use path length
+            highway = self.get_highway_classification(path)
+            if d < self.max_distance_inner_polyline[highway]:
+                return True
+            else:
+                return False
 
     def is_correct_inner_path(self, path):
         if len(path) < 2:
             return False
-
-        first = path[0]
-        last = path[len(path) - 1]
-
-        d =  u.Util.distance(self.G, first, last)
-        if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_boundary(self.G, last):
-            if d < self.max_distance_boundary_polyline:
-                return True
-            else:
-                return False
         
-        if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_in_crossroad(self.G, last):
-            if d < self.max_distance_inner_polyline:
-                return True
-            else:
-                return False
-
-        return False
+        return self.is_correct_inner_path_with_boundary(path) or self.is_correct_inner_path_without_boundary(path)
 
     def get_possible_path(self, n1, n2):
 

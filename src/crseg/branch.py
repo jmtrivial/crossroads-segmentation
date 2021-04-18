@@ -6,26 +6,47 @@ from . import utils as u
 
 class Branch(r.Region):
 
+
     def __init__(self, G, node):
-        super().__init__(G)
+        r.Region.__init__(self, G)
+
+        self.min_branch_length = { "motorway": 100, 
+                                    "trunk": 100,
+                                    "primary": 20, 
+                                    "secondary": 20, 
+                                    "tertiary": 15, 
+                                    "unclassified": 10, 
+                                    "residential": 10,
+                                    "living_street": 10,
+                                    "service": 5,
+                                    "default": 5
+                                    }
 
         self.propagate(node)
 
     def is_branch(self):
         return True
 
-    def is_crossroad(self):
-        return False
 
     def build_branches(G):
         branches = []
+
+        # TODO: on trouve tous les chemins 2-segments sans weakly_boundary, éventuellement jusqu'aux crossings déjà repérés
+        # on ne garde que ceux qui sont plus longs que le critère (ou qui relient deux passages piétons)
+        # si deux chemins partagent un node, on fusionne ?
+        # on repère les chemins parallèles (éventuellement parallèles), on les fusionne.
+        # Attention aux configuration |├ pour lesquelles il faudra couper en deux le chemin le plus long...
+
         for e in G.edges:
             if r.Region.unknown_region_edge_in_graph(G, e):
-                if Branch.is_reliable_branch_edge(G, e):
-                    branches.append(Branch(G, e))
+                b = Branch(G, e)
+                if b.is_valid_branch(b):
+                    branches.append(b)
+                else:
+                    b.clear_region()
         return branches
 
-    def is_reliable_branch_edge(G, e):
+    def is_valid_branch(self, b):
         # TODO
         return True
 
