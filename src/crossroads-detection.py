@@ -39,9 +39,13 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.77717, 3.07861), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((45.77417, 3.07702), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((47.26096, -1.55285), dist=150, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77602, 3.07350), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77563, 3.12478), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.76349, 3.12190), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.76453, 3.12314), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Centre de Clermont-Ferrand
-G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Clermont-Ferrand en entier
 #G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -49,7 +53,7 @@ G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, n
 
 ### Pour les ronds-points
 # La Chapelle-sur-Erdre
-#G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Saint-Herblain
 #G = ox.graph_from_place("Saint-Herblain, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -57,7 +61,7 @@ G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, n
 
 # PARAMETERS
 
-keep_all_components = True
+keep_all_components = False
 
 print("=== PREPROCESSING ===")
 
@@ -73,9 +77,12 @@ seg.process()
 
 print("=== RENDERING ===")
 
-ec = seg.get_regions_class_colors()
 #ec = seg.get_regions_colors()
-nc = seg.get_boundaries_colors(False)
+ec = seg.get_regions_class_colors()
+#ec = seg.get_edges_reliability_colors()
+
+#nc = seg.get_boundaries_colors(False)
+nc = seg.get_nodes_reliability_colors()
 
 ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
