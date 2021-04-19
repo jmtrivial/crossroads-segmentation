@@ -7,7 +7,6 @@ import math
 
 
 from . import crossroad as cr
-from . import branch as b
 from . import region as rg
 from . import reliability as rel
 
@@ -32,10 +31,13 @@ class Segmentation:
         for c in crossroads:
             self.regions[c.id] = c
 
-        # then build straight sections
-        # branches = b.Branch.build_branches(self.G)
-        # for br in branches:
-        #     self.regions[br.id] = br
+        # TODO
+        # ce qui va se passer:
+        # - on aggrège au besoin les carrefour en carrefour complexes
+        # - pour chaque carrefour (complexe ou non), on calcule ses branches
+        # et voilà
+
+
 
 
     def in_crossroad_region(self, e):
@@ -45,14 +47,17 @@ class Segmentation:
         else: 
             return self.regions[tag].is_crossroad()
 
-    def get_adjacent_crossing_regions(self, n):
-        result = set()
+
+    def get_adjacent_crossroad_regions(self, n):
+        result = []
         for nb in self.G.neighbors(n):
             e = (n, nb)
             tag = self.G[e[0]][e[1]][0][rg.Region.label_region]
             if tag != None and self.regions[tag].is_crossroad():
-                result.add(self.regions[tag].id)
-        return list(result)
+                result.append(self.regions[tag].id)
+            else:
+                result.append(None)
+        return result
 
     def is_crossroad_node(self, n):
         tag = self.G.nodes[n][rg.Region.label_region]
@@ -132,20 +137,42 @@ class Segmentation:
             result[e] = values[tag]
         return pd.Series(result)
         
+    def get_nodes_reliability_on_regions_colors(self):
 
+        result = {}
+        for n in self.G.nodes:
+            r_class = rel.Reliability.get_best_reliability_node(self.G, n)
+            r_value = self.G.nodes[n][r_class]
+            coef = (r_value - rel.Reliability.strongly_no) / (rel.Reliability.strongly_yes - rel.Reliability.strongly_no)
+            coef = math.pow(coef, 2)
+            if r_class == rel.Reliability.crossroad_reliability:
+                result[n] = (0.8, 0, 0, coef)
+            elif r_class == rel.Reliability.boundary_reliability:
+                adj = self.get_adjacent_crossroad_regions(n)
+                # in the middle of a branch
+                if len([n for n in adj if n != None]) == 0:
+                    result[n] = (0, 0, 0.6, coef)
+                # inside a region
+                elif len(list(set([n for n in adj if n != None]))) == 1 and len([n for n in adj if n != None]) != 1:
+                    result[n] = (1, 0.6, 0.6, coef)
+                # in a boundary
+                else:
+                    result[n] = (0.6, 0.6, 0, coef)
+
+            else: # branch
+                result[n] = (0, 0, 0, 0)
+
+
+        return pd.Series(result)
 
 
     def get_edges_reliability_colors(self):
         result = {}
         for e in self.G.edges:
-            r_class = rel.Reliability.get_best_reliability_edge(self.G, e)
-            r_value = self.G[e[0]][e[1]][e[2]][r_class]
+            r_value = self.G[e[0]][e[1]][e[2]][rel.Reliability.crossroad_reliability]
             coef = (r_value - rel.Reliability.strongly_no) / (rel.Reliability.strongly_yes - rel.Reliability.strongly_no)
             coef = math.pow(coef, 2)
-            if r_class == rel.Reliability.branch_reliability:
-                result[e] = (0.6, 0.6, 0, coef)
-            else:
-                result[e] = (0.8, 0, 0, coef)
+            result[e] = (0.8, 0, 0, coef)
         return pd.Series(result)
 
     def get_nodes_reliability_colors(self):
@@ -156,9 +183,7 @@ class Segmentation:
             r_value = self.G.nodes[n][r_class]
             coef = (r_value - rel.Reliability.strongly_no) / (rel.Reliability.strongly_yes - rel.Reliability.strongly_no)
             coef = math.pow(coef, 2)
-            if r_class == rel.Reliability.branch_reliability:
-                result[n] = (0.6, 0.6, 0, coef)
-            elif r_class == rel.Reliability.boundary_reliability:
+            if r_class == rel.Reliability.boundary_reliability:
                 result[n] = (0.1, 0, 0.8, coef)
             else:
                 result[n] = (0.8, 0, 0, coef)
@@ -170,7 +195,7 @@ class Segmentation:
 
         result = {}
         for n in self.G.nodes:
-            nb_adj_crossings = len(self.get_adjacent_crossing_regions(n))
+            nb_adj_crossings = len(list(set([r for r in self.get_adjacent_crossroad_regions(n) if r != None])))
             nbnb = len(list(self.G.neighbors(n)))
             nbAdj = len([ nb for nb in self.G.neighbors(n) if rg.Region.unknown_region_edge_in_graph(self.G, (n, nb))])
             if nbnb == nbAdj:

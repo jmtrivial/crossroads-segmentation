@@ -21,16 +21,16 @@ class Crossroad(r.Region):
                                                 "service": 10,
                                                 "default": 10
                                                 }
-        self.max_distance_inner_polyline = { "motorway": 50, 
-                                                "trunk": 50,
-                                                "primary": 20, 
-                                                "secondary": 15, 
-                                                "tertiary": 10, 
-                                                "unclassified": 9, 
-                                                "residential": 7,
-                                                "living_street": 7,
-                                                "service": 7,
-                                                "default": 7
+        self.max_distance_inner_polyline = { "motorway": 15, 
+                                                "trunk": 15,
+                                                "primary": 10, 
+                                                "secondary": 7, 
+                                                "tertiary": 7, 
+                                                "unclassified": 5, 
+                                                "residential": 3,
+                                                "living_street": 3,
+                                                "service": 3,
+                                                "default": 3
                                                 }
 
         self.propagate(node)
@@ -181,7 +181,6 @@ class Crossroad(r.Region):
             return False
 
         return not (rl.Reliability.is_weakly_boundary(self.G, node) \
-                or rl.Reliability.is_weakly_in_branch(self.G, node) \
                 or rl.Reliability.is_weakly_in_crossroad(self.G, node))
 
     def get_next_node_along_polyline(self, current, pred):
