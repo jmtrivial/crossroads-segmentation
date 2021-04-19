@@ -57,7 +57,6 @@ class Reliability:
 
     def compute_nodes_reliability(G):
 
-        # TODO: consider distances relative to the kind of way (primary, etc.)
         for n in G.nodes:
             nb_neighbors = len(list(G.neighbors(n)))
 
