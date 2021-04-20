@@ -50,12 +50,12 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Clermont-Ferrand en entier
-G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 
 ### Pour les ronds-points
 # La Chapelle-sur-Erdre
-#G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Saint-Herblain
 #G = ox.graph_from_place("Saint-Herblain, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)

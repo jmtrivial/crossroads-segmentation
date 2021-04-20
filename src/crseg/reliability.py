@@ -63,6 +63,7 @@ class Reliability:
             if "highway" in G.nodes[n]:
                 if nb_neighbors == 2:
                     G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_no
+                
                 if G.nodes[n]["highway"] in Reliability.strongly_no_boundary_attr:
                     G.nodes[n][Reliability.boundary_reliability] = Reliability.moderate_no
                 elif G.nodes[n]["highway"] in Reliability.possible_boundary and nb_neighbors <= 3:
@@ -74,13 +75,8 @@ class Reliability:
                     G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_yes
             else:
                 if nb_neighbors == 2:
-                    all = True
-                    for nb in G.neighbors(n):
-                        if u.Util.distance(G, n, nb) < Reliability.distance_inner_branch:
-                            all = False
-                            break
-                    if all:
-                        G.nodes[n][Reliability.boundary_reliability] = Reliability.strongly_no
+                    G.nodes[n][Reliability.boundary_reliability] = Reliability.strongly_no
+                    G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_no
                 elif nb_neighbors >= 4:
                         G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_yes
                 elif nb_neighbors == 3:
