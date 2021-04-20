@@ -27,7 +27,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.78032, 3.08051), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Nicolas
-G = ox.graph_from_point((45.77204, 3.08085), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77204, 3.08085), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement décalé près du CRDV
 #G = ox.graph_from_point((45.78070, 3.07912), dist=70, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -44,12 +44,13 @@ G = ox.graph_from_point((45.77204, 3.08085), dist=500, network_type="drive", ret
 #G = ox.graph_from_point((45.76349, 3.12190), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((45.76453, 3.12314), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 #G = ox.graph_from_point((47.30319, -1.54586), dist=1000, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((48.84247, 2.43874), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Centre de Clermont-Ferrand
-# G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Clermont-Ferrand en entier
-#G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 
 ### Pour les ronds-points

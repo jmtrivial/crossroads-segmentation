@@ -10,6 +10,9 @@ class Util:
         y2 = G.nodes[node2]["y"]
         return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
 
+    def length(G, path):
+        return sum([Util.distance(G, p1, p2) for p1, p2 in zip(path, path[1:])])
+
     def get_adjacent_streetnames(G, node):
         streetnames = set()
         for nb in G.neighbors(node):
@@ -18,3 +21,46 @@ class Util:
             else:
                 streetnames.add(None)
         return list(streetnames)
+
+    def is_biffurcation(G, n):
+        return len(list(G.neighbors(n))) > 2
+
+    def is_middle_polyline(G, n):
+        return len(list(G.neighbors(n))) == 2
+
+    def get_opposite_node(G, n, other):
+        for nb in G.neighbors(n):
+            if nb != other:
+                return nb
+        # will not append
+        return None
+
+
+    def get_path_to_biffurcation(G, n1, n2):
+        path = [n1, n2]
+
+        while Util.is_middle_polyline(G, path[len(path) - 1]):
+            path.append(Util.get_opposite_node(G, path[len(path) - 1], path[len(path) - 2]))
+        
+        return path
+
+    def is_part_of_local_triangle(G, n, max_perimeter = 150):
+
+        paths = [ Util.get_path_to_biffurcation(G, n, nb) for nb in G.neighbors(n)]
+
+        for i1, p1 in enumerate(paths):
+
+            p1_end = p1[len(p1) - 1]
+            p1_end_paths = [ Util.get_path_to_biffurcation(G, p1_end, nb) for nb in G.neighbors(p1_end)]
+            p1_end_neighbors = [ p[len(p) - 1] for p in p1_end_paths]
+
+            for i2 in range(i1, len(paths)):
+                p2 = paths[i2]
+                p2_end = p2[len(p2) - 1]
+                if p2_end in p1_end_neighbors:
+                    p = [ path for path in p1_end_paths if path[len(path) - 1] == p2_end][0]
+                    l = Util.length(G, p1) + Util.length(G, p2) + Util.length(G, p)
+                    if l < max_perimeter:
+                        return True
+
+        return False

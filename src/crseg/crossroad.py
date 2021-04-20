@@ -12,26 +12,16 @@ class Crossroad(r.Region):
 
         self.max_distance_boundary_polyline = { "motorway": 50, 
                                                 "trunk": 50,
-                                                "primary": 30, 
-                                                "secondary": 25, 
-                                                "tertiary": 20, 
-                                                "unclassified": 15, 
-                                                "residential": 10,
-                                                "living_street": 10,
-                                                "service": 10,
-                                                "default": 10
+                                                "primary": 40, 
+                                                "secondary": 30, 
+                                                "tertiary": 25, 
+                                                "unclassified": 20, 
+                                                "residential": 20,
+                                                "living_street": 15,
+                                                "service": 15,
+                                                "default": 15
                                                 }
-        self.max_distance_inner_polyline = { "motorway": 15, 
-                                                "trunk": 15,
-                                                "primary": 10, 
-                                                "secondary": 7, 
-                                                "tertiary": 7, 
-                                                "unclassified": 5, 
-                                                "residential": 3,
-                                                "living_street": 3,
-                                                "service": 3,
-                                                "default": 3
-                                                }
+
 
         self.propagate(node)
 
@@ -72,8 +62,6 @@ class Crossroad(r.Region):
 
     def propagate(self, n):
 
-        # TODO: détection des triangles ? Détection des cercles ?
-
         self.add_node(n)
 
         stack = [n]
@@ -100,8 +88,22 @@ class Crossroad(r.Region):
     def is_correct_inner_node(self, node):
         return not rl.Reliability.is_weakly_boundary(self.G, node)
 
-    def get_highway_classification(self, path):
-        edge = self.G[path[0]][path[1]][0]
+    def get_max_highway_classification(self):
+        if len(self.nodes) == 0:
+            return None
+        result = "default"
+        value = self.max_distance_boundary_polyline[result]
+        center = self.nodes[0]
+        for nb in self.G.neighbors(center):
+            c = self.get_highway_classification((center, nb))
+            v = self.max_distance_boundary_polyline[c]
+            if v > value:
+                result = c
+                value = v
+        return result
+            
+
+    def get_highway_classification(self, edge):
         if not "highway" in edge:
             return "default"
         highway = edge["highway"]
@@ -118,44 +120,27 @@ class Crossroad(r.Region):
                 return False
         return True
 
-    def is_correct_inner_path_with_boundary(self, path):
-
-        # remove loops
+    def is_correct_inner_path(self, path):
+        if len(path) < 2:
+            return False
+        # loops are not correct inner path in a crossing
         if path[0] == path[len(path) - 1]:
             return False
 
+        # use "junction" OSM tag as a good clue
         if self.is_inner_path_by_osmdata(path):
             return True
 
         first = path[0]
         last = path[len(path) - 1]
         if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_boundary(self.G, last):
-            d =  u.Util.distance(self.G, first, last) # TODO: use path length
-            highway = self.get_highway_classification(path)
+            d =  u.Util.length(self.G, path)
+            highway = self.get_max_highway_classification()
             if d < self.max_distance_boundary_polyline[highway]:
                 return True
             else:
                 return False
 
-    def is_correct_inner_path_without_boundary(self, path):
-        if self.is_inner_path_by_osmdata(path):
-            return True
-
-        first = path[0]
-        last = path[len(path) - 1]
-        if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_in_crossroad(self.G, last):
-            d =  u.Util.distance(self.G, first, last) # TODO: use path length
-            highway = self.get_highway_classification(path)
-            if d < self.max_distance_inner_polyline[highway]:
-                return True
-            else:
-                return False
-
-    def is_correct_inner_path(self, path):
-        if len(path) < 2:
-            return False
-        
-        return self.is_correct_inner_path_with_boundary(path) or self.is_correct_inner_path_without_boundary(path)
 
     def get_possible_path(self, n1, n2):
 

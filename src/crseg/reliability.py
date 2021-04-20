@@ -61,6 +61,8 @@ class Reliability:
             nb_neighbors = len(list(G.neighbors(n)))
 
             if "highway" in G.nodes[n]:
+                if nb_neighbors == 2:
+                    G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_no
                 if G.nodes[n]["highway"] in Reliability.strongly_no_boundary_attr:
                     G.nodes[n][Reliability.boundary_reliability] = Reliability.moderate_no
                 elif G.nodes[n]["highway"] in Reliability.possible_boundary and nb_neighbors <= 3:
@@ -81,14 +83,18 @@ class Reliability:
                         G.nodes[n][Reliability.boundary_reliability] = Reliability.strongly_no
                 elif nb_neighbors >= 4:
                         G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_yes
-                elif nb_neighbors >= 3:
+                elif nb_neighbors == 3:
                         adj_streetnames = u.Util.get_adjacent_streetnames(G, n)
-                        # if all branches have same street name, not rely on a crossroad
-                        if len(adj_streetnames) == 1 and not adj_streetnames[0] == None:
-                            G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_no
-                        elif len(adj_streetnames) > 1:
+
+                        if len(adj_streetnames) > 1:
                             # more than one street name, it is probably part of a crossroad
                             G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_yes
+                        else:
+                            # only one name
+                            if u.Util.is_part_of_local_triangle(G, n):
+                                G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_no
+                            else:
+                                G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_yes
 
 
     def get_best_reliability_node(G, n):
