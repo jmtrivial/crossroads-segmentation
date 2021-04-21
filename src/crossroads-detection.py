@@ -33,7 +33,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.78070, 3.07912), dist=70, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # abords jardin Lecoq (sud)
-#G = ox.graph_from_point((45.77162, 3.08946), dist=300, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_point((45.77162, 3.08946), dist=500, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # détails incohérents
 #G = ox.graph_from_point((45.77717, 3.07861), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -55,7 +55,7 @@ print("=== DOWNLOADING DATA ===")
 
 ### Pour les ronds-points
 # La Chapelle-sur-Erdre
-G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_place("La Chapelle-sur-Erdre, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Saint-Herblain
 #G = ox.graph_from_place("Saint-Herblain, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)

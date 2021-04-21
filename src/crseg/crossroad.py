@@ -10,18 +10,29 @@ class Crossroad(r.Region):
     def __init__(self, G, node):
         r.Region.__init__(self, G)
 
-        self.max_distance_boundary_polyline = { "motorway": 50, 
-                                                "trunk": 50,
-                                                "primary": 40, 
-                                                "secondary": 30, 
-                                                "tertiary": 25, 
-                                                "unclassified": 20, 
-                                                "residential": 20,
-                                                "living_street": 15,
-                                                "service": 15,
-                                                "default": 15
+        self.max_distance_boundary_polyline = { "motorway": 100, 
+                                                "trunk": 100,
+                                                "primary": 80, 
+                                                "secondary": 80, 
+                                                "tertiary": 50, 
+                                                "unclassified": 40, 
+                                                "residential": 40,
+                                                "living_street": 40,
+                                                "service": 40,
+                                                "default": 40
                                                 }
 
+        self.min_distance_boundary_polyline = { "motorway": 100, 
+                                                "trunk": 100,
+                                                "primary": 50, 
+                                                "secondary": 30, 
+                                                "tertiary": 25, 
+                                                "unclassified": 16, 
+                                                "residential": 16,
+                                                "living_street": 16,
+                                                "service": 12,
+                                                "default": 12
+                                                }
 
         self.propagate(node)
 
@@ -64,19 +75,15 @@ class Crossroad(r.Region):
 
         self.add_node(n)
 
-        stack = [n]
 
-        while stack:
-            parent = stack.pop()
 
-            for nb in self.G.neighbors(parent):
-                if self.unknown_region_edge((parent, nb)):
-                    path = self.get_possible_path(parent, nb)
+        for nb in self.G.neighbors(n):
+            if self.unknown_region_edge((n, nb)):
+                paths = self.get_possible_paths(n, nb)
+                for path in paths[::-1]:
                     if path != None and self.is_correct_inner_path(path):
                         self.add_path(path)
-                        next = path[len(path) - 1]
-                        if self.is_correct_inner_node(next):
-                            stack.append(next)
+                        break
 
 
     def add_path(self, path):
@@ -88,20 +95,33 @@ class Crossroad(r.Region):
     def is_correct_inner_node(self, node):
         return not rl.Reliability.is_weakly_boundary(self.G, node)
 
-    def get_max_highway_classification(self):
+    def get_max_highway_classification_other(self, path):
         if len(self.nodes) == 0:
             return None
         result = "default"
         value = self.max_distance_boundary_polyline[result]
         center = self.nodes[0]
         for nb in self.G.neighbors(center):
-            c = self.get_highway_classification((center, nb))
-            v = self.max_distance_boundary_polyline[c]
-            if v > value:
-                result = c
-                value = v
+            if nb != path[1]:
+                c = self.get_highway_classification((center, nb))
+                v = self.max_distance_boundary_polyline[c]
+                if v > value:
+                    result = c
+                    value = v
         return result
             
+
+    def get_closest_possible_biffurcation(self, point):
+        result = -1
+        length = -1
+        for nb in self.G.neighbors(point):
+            path = u.Util.get_path_to_biffurcation(self.G, point, nb)
+            l = u.Util.length(self.G, path)
+            if length < 0 or l < length:
+                length = l
+                result = path[len(path) - 1]
+
+        return result
 
     def get_highway_classification(self, edge):
         if not "highway" in edge:
@@ -135,38 +155,66 @@ class Crossroad(r.Region):
         last = path[len(path) - 1]
         if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_boundary(self.G, last):
             d =  u.Util.length(self.G, path)
-            highway = self.get_max_highway_classification()
-            if d < self.max_distance_boundary_polyline[highway]:
+            highway = self.get_max_highway_classification_other(path)
+            if d < self.min_distance_boundary_polyline[highway] or \
+                (d < self.max_distance_boundary_polyline[highway] and \
+                self.get_closest_possible_biffurcation(last) == first):
                 return True
             else:
                 return False
 
 
-    def get_possible_path(self, n1, n2):
+    def get_possible_paths(self, n1, n2):
+        results = []
 
         path = [n1, n2]
 
+        # check first for a boundary
         while self.is_middle_path_node(path[len(path) - 1]):
             next = self.get_next_node_along_polyline(path[len(path) - 1], path[len(path) - 2])                
 
             if next == None:
                 print("ERROR: cannot follow a path")
-                return None
+                return results
             path.append(next)
 
             # if we reach a known region, we stop the expension process
             if not self.unknown_region_node(next):
                 break
 
-        
-        return path
+        results.append(path)
+
+        if not self.is_middle_path_node(path[len(path) - 1], True):
+            return results
+        path = path.copy()
+
+        # if it's a weak border, we continue until we reach a strong one
+        while self.is_middle_path_node(path[len(path) - 1], True):
+            next = self.get_next_node_along_polyline(path[len(path) - 1], path[len(path) - 2])                
+
+            if next == None:
+                print("ERROR: cannot follow a path")
+                return results
+            path.append(next)
+
+            # if we reach a known region, we stop the expension process
+            if not self.unknown_region_node(next):
+                break
+
+        results.append(path)
+
+        return results
     
-    def is_middle_path_node(self, node):
+    def is_middle_path_node(self, node, strong = False):
         if len(list(self.G.neighbors(node))) != 2:
             return False
 
-        return not (rl.Reliability.is_weakly_boundary(self.G, node) \
-                or rl.Reliability.is_weakly_in_crossroad(self.G, node))
+        if strong:
+            return not (rl.Reliability.is_strong_boundary(self.G, node) \
+                    or rl.Reliability.is_strong_in_crossroad(self.G, node))
+        else:
+            return not (rl.Reliability.is_weakly_boundary(self.G, node) \
+                    or rl.Reliability.is_weakly_in_crossroad(self.G, node))
 
     def get_next_node_along_polyline(self, current, pred):
         for n in self.G.neighbors(current):
