@@ -57,7 +57,8 @@ class Crossroad(r.Region):
         edges = [(nb, border) for nb in self.G.neighbors(border) if self.has_edge((nb, border))]
         return [self.get_branch_description_from_edge(e) for e in edges]
 
-    def get_radius(self, borders):
+    def get_radius(self):
+        borders = [n for n in self.nodes if self.is_boundary_node(n)]
         center = self.getCenter()
         if len(borders) == 0:
             radius = 0
@@ -84,9 +85,9 @@ class Crossroad(r.Region):
         self.branches = []
 
         center = self.getCenter()
-        borders = [n for n in self.nodes if self.is_boundary_node(n)]
+        radius = self.get_radius()
 
-        radius = self.get_radius(borders)
+        borders = [n for n in self.nodes if self.is_boundary_node(n)]
 
         for b in borders:
             if b != center:
@@ -279,3 +280,58 @@ class Crossroad(r.Region):
         # cannot append
         return None
 
+
+    def get_crossroads_in_neighborhood(self, crossroads):
+        result = []
+
+        center = self.getCenter()
+        radius = self.get_radius() * 4
+
+        for c in crossroads:
+            if c.id != self.id and u.Util.distance(self.G, center, c.getCenter()) < radius:
+                result.append(c)
+
+        return result
+
+    def in_same_cluster(self, crossroad):        
+
+        angle = u.Util.bearing(self.G, self.getCenter(), crossroad.getCenter())
+
+        for b1 in self.branches:
+            for b2 in crossroad.branches:
+                if b1.is_similar(b2) and b1.is_orthogonal(angle):
+                    return True
+
+        return False
+
+    def get_clusters(crossroads):
+        result = []
+
+        visited = []
+
+        for crossroad in crossroads:
+            if not crossroad.id in visited:
+                visited.append(crossroad.id)
+
+                
+                cluster = [crossroad]
+                cr_in_neigborhood = crossroad.get_crossroads_in_neighborhood(crossroads)
+                for cr in cr_in_neigborhood:
+                    if crossroad.in_same_cluster(cr):
+                        if not cr.id in visited:
+                            visited.append(cr.id)
+                            cluster.append(cr)
+                        else:
+                            # merge clusters
+                            other_cluster = [c for c in result if cr in c]
+                            if len(other_cluster) != 1:
+                                print("Error while merging two clusters")
+                            else:
+                                other_cluster = other_cluster[0]
+                                cluster = cluster + other_cluster
+                                result = [c for c in result if not cr in c]
+                            
+                if len(cluster) > 1:
+                    result.append(cluster)
+
+        return result

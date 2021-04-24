@@ -20,6 +20,15 @@ class Util:
     def length(G, path):
         return sum([Util.distance(G, p1, p2) for p1, p2 in zip(path, path[1:])])
 
+    def angular_distance(angle1, angle2):
+        a = angle1 - angle2
+        if a > 180:
+            a -= 360
+        if a < -180:
+            a += 360 
+        return abs(a)
+
+
     def get_adjacent_streetnames(G, node):
         streetnames = set()
         for nb in G.neighbors(node):

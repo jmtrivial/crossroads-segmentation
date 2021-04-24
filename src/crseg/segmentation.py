@@ -31,11 +31,15 @@ class Segmentation:
         for c in crossroads:
             self.regions[c.id] = c
 
-        # TODO
-        # ce qui va se passer:
-        # - on aggrège au besoin les carrefour en carrefour complexes
-        # - pour chaque carrefour (complexe ou non), on calcule ses branches
-        # et voilà
+
+        # group subparts of crossroads together if they are part of the same crossing
+        clusters = cr.Crossroad.get_clusters(crossroads)
+
+        # for each cluster
+        for cluster in clusters:
+            print("on a un cluster:", [c.branches for c in cluster])
+            # merge them
+            # TODO
 
 
 
