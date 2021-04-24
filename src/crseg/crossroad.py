@@ -1,8 +1,10 @@
 
+import osmnx as ox
 
 from . import reliability as rl
 from . import region as r
 from . import utils as u
+from . import branch_description as bd
 
 
 class Crossroad(r.Region):
@@ -15,11 +17,11 @@ class Crossroad(r.Region):
                                                 "primary": 80, 
                                                 "secondary": 80, 
                                                 "tertiary": 50, 
-                                                "unclassified": 40, 
-                                                "residential": 40,
-                                                "living_street": 40,
-                                                "service": 40,
-                                                "default": 40
+                                                "unclassified": 30, 
+                                                "residential": 30,
+                                                "living_street": 25,
+                                                "service": 25,
+                                                "default": 25
                                                 }
 
         self.min_distance_boundary_polyline = { "motorway": 100, 
@@ -36,9 +38,66 @@ class Crossroad(r.Region):
 
         self.propagate(node)
 
+        self.build_branches_description()
+
+    def getCenter(self):
+        return self.nodes[0]
+
     def is_crossroad(self):
         return True
 
+
+    def get_branch_description_from_edge(self, edge):
+        e = self.G[edge[0]][edge[1]][0]
+        angle = u.Util.bearing(self.G, self.getCenter(), edge[1])
+        name = e["name"] if "name" in e else None
+        return bd.BranchDescription(angle, name)
+
+    def get_branches_description_from_node(self, border):
+        edges = [(nb, border) for nb in self.G.neighbors(border) if self.has_edge((nb, border))]
+        return [self.get_branch_description_from_edge(e) for e in edges]
+
+    def get_radius(self, borders):
+        center = self.getCenter()
+        if len(borders) == 0:
+            radius = 0
+            for nb in self.G.neighbors(center):
+                c = self.get_highway_classification((center, nb))
+                v = self.min_distance_boundary_polyline[c]
+                if v > radius:
+                    radius = v
+            return radius
+        else:
+            return sum([u.Util.distance(self.G, center, b) for b in borders]) / len(borders)
+        
+
+    def get_open_paths(self, point, radius):
+        result = []
+
+        for nb in self.G.neighbors(point):
+            if not self.has_edge((nb, point)):    
+                result.append(u.Util.get_path_to_biffurcation(self.G, point, nb, radius))
+
+        return result
+
+    def build_branches_description(self):
+        self.branches = []
+
+        center = self.getCenter()
+        borders = [n for n in self.nodes if self.is_boundary_node(n)]
+
+        radius = self.get_radius(borders)
+
+        for b in borders:
+            if b != center:
+                self.branches = self.branches + self.get_branches_description_from_node(b)
+            else:
+                # go trough all possible paths starting from the center
+                # and add the corresponding branches
+                open_branches = self.get_open_paths(center, radius)
+                for ob in open_branches:
+                    self.branches.append(self.get_branch_description_from_edge((ob[len(ob) - 2], ob[len(ob) - 1])))
+        
 
     def build_crossroads(G):
         crossroads = []
@@ -86,12 +145,6 @@ class Crossroad(r.Region):
                         break
 
 
-    def add_path(self, path):
-        for p in path:
-            self.add_node(p)
-        for p1, p2 in zip(path, path[1:]):
-            self.add_edge((p1, p2))
-
     def is_correct_inner_node(self, node):
         return not rl.Reliability.is_weakly_boundary(self.G, node)
 
@@ -100,7 +153,7 @@ class Crossroad(r.Region):
             return None
         result = "default"
         value = self.max_distance_boundary_polyline[result]
-        center = self.nodes[0]
+        center = self.getCenter()
         for nb in self.G.neighbors(center):
             if nb != path[1]:
                 c = self.get_highway_classification((center, nb))
@@ -155,9 +208,12 @@ class Crossroad(r.Region):
         last = path[len(path) - 1]
         if rl.Reliability.is_weakly_in_crossroad(self.G, first) and rl.Reliability.is_weakly_boundary(self.G, last):
             d =  u.Util.length(self.G, path)
+            r = 1
+            if len(list(self.G.neighbors(first))) > 4: # a crossroad with many lanes is larger, thus 
+                r = 2
             highway = self.get_max_highway_classification_other(path)
-            if d < self.min_distance_boundary_polyline[highway] or \
-                (d < self.max_distance_boundary_polyline[highway] and \
+            if d < self.min_distance_boundary_polyline[highway] * r or \
+                (d < self.max_distance_boundary_polyline[highway] * r and \
                 self.get_closest_possible_biffurcation(last) == first):
                 return True
             else:

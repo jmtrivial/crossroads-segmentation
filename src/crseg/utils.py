@@ -10,6 +10,13 @@ class Util:
         y2 = G.nodes[node2]["y"]
         return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
 
+    def bearing(G, node1, node2):
+        x1 = G.nodes[node1]["x"]
+        y1 = G.nodes[node1]["y"]
+        x2 = G.nodes[node2]["x"]
+        y2 = G.nodes[node2]["y"]
+        return ox.bearing.get_bearing((x1, y1), (x2, y2))
+
     def length(G, path):
         return sum([Util.distance(G, p1, p2) for p1, p2 in zip(path, path[1:])])
 
@@ -36,11 +43,13 @@ class Util:
         return None
 
 
-    def get_path_to_biffurcation(G, n1, n2):
+    def get_path_to_biffurcation(G, n1, n2, max = -1):
         path = [n1, n2]
+        length = Util.distance(G, n1, n2)
 
-        while Util.is_middle_polyline(G, path[len(path) - 1]):
+        while (max < 0 or length < max) and Util.is_middle_polyline(G, path[len(path) - 1]):
             path.append(Util.get_opposite_node(G, path[len(path) - 1], path[len(path) - 2]))
+            length += Util.distance(G, path[len(path) - 2], path[len(path) - 1])
         
         return path
 

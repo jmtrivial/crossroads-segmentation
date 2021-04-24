@@ -27,13 +27,13 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.78032, 3.08051), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Nicolas
-#G = ox.graph_from_point((45.77204, 3.08085), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_point((45.77204, 3.08085), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement décalé près du CRDV
 #G = ox.graph_from_point((45.78070, 3.07912), dist=70, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # abords jardin Lecoq (sud)
-G = ox.graph_from_point((45.77162, 3.08946), dist=500, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77162, 3.08946), dist=500, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # détails incohérents
 #G = ox.graph_from_point((45.77717, 3.07861), dist=100, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)

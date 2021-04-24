@@ -58,12 +58,26 @@ class Region:
         G.nodes[n][Region.label_region] = None
 
     def add_node(self, n):
-        if self.G.nodes[n][Region.label_region] == None:
+        if n not in self.nodes:
             self.nodes.append(n)
             self.G.nodes[n][Region.label_region] = self.id
 
     def add_edge(self, e):
-        if self.G[e[0]][e[1]][0][Region.label_region] == None:
+        if not self.has_edge(e):
             self.edges.append(e)
             self.G[e[0]][e[1]][0][Region.label_region] = self.id
+
+    def add_path(self, path):
+        for p in path:
+            self.add_node(p)
+        for p1, p2 in zip(path, path[1:]):
+            self.add_edge((p1, p2))
+
+    def has_edge(self, e):
+        return e in self.edges or (e[1], e[0]) in self.edges
+
+    def is_boundary_node(self, n):
+        nbnb = len(list(self.G.neighbors(n)))
+        nbEdgesInside = len([e for e in self.edges if e[0] == n or e[1] == n])
+        return nbnb != nbEdgesInside
 
