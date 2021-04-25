@@ -31,7 +31,7 @@ class Util:
         y1 = G.nodes[node1]["y"]
         x2 = G.nodes[node2]["x"]
         y2 = G.nodes[node2]["y"]
-        return ox.bearing.get_bearing((x1, y1), (x2, y2))
+        return ox.bearing.get_bearing((y1, x1), (y2, x2))
 
     def length(G, path):
         return sum([Util.distance(G, p1, p2) for p1, p2 in zip(path, path[1:])])

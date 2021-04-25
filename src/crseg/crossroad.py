@@ -40,6 +40,12 @@ class Crossroad(r.Region):
 
         self.build_branches_description()
 
+    def __str__(self):
+        return "id: %s, center: %s, branches: %s" % (self.id, self.center, self.branches)
+
+    def __repr__(self):
+        return "id: %s, center: %s" % (self.id, self.center)
+
     def get_center(self):
         return self.center
 
@@ -292,10 +298,28 @@ class Crossroad(r.Region):
 
         return result
 
+
+    def find_direct_path_to_possible_adjacent_biffurcation(self, point):
+        center = self.get_center()
+        for nb in self.G.neighbors(center):
+            path = u.Util.get_path_to_biffurcation(self.G, center, nb)
+            if path[len(path) - 1] == point:
+                return path
+        return None
+
     def in_same_cluster(self, crossroad):        
 
         angle = u.Util.bearing(self.G, self.get_center(), crossroad.get_center())
 
+        # if their is no direct path between centers, or 
+        # if it exists a strong border between the two crossings, they are not
+        # in the same cluster
+        path = self.find_direct_path_to_possible_adjacent_biffurcation(crossroad.get_center())
+        if path == None or rl.Reliability.has_strong_boundary_in_path(self.G, path):
+            return False
+
+        # if no strong boundary has been identified, consider similar branches
+        # orthogonal to the junction
         for b1 in self.branches:
             for b2 in crossroad.branches:
                 if b1.is_similar(b2) and b1.is_orthogonal(angle):
@@ -324,7 +348,11 @@ class Crossroad(r.Region):
                             # merge clusters
                             other_cluster = [c for c in result if cr in c]
                             if len(other_cluster) != 1:
-                                print("Error while merging two clusters:", other_cluster)
+                                # we check if the merge wasn't processed before
+                                if not cr in cluster:
+                                    print("Error while merging two clusters:", crossroad, cr)
+                                    print("Other cluster", other_cluster)
+                                    print("result", result)
                             else:
                                 other_cluster = other_cluster[0]
                                 cluster = cluster + other_cluster
@@ -372,3 +400,6 @@ class Crossroad(r.Region):
                 new_center = n
         if new_center != None:
             self.center = new_center
+        
+        # finally rebuild the branch descriptions
+        self.build_branches_description()

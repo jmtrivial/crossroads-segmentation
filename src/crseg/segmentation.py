@@ -75,9 +75,19 @@ class Segmentation:
     ######################### Functions used to prepare the graph ########################
 
     def remove_footways_and_parkings(G, keep_all_components):
+            
+
+        # remove footways and parkings
         to_remove = []
         for u, v, a in G.edges(data = True):
-            if "footway" in a or ("highway" in a and a["highway"] in ["footway", "cycleway", "path"]):
+            if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
+                to_remove.append((u, v))
+                # add missing crossings
+                if not "highway" in G.nodes[u]:
+                    G.nodes[u]["highway"] = "crossing"
+                if not "highway" in G.nodes[v]:
+                    G.nodes[v]["highway"] = "crossing"
+            if ("highway" in a and a["highway"] in ["cycleway", "path"]):
                 to_remove.append((u, v))
             elif "service" in a and a["service"] in ["parking_aisle"]:
                 to_remove.append((u, v))                
