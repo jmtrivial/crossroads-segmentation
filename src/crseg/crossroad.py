@@ -64,13 +64,13 @@ class Crossroad(r.Region):
         return [self.get_branch_description_from_edge(e) for e in edges]
 
     def get_radius(self):
-        borders = [n for n in self.nodes if self.is_boundary_node(n)]
+        borders = [n for n in self.nodes if self.is_boundary_node(n) and n != self.get_center()]
         center = self.get_center()
         if len(borders) == 0:
             radius = 0
             for nb in self.G.neighbors(center):
                 c = self.get_highway_classification((center, nb))
-                v = self.min_distance_boundary_polyline[c]
+                v = self.min_distance_boundary_polyline[c] / 2 # we reduce the impact of missing branches
                 if v > radius:
                     radius = v
             return radius
@@ -286,11 +286,11 @@ class Crossroad(r.Region):
         return None
 
 
-    def get_crossroads_in_neighborhood(self, crossroads):
+    def get_crossroads_in_neighborhood(self, crossroads, scale = 3):
         result = []
 
         center = self.get_center()
-        radius = self.get_radius() * 4
+        radius = self.get_radius() * scale
 
         for c in crossroads:
             if c.id != self.id and u.Util.distance(self.G, center, c.get_center()) < radius:
@@ -307,7 +307,10 @@ class Crossroad(r.Region):
                 return path
         return None
 
-    def in_same_cluster(self, crossroad):        
+    def in_same_cluster(self, crossroad):
+
+        if self.id == crossroad.id:
+            return False  
 
         angle = u.Util.bearing(self.G, self.get_center(), crossroad.get_center())
 
@@ -325,9 +328,13 @@ class Crossroad(r.Region):
                 if b1.is_similar(b2) and b1.is_orthogonal(angle):
                     return True
 
+        # if their distance is less than their combinded radius
+        if u.Util.distance(self.G, self.get_center(), crossroad.get_center()) < self.get_radius() + crossroad.get_radius():
+            return True
+
         return False
 
-    def get_clusters(crossroads):
+    def get_clusters(crossroads, scale = 3):
         result = []
 
         visited = []
@@ -338,7 +345,7 @@ class Crossroad(r.Region):
 
                 
                 cluster = [crossroad]
-                cr_in_neigborhood = crossroad.get_crossroads_in_neighborhood(crossroads)
+                cr_in_neigborhood = crossroad.get_crossroads_in_neighborhood(crossroads, scale)
                 for cr in cr_in_neigborhood:
                     if crossroad.in_same_cluster(cr):
                         if not cr.id in visited:
