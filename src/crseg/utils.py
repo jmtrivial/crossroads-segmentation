@@ -3,6 +3,22 @@ import osmnx as ox
 
 class Util:
 
+
+    def centroid(G, points):
+        x = 0.0
+        y = 0.0
+        for p in points:
+            x += G.nodes[p]["x"]
+            y += G.nodes[p]["y"]
+        return (x / len(points), y / len(points))
+
+    def distance_to(G, node, point):
+        x1 = G.nodes[node]["x"]
+        y1 = G.nodes[node]["y"]
+        x2 = point[0]
+        y2 = point[1]
+        return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
+
     def distance(G, node1, node2):
         x1 = G.nodes[node1]["x"]
         y1 = G.nodes[node1]["y"]

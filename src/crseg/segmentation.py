@@ -37,9 +37,11 @@ class Segmentation:
 
         # for each cluster
         for cluster in clusters:
-            print("on a un cluster:", [c.branches for c in cluster])
             # merge them
-            # TODO
+            if len(cluster) > 1:
+                cluster[0].merge(cluster[1:])
+            for o in cluster[1:]:
+                del self.regions[o.id]
 
 
 

@@ -40,8 +40,8 @@ class Crossroad(r.Region):
 
         self.build_branches_description()
 
-    def getCenter(self):
-        return self.nodes[0]
+    def get_center(self):
+        return self.center
 
     def is_crossroad(self):
         return True
@@ -49,7 +49,7 @@ class Crossroad(r.Region):
 
     def get_branch_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]
-        angle = u.Util.bearing(self.G, self.getCenter(), edge[1])
+        angle = u.Util.bearing(self.G, self.get_center(), edge[1])
         name = e["name"] if "name" in e else None
         return bd.BranchDescription(angle, name)
 
@@ -59,7 +59,7 @@ class Crossroad(r.Region):
 
     def get_radius(self):
         borders = [n for n in self.nodes if self.is_boundary_node(n)]
-        center = self.getCenter()
+        center = self.get_center()
         if len(borders) == 0:
             radius = 0
             for nb in self.G.neighbors(center):
@@ -84,7 +84,7 @@ class Crossroad(r.Region):
     def build_branches_description(self):
         self.branches = []
 
-        center = self.getCenter()
+        center = self.get_center()
         radius = self.get_radius()
 
         borders = [n for n in self.nodes if self.is_boundary_node(n)]
@@ -134,8 +134,7 @@ class Crossroad(r.Region):
     def propagate(self, n):
 
         self.add_node(n)
-
-
+        self.center = n
 
         for nb in self.G.neighbors(n):
             if self.unknown_region_edge((n, nb)):
@@ -154,7 +153,7 @@ class Crossroad(r.Region):
             return None
         result = "default"
         value = self.max_distance_boundary_polyline[result]
-        center = self.getCenter()
+        center = self.get_center()
         for nb in self.G.neighbors(center):
             if nb != path[1]:
                 c = self.get_highway_classification((center, nb))
@@ -284,18 +283,18 @@ class Crossroad(r.Region):
     def get_crossroads_in_neighborhood(self, crossroads):
         result = []
 
-        center = self.getCenter()
+        center = self.get_center()
         radius = self.get_radius() * 4
 
         for c in crossroads:
-            if c.id != self.id and u.Util.distance(self.G, center, c.getCenter()) < radius:
+            if c.id != self.id and u.Util.distance(self.G, center, c.get_center()) < radius:
                 result.append(c)
 
         return result
 
     def in_same_cluster(self, crossroad):        
 
-        angle = u.Util.bearing(self.G, self.getCenter(), crossroad.getCenter())
+        angle = u.Util.bearing(self.G, self.get_center(), crossroad.get_center())
 
         for b1 in self.branches:
             for b2 in crossroad.branches:
@@ -325,13 +324,51 @@ class Crossroad(r.Region):
                             # merge clusters
                             other_cluster = [c for c in result if cr in c]
                             if len(other_cluster) != 1:
-                                print("Error while merging two clusters")
+                                print("Error while merging two clusters:", other_cluster)
                             else:
                                 other_cluster = other_cluster[0]
                                 cluster = cluster + other_cluster
                                 result = [c for c in result if not cr in c]
                             
-                if len(cluster) > 1:
+                if len(cluster) >= 1:
                     result.append(cluster)
 
+        # finally remove single clusters
+        result = [r for r in result if len(r) > 1]
+
         return result
+
+    def add_direct_paths_between_nodes(self, points):
+
+        for p1 in points:
+            for n in self.G.neighbors(p1):
+                if not self.has_edge((p1, n)):
+                    path = u.Util.get_path_to_biffurcation(self.G, p1, n)
+                    if path[len(path) - 1] in points:
+                        self.add_path(path)
+
+    def merge(self, regions):
+        # add nodes and edges from the other regions
+        for region in regions:
+            for n in region.nodes:
+                self.add_node(n)
+            for e in region.edges:
+                self.add_edge(e)
+
+        old_centers = [r.get_center() for r in regions]
+        old_centers.append(self.get_center())
+
+        # add missing paths between old centers
+        self.add_direct_paths_between_nodes(old_centers)
+
+        # set a new center
+        center = u.Util.centroid(self.G, old_centers)
+        distance = -1
+        new_center = None
+        for n in self.nodes:
+            d = u.Util.distance_to(self.G, n, center)
+            if distance < 0 or d < distance:
+                distance = d
+                new_center = n
+        if new_center != None:
+            self.center = new_center
