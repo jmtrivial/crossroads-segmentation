@@ -20,7 +20,7 @@ class Crossroad(r.Region):
                                                 "unclassified": 30, 
                                                 "residential": 30,
                                                 "living_street": 25,
-                                                "service": 25,
+                                                "service": 15,
                                                 "default": 25
                                                 }
 
@@ -32,8 +32,8 @@ class Crossroad(r.Region):
                                                 "unclassified": 16, 
                                                 "residential": 16,
                                                 "living_street": 16,
-                                                "service": 12,
-                                                "default": 12
+                                                "service": 6,
+                                                "default": 6
                                                 }
 
         self.propagate(node)
@@ -314,12 +314,15 @@ class Crossroad(r.Region):
 
         angle = u.Util.bearing(self.G, self.get_center(), crossroad.get_center())
 
+
         # if their is no direct path between centers, or 
         # if it exists a strong border between the two crossings, they are not
         # in the same cluster
         path = self.find_direct_path_to_possible_adjacent_biffurcation(crossroad.get_center())
         if path == None or rl.Reliability.has_strong_boundary_in_path(self.G, path):
             return False
+
+
 
         # if no strong boundary has been identified, consider similar branches
         # orthogonal to the junction
@@ -342,35 +345,40 @@ class Crossroad(r.Region):
         for crossroad in crossroads:
             if not crossroad.id in visited:
                 visited.append(crossroad.id)
-
-                
                 cluster = [crossroad]
-                cr_in_neigborhood = crossroad.get_crossroads_in_neighborhood(crossroads, scale)
-                for cr in cr_in_neigborhood:
-                    if crossroad.in_same_cluster(cr):
-                        if not cr.id in visited:
-                            visited.append(cr.id)
-                            cluster.append(cr)
+            else:
+                cluster = [c for c in result if crossroad in c]
+                if len(cluster) != 1:
+                    cluster = [crossroad]
+                else:
+                    cluster = cluster[0]
+                    result = [c for c in result if not crossroad in c]
+
+            cr_in_neigborhood = crossroad.get_crossroads_in_neighborhood(crossroads, scale)
+            for cr in cr_in_neigborhood:
+                if crossroad.in_same_cluster(cr):
+                    if not cr.id in visited:
+                        visited.append(cr.id)
+                        cluster.append(cr)
+                    else:
+                        # merge clusters
+                        other_cluster = [c for c in result if cr in c]
+                        if len(other_cluster) != 1:
+                            # we check if the merge wasn't processed before
+                            if not cr in cluster:
+                                print("Error while merging two clusters:", crossroad, cr)
+                                print("Other cluster", other_cluster)
+                                print("result", result)
                         else:
-                            # merge clusters
-                            other_cluster = [c for c in result if cr in c]
-                            if len(other_cluster) != 1:
-                                # we check if the merge wasn't processed before
-                                if not cr in cluster:
-                                    print("Error while merging two clusters:", crossroad, cr)
-                                    print("Other cluster", other_cluster)
-                                    print("result", result)
-                            else:
-                                other_cluster = other_cluster[0]
-                                cluster = cluster + other_cluster
-                                result = [c for c in result if not cr in c]
-                            
-                if len(cluster) >= 1:
-                    result.append(cluster)
+                            other_cluster = other_cluster[0]
+                            cluster = cluster + other_cluster
+                            result = [c for c in result if not cr in c]
+                        
+            if len(cluster) >= 1:
+                result.append(cluster)
 
         # finally remove single clusters
         result = [r for r in result if len(r) > 1]
-
         return result
 
     def add_direct_paths_between_nodes(self, points):

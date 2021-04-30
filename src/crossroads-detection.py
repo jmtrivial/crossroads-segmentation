@@ -15,10 +15,10 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.77704, 3.07491), dist=50, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # voisinage large du croisement Manon
-#G = ox.graph_from_point((45.77722, 3.07295), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+G = ox.graph_from_point((45.77722, 3.07295), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement de Jérémy (master)
-#G = ox.graph_from_point((45.77631, 3.09015), dist=500, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_point((45.77631, 3.09015), dist=500, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # croisement en croix de Jérémy (thèse)
 #G = ox.graph_from_point((45.77351, 3.09015), dist=200, network_type="drive", retain_all=False, truncate_by_edge=True, simplify=False)
@@ -50,7 +50,7 @@ print("=== DOWNLOADING DATA ===")
 #G = ox.graph_from_point((45.77995, 3.09159), dist=70, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Centre de Clermont-Ferrand
-G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+#G = ox.graph_from_bbox(west=3.0529, north=45.7901, east=3.1203, south=45.7634, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
 # Clermont-Ferrand en entier
 #G = ox.graph_from_place("Clermont-Ferrand, France", network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)

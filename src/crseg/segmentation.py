@@ -90,8 +90,8 @@ class Segmentation:
                     G.nodes[v]["highway"] = "crossing"
             if ("highway" in a and a["highway"] in ["cycleway", "path"]):
                 to_remove.append((u, v))
-            elif "service" in a and a["service"] in ["parking_aisle"]:
-                to_remove.append((u, v))                
+            #elif "service" in a and a["service"] in ["parking_aisle"]:
+            #    to_remove.append((u, v))                
         G.remove_edges_from(to_remove)
         G = ox.utils_graph.remove_isolated_nodes(G)
         if not keep_all_components:
