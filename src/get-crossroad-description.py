@@ -9,24 +9,29 @@ import osmnx as ox
 
 import crseg.segmentation as cs
 
-
+# set parser
 parser = argparse.ArgumentParser(description="Build a basic description of the crossroad located at the requested coordinate.")
 
-group_coords = parser.add_argument_group('Coordinates', "Describe a request region by coordinates")
+group_coords = parser.add_argument_group('selection by coordinates', "Describe a request region by coordinates")
 group_coords.add_argument('--lat', help='Requested latitude', type=float)
 group_coords.add_argument('--lng', help='Requested longitude', type=float)
 
 
-group_byname = parser.add_argument_group('Name', "Describe a request region by internal name")
+group_byname = parser.add_argument_group('selection by name', "Describe a request region by internal name")
 group_byname.add_argument('--by-name', help='Requested crossroad, selection by name', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier"])
 
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed', type=float, default=150)
+
+
+parser.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
 parser.add_argument('-d', '--display', help='Display crossroads in the reconstructed region', action='store_true')
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
+
+# load and validate parameters
 args = parser.parse_args()
 
-
+# get parameterr
 latitude = args.lat
 longitude = args.lng
 byname = args.by_name
@@ -57,7 +62,9 @@ radius = args.radius
 
 verbose = args.verbose
 display = args.display
+display_reliability = args.display_reliability
 
+# load data
 
 if verbose:
     print("=== DOWNLOADING DATA ===")
@@ -75,13 +82,31 @@ G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
 
 if verbose:
     print("=== PREPROCESSING (2) ===")
+
+# build an undirected version of the graph
 G = ox.utils_graph.get_undirected(G)
 
+
 if verbose:
-    print("=== SEGMENTATION ===")
+    print("=== INITIALISATION ===")
+
+# segment it using topology and semantic
 seg = cs.Segmentation(G)
 
-seg.process()
+if display_reliability:
+    print("=== RENDERING RELIABILITY ===")
+
+    ec = seg.get_edges_reliability_colors()
+
+    nc = seg.get_nodes_reliability_colors()
+
+    ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
+
+
+if display: # or any other next step
+    if verbose:
+        print("=== SEGMENTATION ===")
+    seg.process()
 
 
 if display:

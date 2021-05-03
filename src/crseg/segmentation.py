@@ -16,11 +16,11 @@ class Segmentation:
         self.G = G
         self.regions = []
         random.seed()
+        rel.Reliability.init_attr(self.G)
 
     def process(self):
 
         # init flags
-        rel.Reliability.init_attr(self.G)
         rg.Region.init_attr(self.G)
 
 
