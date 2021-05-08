@@ -189,7 +189,7 @@ class Segmentation:
             r_value = self.G[e[0]][e[1]][e[2]][rel.Reliability.crossroad_reliability]
             coef = (r_value - rel.Reliability.strongly_no) / (rel.Reliability.strongly_yes - rel.Reliability.strongly_no)
             coef = math.pow(coef, 2)
-            result[e] = (0.8, 0, 0, coef)
+            result[e] = (1, 1, 1, coef)
         return pd.Series(result)
 
     def get_nodes_reliability_colors(self):
