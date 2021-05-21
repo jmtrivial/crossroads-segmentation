@@ -113,13 +113,9 @@ if display:
     if verbose:
         print("=== RENDERING ===")
 
-    #ec = seg.get_regions_colors()
     ec = seg.get_regions_class_colors()
-    #ec = seg.get_edges_reliability_colors()
 
-    #nc = seg.get_nodes_reliability_colors()
     nc = seg.get_nodes_reliability_on_regions_colors()
-    #nc = seg.get_boundary_node_colors()
 
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
