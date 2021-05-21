@@ -110,7 +110,8 @@ if display: # or any other next step
 
 
 if display:
-    print("=== RENDERING ===")
+    if verbose:
+        print("=== RENDERING ===")
 
     #ec = seg.get_regions_colors()
     ec = seg.get_regions_class_colors()
