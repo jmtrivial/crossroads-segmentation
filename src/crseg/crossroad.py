@@ -60,7 +60,7 @@ class Crossroad(r.Region):
         return bd.BranchDescription(angle, name)
 
     def get_branches_description_from_node(self, border):
-        edges = [(nb, border) for nb in self.G.neighbors(border) if self.has_edge((nb, border))]
+        edges = [(border, nb) for nb in self.G.neighbors(border) if not self.has_edge((nb, border))]
         return [self.get_branch_description_from_edge(e) for e in edges]
 
     def get_radius(self):
