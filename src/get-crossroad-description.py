@@ -40,8 +40,8 @@ if byname == "Nicolas":
     latitude = 45.77204
     longitude = 3.08085
 elif byname == "Manon":
-    latitude = 45.77722
-    longitude = 3.07295
+    latitude = 45.77725
+    longitude = 3.07279
 elif byname == "Jérémy-master":
     latitude = 45.77631
     longitude = 3.09015
