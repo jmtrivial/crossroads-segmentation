@@ -14,7 +14,7 @@ class Segmentation:
 
     def __init__(self, G):
         self.G = G
-        self.regions = []
+        self.regions = {}
         random.seed()
         rel.Reliability.init_attr(self.G)
 
@@ -44,6 +44,9 @@ class Segmentation:
             for o in cluster[1:]:
                 del self.regions[o.id]
 
+        # TODO: add a second pass to merge main crossroad and small adjacent parts (such as access branches with forks)
+
+        # TODO: add inner paths (between two nodes in the crossing)
 
 
 
@@ -235,3 +238,26 @@ class Segmentation:
                 else:
                     result[n] = (0, 0, 0, 0)
         return pd.Series(result)
+
+    ######################### text descriptions ########################
+
+    def to_text(self, longitude, latitude):
+        distance = -1
+        middle = -1
+        for rid in self.regions:
+            region = self.regions[rid]
+            x1 = self.G.nodes[region.get_center()]["x"]
+            y1 = self.G.nodes[region.get_center()]["y"]
+            d = ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=latitude, lng2=longitude)
+            if distance < 0 or d < distance:
+                distance = d
+                middle = rid
+        
+        return self.regions[middle].to_text()
+
+    def to_text_all(self):
+        result = ""
+        for rid in self.regions:
+            result += self.regions[rid].to_text()
+            result += "\n"
+        return result

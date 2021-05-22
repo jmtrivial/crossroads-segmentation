@@ -52,6 +52,10 @@ class Crossroad(r.Region):
     def is_crossroad(self):
         return True
 
+    def to_text(self):
+        # TODO: improve by identifying similar branches
+        return self.__str__()
+
 
     def get_branch_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]

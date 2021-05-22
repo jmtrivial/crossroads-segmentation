@@ -27,6 +27,8 @@ parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroa
 parser.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
 parser.add_argument('-d', '--display', help='Display crossroads in the reconstructed region', action='store_true')
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
+parser.add_argument('--to-text-all', help='Generate a text description of all reconstructed crossings', action='store_true')
+parser.add_argument('--to-text', help='Generate a text description of crossing in the middle of the map', action='store_true')
 
 # load and validate parameters
 args = parser.parse_args()
@@ -63,6 +65,8 @@ radius = args.radius
 verbose = args.verbose
 display = args.display
 display_reliability = args.display_reliability
+to_text_all = args.to_text_all
+to_text = args.to_text
 
 # load data
 
@@ -103,11 +107,17 @@ if display_reliability:
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
 
-if display: # or any other next step
+if display or to_text or to_text_all: # or any other next step
     if verbose:
         print("=== SEGMENTATION ===")
     seg.process()
 
+
+if to_text_all:
+    print(seg.to_text_all())
+
+if to_text:
+    print(seg.to_text(longitude, latitude))
 
 if display:
     if verbose:
