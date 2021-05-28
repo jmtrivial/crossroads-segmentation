@@ -263,3 +263,13 @@ class Segmentation:
             result += self.regions[rid].to_text()
             result += "\n"
         return result
+
+    ######################### json descriptions ########################
+
+    def to_json_all(self, filename):
+        # TODO
+        pass
+
+    def to_json(self, filename):
+        # TODO
+        pass

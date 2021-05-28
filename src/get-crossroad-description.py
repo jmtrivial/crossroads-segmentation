@@ -31,7 +31,9 @@ group_display.add_argument('-d', '--display', help='Display crossroads in the re
 group_output = parser.add_argument_group("Output", "Export intermediate properties or final data in a dedicated format")
 group_output.add_argument('--to-text-all', help='Generate a text description of all reconstructed crossings', action='store_true')
 group_output.add_argument('--to-text', help='Generate a text description of crossing in the middle of the map', action='store_true')
-group_output.add_argument('--to-gexf', help='Generate a GEXF file with the computed graph', type=argparse.FileType('w'))
+group_output.add_argument('--to-gexf', help='Generate a GEXF file with the computed graph (contains reliability scores for edges and nodes)', type=argparse.FileType('w'))
+group_output.add_argument('--to-json-all', help='Generate a json description of the crossings', type=argparse.FileType('w'))
+group_output.add_argument('--to-json', help='Generate a json description of the crossing in the middle of the map', type=argparse.FileType('w'))
 
 # load and validate parameters
 args = parser.parse_args()
@@ -71,6 +73,8 @@ display_reliability = args.display_reliability
 to_text_all = args.to_text_all
 to_text = args.to_text
 to_gexf = args.to_gexf
+to_json = args.to_json
+to_json_all = args.to_json_all
 
 # load data
 
@@ -112,7 +116,7 @@ if display_reliability:
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
 
-if display or to_text or to_text_all: # or any other next step
+if display or to_text or to_text_all or to_gexf or to_json or to_json_all: # or any other next step
     if verbose:
         print("=== SEGMENTATION ===")
     seg.process()
@@ -123,6 +127,12 @@ if to_text_all:
 
 if to_text:
     print(seg.to_text(longitude, latitude))
+
+if to_json:
+    seg.to_json(to_json.name)
+
+if to_json_all:
+    seg.to_json(to_json_all.name)
 
 if display:
     if verbose:
