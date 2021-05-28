@@ -32,21 +32,21 @@ class Region:
     def clear_region(self):
         # remove edges
         for e in self.edges:
-            self.G[e[0]][e[1]][0][Region.label_region] = None
+            self.G[e[0]][e[1]][0][Region.label_region] = -1
         
         # then remove nodes
         for n in self.nodes:
-            self.G.nodes[n][Region.label_region] = None
+            self.G.nodes[n][Region.label_region] = -1
     
     def init_attr(G):
-        nx.set_edge_attributes(G, values=None, name=Region.label_region)
-        nx.set_node_attributes(G, values=None, name=Region.label_region)
+        nx.set_edge_attributes(G, values=-1, name=Region.label_region)
+        nx.set_node_attributes(G, values=-1, name=Region.label_region)
 
     def unknown_region_node_in_graph(G, n):
-        return G.nodes[n][Region.label_region] == None
+        return G.nodes[n][Region.label_region] == -1
 
     def unknown_region_edge_in_graph(G, e):
-        return G[e[0]][e[1]][0][Region.label_region] == None
+        return G[e[0]][e[1]][0][Region.label_region] == -1
 
     def unknown_region_node(self, n):
         return Region.unknown_region_node_in_graph(self.G, n)
@@ -55,7 +55,7 @@ class Region:
         return Region.unknown_region_edge_in_graph(self.G, e)
 
     def clear_node_region_in_grah(G, n):
-        G.nodes[n][Region.label_region] = None
+        G.nodes[n][Region.label_region] = -1
 
     def add_node(self, n):
         if n not in self.nodes:

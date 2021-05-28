@@ -20,20 +20,23 @@ group_coords.add_argument('--lng', help='Requested longitude', type=float)
 group_byname = parser.add_argument_group('selection by name', "Describe a request region by internal name")
 group_byname.add_argument('--by-name', help='Requested crossroad, selection by name', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier"])
 
-
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed', type=float, default=150)
-
-
-parser.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
-parser.add_argument('-d', '--display', help='Display crossroads in the reconstructed region', action='store_true')
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
-parser.add_argument('--to-text-all', help='Generate a text description of all reconstructed crossings', action='store_true')
-parser.add_argument('--to-text', help='Generate a text description of crossing in the middle of the map', action='store_true')
+
+
+group_display = parser.add_argument_group("Display", "Activate a display")
+group_display.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
+group_display.add_argument('-d', '--display', help='Display crossroads in the reconstructed region', action='store_true')
+
+group_output = parser.add_argument_group("Output", "Export intermediate properties or final data in a dedicated format")
+group_output.add_argument('--to-text-all', help='Generate a text description of all reconstructed crossings', action='store_true')
+group_output.add_argument('--to-text', help='Generate a text description of crossing in the middle of the map', action='store_true')
+group_output.add_argument('--to-gexf', help='Generate a GEXF file with the computed graph', type=argparse.FileType('w'))
 
 # load and validate parameters
 args = parser.parse_args()
 
-# get parameterr
+# get parameters
 latitude = args.lat
 longitude = args.lng
 byname = args.by_name
@@ -67,6 +70,7 @@ display = args.display
 display_reliability = args.display_reliability
 to_text_all = args.to_text_all
 to_text = args.to_text
+to_gexf = args.to_gexf
 
 # load data
 
@@ -89,6 +93,7 @@ if verbose:
 
 # build an undirected version of the graph
 G = ox.utils_graph.get_undirected(G)
+
 
 
 if verbose:
@@ -130,3 +135,14 @@ if display:
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
 
+if to_gexf:
+    if verbose:
+        print("=== EXPORT IN GEXF ===")
+
+    att_list = ['geometry']
+    for n1, n2, d in G.edges(data=True):
+        for att in att_list:
+            d.pop(att, None)
+
+    # Simplify after removing attribute
+    nx.write_gexf(G, to_gexf.name)

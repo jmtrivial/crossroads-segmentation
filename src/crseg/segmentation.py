@@ -52,7 +52,7 @@ class Segmentation:
 
     def in_crossroad_region(self, e):
         tag = self.G[e[0]][e[1]][0][rg.Region.label_region]
-        if tag == None:
+        if tag == -1:
             False
         else: 
             return self.regions[tag].is_crossroad()
@@ -63,15 +63,15 @@ class Segmentation:
         for nb in self.G.neighbors(n):
             e = (n, nb)
             tag = self.G[e[0]][e[1]][0][rg.Region.label_region]
-            if tag != None and self.regions[tag].is_crossroad():
+            if tag != -1 and self.regions[tag].is_crossroad():
                 result.append(self.regions[tag].id)
             else:
-                result.append(None)
+                result.append(-1)
         return result
 
     def is_crossroad_node(self, n):
         tag = self.G.nodes[n][rg.Region.label_region]
-        if tag == None:
+        if tag == -1:
             False
         else: 
             return self.regions[tag].is_crossroad()
@@ -110,7 +110,7 @@ class Segmentation:
         color = {}
         for e in self.G.edges:
             tag = self.G[e[0]][e[1]][e[2]][rg.Region.label_region]
-            if tag == None:
+            if tag == -1:
                 result[e] = (0.5, 0.5, 0.5, 0.5)
             else:
                 if not tag in color:
@@ -123,7 +123,7 @@ class Segmentation:
         result = {}
         for e in self.G.edges:
             tag = self.G[e[0]][e[1]][e[2]][rg.Region.label_region]
-            if tag == None:
+            if tag == -1:
                 result[e] = (0.5, 0.5, 0.5, 0.5)
             elif self.regions[tag].is_crossroad():
                 result[e] = (0.8, 0, 0, 1)
@@ -150,7 +150,7 @@ class Segmentation:
         for e in G.edges:
             tag = G[e[0]][e[1]][e[2]][label]
             if not tag in values:
-                if tag == None:
+                if tag == -1:
                     values[tag] = (0.5, 0.5, 0.5, 0.5)
                 else:
                     values[tag] = Segmentation.random_color()
@@ -170,10 +170,10 @@ class Segmentation:
             elif r_class == rel.Reliability.boundary_reliability:
                 adj = self.get_adjacent_crossroad_regions(n)
                 # in the middle of a branch
-                if len([n for n in adj if n != None]) == 0:
+                if len([n for n in adj if n != -1]) == 0:
                     result[n] = (0, 0, 0.6, coef)
                 # inside a region
-                elif len(list(set([n for n in adj if n != None]))) == 1 and len([n for n in adj if n != None]) != 1:
+                elif len(list(set([n for n in adj if n != -1]))) == 1 and len([n for n in adj if n != -1]) != 1:
                     result[n] = (1, 0.6, 0.6, coef)
                 # in a boundary
                 else:
@@ -215,7 +215,7 @@ class Segmentation:
 
         result = {}
         for n in self.G.nodes:
-            nb_adj_crossings = len(list(set([r for r in self.get_adjacent_crossroad_regions(n) if r != None])))
+            nb_adj_crossings = len(list(set([r for r in self.get_adjacent_crossroad_regions(n) if r != -1])))
             nbnb = len(list(self.G.neighbors(n)))
             nbAdj = len([ nb for nb in self.G.neighbors(n) if rg.Region.unknown_region_edge_in_graph(self.G, (n, nb))])
             if nbnb == nbAdj:
