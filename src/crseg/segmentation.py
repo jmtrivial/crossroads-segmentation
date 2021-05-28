@@ -241,7 +241,7 @@ class Segmentation:
 
     ######################### text descriptions ########################
 
-    def to_text(self, longitude, latitude):
+    def get_crossroad(self, longitude, latitude):
         distance = -1
         middle = -1
         for rid in self.regions:
@@ -252,8 +252,10 @@ class Segmentation:
             if distance < 0 or d < distance:
                 distance = d
                 middle = rid
-        
-        return self.regions[middle].to_text()
+        return self.regions[middle]
+
+    def to_text(self, longitude, latitude):
+        return self.get_crossroad(longitude, latitude).to_text()
 
     def to_text_all(self):
         result = ""
