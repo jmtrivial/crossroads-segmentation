@@ -20,7 +20,7 @@ group_coords.add_argument('--lng', help='Requested longitude', type=float)
 group_byname = parser.add_argument_group('selection by name', "Describe a request region by internal name")
 group_byname.add_argument('--by-name', help='Requested crossroad, selection by name', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier"])
 
-parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed', type=float, default=150)
+parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
 
 
