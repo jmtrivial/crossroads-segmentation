@@ -28,8 +28,8 @@ class Reliability:
     strongly_no_boundary_attr = [ "bus_stop", "milestone", "steps", "elevator" ]
 
 
-    strongly_yes = 1000
-    strongly_no = 0
+    strongly_yes = 1000.0
+    strongly_no = 0.0
 
     uncertain = (strongly_yes + strongly_no) / 2
 

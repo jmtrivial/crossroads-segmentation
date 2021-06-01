@@ -12,13 +12,13 @@ import crseg.segmentation as cs
 # set parser
 parser = argparse.ArgumentParser(description="Build a basic description of the crossroad located at the requested coordinate.")
 
-group_coords = parser.add_argument_group('selection by coordinates', "Describe a request region by coordinates")
-group_coords.add_argument('--lat', help='Requested latitude', type=float)
-group_coords.add_argument('--lng', help='Requested longitude', type=float)
+group_input = parser.add_argument_group('Input region', "Define the input region from OSM (by coordinates or by name) or from a local file")
+input_params = group_input.add_mutually_exclusive_group(required=True)
+input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM using the given latitude', type=float)
 
+input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier"])
+input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
 
-group_byname = parser.add_argument_group('selection by name', "Describe a request region by internal name")
-group_byname.add_argument('--by-name', help='Requested crossroad, selection by name', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier"])
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
@@ -31,7 +31,8 @@ group_display.add_argument('-d', '--display', help='Display crossroads in the re
 group_output = parser.add_argument_group("Output", "Export intermediate properties or final data in a dedicated format")
 group_output.add_argument('--to-text-all', help='Generate a text description of all reconstructed crossings', action='store_true')
 group_output.add_argument('--to-text', help='Generate a text description of crossing in the middle of the map', action='store_true')
-group_output.add_argument('--to-gexf', help='Generate a GEXF file with the computed graph (contains reliability scores for edges and nodes)', type=argparse.FileType('w'))
+group_output.add_argument('--to-gexf', help='Generate a GEXF file with the computed graph (contains reliability scores for edges and nodes). Some metadata will not be exported.', type=argparse.FileType('w'))
+group_output.add_argument('--to-graphml', help='Generate a GraphML file with the computed graph (contains reliability scores for edges and nodes)', type=argparse.FileType('w'))
 group_output.add_argument('--to-json-all', help='Generate a json description of the crossings', type=argparse.FileType('w'))
 group_output.add_argument('--to-json', help='Generate a json description of the crossing in the middle of the map', type=argparse.FileType('w'))
 
@@ -39,8 +40,9 @@ group_output.add_argument('--to-json', help='Generate a json description of the 
 args = parser.parse_args()
 
 # get parameters
-latitude = args.lat
-longitude = args.lng
+if args.by_coordinates:
+    latitude = args.by_coordinates[0]
+    longitude = args.by_coordinates[1]
 byname = args.by_name
 
 if byname == "Nicolas":
@@ -65,6 +67,8 @@ elif byname == "Gauthier":
     latitude = 45.77712
     longitude = 3.09622
 
+from_graphml = args.from_graphml
+
 # set input parameters
 radius = args.radius
 verbose = args.verbose
@@ -74,12 +78,9 @@ display_reliability = args.display_reliability
 to_text_all = args.to_text_all
 to_text = args.to_text
 to_gexf = args.to_gexf
+to_graphml = args.to_graphml
 to_json = args.to_json
 to_json_all = args.to_json_all
-
-if verbose:
-    print("Coordinates:", latitude, longitude)
-    print("Radius:", radius)
 
 
 # load data
@@ -87,22 +88,31 @@ if verbose:
 if verbose:
     print("=== DOWNLOADING DATA ===")
 
-G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+if from_graphml:
+    G = ox.io.load_graphml(from_graphml.name)
+    # load parameters
+    latitude = G.graph["cr.latitude"]
+    longitude = G.graph["cr.longitude"]
+    radius = G.graph["cr.radius"]
+else:
+    G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
+    if verbose:
+        print("=== PREPROCESSING (1) ===")
 
+    # remove sidewalks, cycleways
+    keep_all_components = False
+    G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
+
+    if verbose:
+        print("=== PREPROCESSING (2) ===")
+
+    # build an undirected version of the graph
+    G = ox.utils_graph.get_undirected(G)
 
 if verbose:
-    print("=== PREPROCESSING (1) ===")
-
-# remove sidewalks, cycleways
-keep_all_components = False
-G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
-
-if verbose:
-    print("=== PREPROCESSING (2) ===")
-
-# build an undirected version of the graph
-G = ox.utils_graph.get_undirected(G)
+    print("Coordinates:", latitude, longitude)
+    print("Radius:", radius)
 
 
 
@@ -122,7 +132,7 @@ if display_reliability:
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
 
-if display or to_text or to_text_all or to_gexf or to_json or to_json_all: # or any other next step
+if display or to_text or to_text_all or to_gexf or to_json or to_json_all or to_graphml: # or any other next step
     if verbose:
         print("=== SEGMENTATION ===")
     seg.process()
@@ -135,10 +145,10 @@ if to_text:
     print(seg.to_text(longitude, latitude))
 
 if to_json:
-    seg.to_json(to_json.name)
+    seg.to_json(to_json.name, longitude, latitude)
 
 if to_json_all:
-    seg.to_json(to_json_all.name)
+    seg.to_json_all(to_json_all.name)
 
 if display:
     if verbose:
@@ -162,3 +172,12 @@ if to_gexf:
 
     # Simplify after removing attribute
     nx.write_gexf(G, to_gexf.name)
+
+if to_graphml:
+    if verbose:
+        print("=== EXPORT IN GraphML ===")
+        # Store parameters
+        G.graph["cr.latitude"] = latitude
+        G.graph["cr.longitude"] = longitude
+        G.graph["cr.radius"] = radius
+        ox.io.save_graphml(G, to_graphml.name)
