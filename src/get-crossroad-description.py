@@ -65,9 +65,10 @@ elif byname == "Gauthier":
     latitude = 45.77712
     longitude = 3.09622
 
+# set input parameters
 radius = args.radius
-
 verbose = args.verbose
+
 display = args.display
 display_reliability = args.display_reliability
 to_text_all = args.to_text_all
@@ -75,6 +76,11 @@ to_text = args.to_text
 to_gexf = args.to_gexf
 to_json = args.to_json
 to_json_all = args.to_json_all
+
+if verbose:
+    print("Coordinates:", latitude, longitude)
+    print("Radius:", radius)
+
 
 # load data
 
