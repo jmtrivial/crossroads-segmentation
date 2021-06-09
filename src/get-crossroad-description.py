@@ -30,6 +30,7 @@ parser.add_argument('--skip-processing', help="Do not compute segmentation (can 
 group_display = parser.add_argument_group("Display", "Activate a display")
 group_display.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
 group_display.add_argument('-d', '--display', help='Display crossroads in the reconstructed region', action='store_true')
+group_display.add_argument('--display-segmentation', help='Display segmentation (crossroads and branches) in the reconstructed region', action='store_true')
 
 group_output = parser.add_argument_group("Output", "Export intermediate properties or final data in a dedicated format")
 group_output.add_argument('--to-text-all', help='Generate a text description of all reconstructed crossings', action='store_true')
@@ -81,6 +82,7 @@ verbose = args.verbose
 
 display = args.display
 display_reliability = args.display_reliability
+display_segmentation = args.display_segmentation
 to_text_all = args.to_text_all
 to_text = args.to_text
 to_gexf = args.to_gexf
@@ -152,7 +154,7 @@ if display_reliability:
 if skip_processing:
     print("=== SKIP SEGMENTATION ===")
 else:
-    if display or to_text or to_text_all or to_gexf or to_json or to_json_all or to_graphml: # or any other next step
+    if display or display_segmentation or to_text or to_text_all or to_gexf or to_json or to_json_all or to_graphml: # or any other next step
         if verbose:
             print("=== SEGMENTATION ===")
         seg.process()
@@ -180,6 +182,15 @@ if display:
 
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
+if display_segmentation:
+    if verbose:
+        print("=== RENDERING SEGMENTATION ===")
+
+    ec = seg.get_regions_colors()
+
+    nc = seg.get_nodes_regions_colors()
+
+    ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
 if to_gexf:
     if verbose:

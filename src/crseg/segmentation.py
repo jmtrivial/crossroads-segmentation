@@ -145,7 +145,7 @@ class Segmentation:
     def random_color():
         r1 = math.pi * random.random()
         r2 = math.pi * random.random()
-        coef = 0.5
+        coef = 1
         return (coef * abs(math.sin(r1)) * abs(math.sin(r2)), \
                 coef * abs(math.cos(r1)) * abs(math.sin(r2)), \
                 coef * abs(math.sin(r1)) * abs(math.cos(r2)), 
@@ -244,6 +244,24 @@ class Segmentation:
                     result[n] = (1, 0, 0, 1) # single-node crossroad
                 else:
                     result[n] = (0, 0, 0, 0)
+        return pd.Series(result)
+
+    def get_nodes_regions_colors(self):
+        result = {}
+        for n in self.G.nodes:
+            if len(list(self.G.neighbors(n))) <= 2:
+                result[n] = (0, 0, 0, 0)
+            else:
+                label = self.G.nodes[n][rg.Region.label_region]
+                if label < 0:
+                    result[n] = (0, 0, 0, 0)
+                else:
+                    nb_edge_in_region = len([nb for nb in self.G[n] if self.G[n][nb][0][rg.Region.label_region] == label])
+                    if nb_edge_in_region == 0:
+                        result[n] = Segmentation.random_color()
+                    else:
+                        result[n] = (0, 0, 0, 0)
+
         return pd.Series(result)
 
     ######################### text descriptions ########################
