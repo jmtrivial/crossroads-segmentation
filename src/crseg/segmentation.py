@@ -53,6 +53,8 @@ class Segmentation:
 
         # TODO: add inner paths (between two nodes in the crossing)
 
+        # TODO: create branch regions
+
 
 
     def in_crossroad_region(self, e):
