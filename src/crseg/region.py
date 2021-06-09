@@ -15,6 +15,7 @@ class Region:
     id_region = 0
 
     label_region = "region"
+    regiontag_prefix = "cr.region-"
 
     def __init__(self, G, target_id = -1):
         self.G = G

@@ -198,6 +198,6 @@ if to_graphml:
         G.graph["cr.longitude"] = longitude
         G.graph["cr.radius"] = radius
         for r in seg.regions:
-            G.graph["cr.region-" + str(r)] = "crossroad" if seg.regions[r].is_crossroad() else "branch"
+            G.graph[rg.Region.regiontag_prefix + str(r)] = "crossroad" if seg.regions[r].is_crossroad() else "branch"
         # TODO: store for each region id its kind (crossing or branch)
         ox.io.save_graphml(G, to_graphml.name)

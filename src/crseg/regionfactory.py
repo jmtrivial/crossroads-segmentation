@@ -15,14 +15,14 @@ class RegionFactory:
             if G.nodes[n][rg.Region.label_region] != -1:
                 id = G.nodes[n][rg.Region.label_region]
                 if not id in regions:
-                    regions[id] = cr.Crossroad(G, target_id = int(id)) if G.graph["cr.region-" + str(id)] == "crossroad" else rg.Region(G, target_id = id)
+                    regions[id] = cr.Crossroad(G, target_id = int(id)) if G.graph[rg.Region.regiontag_prefix + str(id)] == "crossroad" else rg.Region(G, target_id = id)
                 regions[id].add_node(n)
 
         for e in G.edges:
             if G[e[0]][e[1]][0][rg.Region.label_region] != -1:
                 id = G[e[0]][e[1]][0][rg.Region.label_region]
                 if not id in regions:
-                    regions[id] = cr.Crossroad(G, target_id = id) if G.graph["cr.region-" + str(id)] == "crossroad" else rg.Region(G, target_id = id)
+                    regions[id] = cr.Crossroad(G, target_id = id) if G.graph[rg.Region.regiontag_prefix + str(id)] == "crossroad" else rg.Region(G, target_id = id)
                 regions[id].add_edge(e)
 
         return regions
