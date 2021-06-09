@@ -49,7 +49,7 @@ class Segmentation:
             for o in cluster[1:]:
                 del self.regions[o.id]
 
-        # TODO: add a second pass to merge main crossroad and small adjacent parts (such as access branches with forks)
+        # TODO: add a second pass to merge main crossroad and small adjacent parts (such as access branches with forks, or orphan boundaries)
 
         # TODO: add inner paths (between two nodes in the crossing)
 

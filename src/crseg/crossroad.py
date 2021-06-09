@@ -27,13 +27,13 @@ class Crossroad(r.Region):
         self.min_distance_boundary_polyline = { "motorway": 100, 
                                                 "trunk": 100,
                                                 "primary": 50, 
-                                                "secondary": 40, 
-                                                "tertiary": 30, 
-                                                "unclassified": 25, 
-                                                "residential": 25,
-                                                "living_street": 20,
-                                                "service": 10,
-                                                "default": 15
+                                                "secondary": 25, 
+                                                "tertiary": 20, 
+                                                "unclassified": 15, 
+                                                "residential": 15,
+                                                "living_street": 10,
+                                                "service": 6,
+                                                "default": 6
                                                 }
 
         if node != None:
