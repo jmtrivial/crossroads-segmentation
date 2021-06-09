@@ -17,23 +17,23 @@ class Crossroad(r.Region):
                                                 "primary": 80, 
                                                 "secondary": 80, 
                                                 "tertiary": 50, 
-                                                "unclassified": 30, 
-                                                "residential": 30,
-                                                "living_street": 25,
-                                                "service": 15,
+                                                "unclassified": 40, 
+                                                "residential": 40,
+                                                "living_street": 30,
+                                                "service": 20,
                                                 "default": 25
                                                 }
 
         self.min_distance_boundary_polyline = { "motorway": 100, 
                                                 "trunk": 100,
                                                 "primary": 50, 
-                                                "secondary": 30, 
-                                                "tertiary": 25, 
-                                                "unclassified": 16, 
-                                                "residential": 16,
-                                                "living_street": 16,
-                                                "service": 6,
-                                                "default": 6
+                                                "secondary": 40, 
+                                                "tertiary": 30, 
+                                                "unclassified": 25, 
+                                                "residential": 25,
+                                                "living_street": 20,
+                                                "service": 10,
+                                                "default": 15
                                                 }
 
         if node != None:
