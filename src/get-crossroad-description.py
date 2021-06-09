@@ -18,7 +18,7 @@ group_input = parser.add_argument_group('Input region', "Define the input region
 input_params = group_input.add_mutually_exclusive_group(required=True)
 input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM using the given latitude', type=float)
 
-input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier"])
+input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "lafayette", "Gauthier", "Pasteur-Duclaux"])
 input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
 
 
@@ -69,6 +69,9 @@ elif byname == "lafayette":
 elif byname == "Gauthier":
     latitude = 45.77712
     longitude = 3.09622
+elif byname == "Pasteur-Duclaux":
+    latitude = 45.77364
+    longitude = 3.07525
 
 from_graphml = args.from_graphml
 
