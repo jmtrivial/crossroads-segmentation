@@ -24,5 +24,7 @@ class RegionFactory:
                 if not id in regions:
                     regions[id] = cr.Crossroad(G, target_id = id) if G.graph[rg.Region.regiontag_prefix + str(id)] == "crossroad" else rg.Region(G, target_id = id)
                 regions[id].add_edge(e)
+                regions[id].add_node(e[0])
+                regions[id].add_node(e[1])
 
         return regions
