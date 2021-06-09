@@ -8,15 +8,20 @@ import math
 
 from . import crossroad as cr
 from . import region as rg
+from . import regionfactory as rf
 from . import reliability as rel
 
 class Segmentation:
 
-    def __init__(self, G):
+    def __init__(self, G, init=True):
         self.G = G
         self.regions = {}
         random.seed()
-        rel.Reliability.init_attr(self.G)
+        if init:
+            rel.Reliability.init_attr(self.G)
+        else:
+            self.regions = rf.RegionFactory.rebuild_regions_from_tags(self.G)
+
 
     def process(self):
 

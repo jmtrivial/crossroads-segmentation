@@ -16,12 +16,17 @@ class Region:
 
     label_region = "region"
 
-    def __init__(self, G):
-        self.id = Region.id_region
+    def __init__(self, G, target_id = -1):
         self.G = G
         self.edges = []
         self.nodes = []
-        Region.id_region += 1
+        if target_id == -1:
+            self.id = Region.id_region
+            Region.id_region += 1
+        else:
+            self.id = target_id
+            if Region.id_region <= target_id:
+                Region.id_region = target_id + 1
 
     def is_crossroad(self):
         return False
@@ -38,6 +43,7 @@ class Region:
         for n in self.nodes:
             self.G.nodes[n][Region.label_region] = -1
     
+
     def init_attr(G):
         nx.set_edge_attributes(G, values=-1, name=Region.label_region)
         nx.set_node_attributes(G, values=-1, name=Region.label_region)

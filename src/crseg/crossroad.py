@@ -9,8 +9,8 @@ from . import branch_description as bd
 
 class Crossroad(r.Region):
 
-    def __init__(self, G, node):
-        r.Region.__init__(self, G)
+    def __init__(self, G, node = None, target_id = -1):
+        r.Region.__init__(self, G, target_id)
 
         self.max_distance_boundary_polyline = { "motorway": 100, 
                                                 "trunk": 100,
@@ -36,9 +36,9 @@ class Crossroad(r.Region):
                                                 "default": 6
                                                 }
 
-        self.propagate(node)
-
-        self.build_branches_description()
+        if node != None:
+            self.propagate(node)
+            self.build_branches_description()
 
     def __str__(self):
         return "id: %s, center: %s, branches: %s" % (self.id, self.center, self.branches)

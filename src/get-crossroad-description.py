@@ -8,6 +8,8 @@ import networkx as nx
 import osmnx as ox
 
 import crseg.segmentation as cs
+import crseg.reliability as r
+import crseg.region as rg
 
 # set parser
 parser = argparse.ArgumentParser(description="Build a basic description of the crossroad located at the requested coordinate.")
@@ -23,6 +25,7 @@ input_params.add_argument('--from-graphml', help='Load road graph from a GraphML
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
 
+parser.add_argument('--skip-processing', help="Do not compute segmentation (can be useful to store OSM data without modification, or to use result of a previous run by loading a GraphML.", action='store_true')
 
 group_display = parser.add_argument_group("Display", "Activate a display")
 group_display.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
@@ -81,6 +84,7 @@ to_gexf = args.to_gexf
 to_graphml = args.to_graphml
 to_json = args.to_json
 to_json_all = args.to_json_all
+skip_processing = args.skip_processing
 
 
 # load data
@@ -89,11 +93,18 @@ if verbose:
     print("=== DOWNLOADING DATA ===")
 
 if from_graphml:
-    G = ox.io.load_graphml(from_graphml.name)
+    G = ox.io.load_graphml(from_graphml.name, 
+                                node_dtypes={r.Reliability.boundary_reliability: float, 
+                                        r.Reliability.crossroad_reliability: float,
+                                        rg.Region.label_region: int},
+                                edge_dtypes={r.Reliability.crossroad_reliability: float,
+                                            rg.Region.label_region: int})
     # load parameters
     latitude = G.graph["cr.latitude"]
     longitude = G.graph["cr.longitude"]
     radius = G.graph["cr.radius"]
+
+    print(type(G))    
 else:
     G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
@@ -115,12 +126,15 @@ if verbose:
     print("Radius:", radius)
 
 
+if skip_processing:
+    print("=== SKIP INITIALISATION ===")
+    seg = cs.Segmentation(G, False)
+else:
+    if verbose:
+        print("=== INITIALISATION ===")
 
-if verbose:
-    print("=== INITIALISATION ===")
-
-# segment it using topology and semantic
-seg = cs.Segmentation(G)
+    # segment it using topology and semantic
+    seg = cs.Segmentation(G)
 
 if display_reliability:
     print("=== RENDERING RELIABILITY ===")
@@ -132,10 +146,13 @@ if display_reliability:
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 
 
-if display or to_text or to_text_all or to_gexf or to_json or to_json_all or to_graphml: # or any other next step
-    if verbose:
-        print("=== SEGMENTATION ===")
-    seg.process()
+if skip_processing:
+    print("=== SKIP SEGMENTATION ===")
+else:
+    if display or to_text or to_text_all or to_gexf or to_json or to_json_all or to_graphml: # or any other next step
+        if verbose:
+            print("=== SEGMENTATION ===")
+        seg.process()
 
 
 if to_text_all:
@@ -180,4 +197,7 @@ if to_graphml:
         G.graph["cr.latitude"] = latitude
         G.graph["cr.longitude"] = longitude
         G.graph["cr.radius"] = radius
+        for r in seg.regions:
+            G.graph["cr.region-" + str(r)] = "crossroad" if seg.regions[r].is_crossroad() else "branch"
+        # TODO: store for each region id its kind (crossing or branch)
         ox.io.save_graphml(G, to_graphml.name)
