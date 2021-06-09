@@ -78,6 +78,14 @@ class Util:
         
         return path
 
+    # return true if two the node is part of 3 edges, and
+    # if two of them are one-way
+    def is_street_separation(G, n):
+        if len(G[n]) != 3:
+            return False
+        
+        return len([nb for nb in G.neighbors(n) if "oneway" in G[n][nb][0] and G[n][nb][0]["oneway"]]) >= 2
+
     def is_part_of_local_triangle(G, n, max_perimeter = 150):
 
         paths = [ Util.get_path_to_biffurcation(G, n, nb) for nb in G.neighbors(n)]

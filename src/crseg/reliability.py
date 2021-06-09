@@ -23,7 +23,7 @@ class Reliability:
     crossroad_reliability = "reliability.crossroad"
 
 
-    moderate_boundary = [ "stop", "traffic_signals", "motorway_junction" ]
+    moderate_boundary = [ "stop", "traffic_signals", "motorway_junction", "give_way" ]
     possible_boundary = [ "crossing"]
     strongly_no_boundary_attr = [ "bus_stop", "milestone", "steps", "elevator" ]
 
@@ -87,7 +87,7 @@ class Reliability:
                             G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_yes
                         else:
                             # only one name
-                            if u.Util.is_part_of_local_triangle(G, n):
+                            if u.Util.is_part_of_local_triangle(G, n) or u.Util.is_street_separation(G, n):
                                 G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_no
                             else:
                                 G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_yes
