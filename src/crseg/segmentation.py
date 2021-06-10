@@ -49,9 +49,16 @@ class Segmentation:
             for o in cluster[1:]:
                 del self.regions[o.id]
 
+        # add inner paths and missing boundaries
+        for rid in self.regions:
+            region = self.regions[rid]
+            if region.is_crossroad():
+                region.add_missing_paths()
+            
+
         # TODO: add a second pass to merge main crossroad and small adjacent parts (such as access branches with forks, or orphan boundaries)
 
-        # TODO: add inner paths (between two nodes in the crossing)
+        # TODO: add inner paths and missing boundaries (again)
 
         # TODO: create branch regions
 
