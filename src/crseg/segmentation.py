@@ -56,7 +56,7 @@ class Segmentation:
                 region.add_missing_paths()
             
 
-        # TODO: add a second pass to merge main crossroad and small adjacent parts (such as access branches with forks, or orphan boundaries)
+        # TODO: second pass to merge main crossroad and small adjacent parts (such as access branches with forks)
 
         # TODO: add inner paths and missing boundaries (again)
 

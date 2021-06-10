@@ -343,7 +343,7 @@ class Crossroad(r.Region):
 
     # merge crossroads if they are in a neigborhood defined by scale times the radius of the crossroad
     # and if they are considered as "in same cluster" (using branch similarities)
-    def get_clusters(crossroads, scale = 3):
+    def get_clusters(crossroads, scale = 2):
         result = []
 
         visited = []
@@ -425,10 +425,9 @@ class Crossroad(r.Region):
         # finally rebuild the branch descriptions
         self.build_branches_description()
 
-    def add_missing_paths(self, scale = 3):
+    def add_missing_paths(self, scale = 2):
         # add inner paths
         self.add_direct_paths_between_nodes(self.nodes)
-
 
 
         # add paths to missing boundaries within the given scale
@@ -440,4 +439,7 @@ class Crossroad(r.Region):
                     # find a boundary node inside the path and cut it
                     if len(path) > 0 and u.Util.length(self.G, path) < max_length:
                         self.add_path(path)
+
+        # finally rebuild the branch descriptions
+        self.build_branches_description()
 
