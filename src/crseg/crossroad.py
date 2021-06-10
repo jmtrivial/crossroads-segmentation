@@ -341,6 +341,8 @@ class Crossroad(r.Region):
 
         return False
 
+    # merge crossroads if they are in a neigborhood defined by scale times the radius of the crossroad
+    # and if they are considered as "in same cluster" (using branch similarities)
     def get_clusters(crossroads, scale = 3):
         result = []
 
