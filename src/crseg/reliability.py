@@ -26,7 +26,6 @@ class Reliability:
     moderate_boundary = [ "stop", "traffic_signals", "motorway_junction", "give_way" ]
     possible_boundary = [ "crossing"]
     strongly_no_boundary_attr = [ "bus_stop", "milestone", "steps", "elevator" ]
-    strongly_crossing_attr = [ "crossing" ]
 
     strongly_yes = 1000.0
     strongly_no = 0.0
@@ -64,8 +63,8 @@ class Reliability:
                 if nb_neighbors == 2:
                     G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_no
                 
-                if G.nodes[n]["highway"] in Reliability.strongly_crossing_attr:
-                    G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_yes
+                
+
 
                 if G.nodes[n]["highway"] in Reliability.strongly_no_boundary_attr:
                     G.nodes[n][Reliability.boundary_reliability] = Reliability.moderate_no
@@ -74,7 +73,8 @@ class Reliability:
                 elif G.nodes[n]["highway"] in Reliability.moderate_boundary and nb_neighbors <= 3:
                     G.nodes[n][Reliability.boundary_reliability] = Reliability.moderate_yes
                     G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_yes
-                elif nb_neighbors >= 3:
+                
+                if nb_neighbors >= 3:
                     G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_yes
             else:
                 if nb_neighbors == 2:
