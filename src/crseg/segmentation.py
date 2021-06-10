@@ -60,7 +60,10 @@ class Segmentation:
 
         # TODO: add inner paths and missing boundaries (again)
 
-        # TODO: create branch regions
+        # create branch regions
+        # for rid in self.regions:
+        #    self.regions[rid].compute_branch_groups()
+            
 
 
 

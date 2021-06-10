@@ -4,7 +4,7 @@ import osmnx as ox
 from . import reliability as rl
 from . import region as r
 from . import utils as u
-from . import branch_description as bd
+from . import lane_description as ld
 
 
 class Crossroad(r.Region):
@@ -38,10 +38,10 @@ class Crossroad(r.Region):
 
         if node != None:
             self.propagate(node)
-            self.build_branches_description()
+            self.build_lanes_description()
 
     def __str__(self):
-        return "id: %s, center: %s, branches: %s" % (self.id, self.center, self.branches)
+        return "id: %s, center: %s, lanes: %s" % (self.id, self.center, self.lanes)
 
     def __repr__(self):
         return "id: %s, center: %s" % (self.id, self.center)
@@ -57,15 +57,15 @@ class Crossroad(r.Region):
         return self.__str__()
 
 
-    def get_branch_description_from_edge(self, edge):
+    def get_lane_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]
         angle = u.Util.bearing(self.G, self.get_center(), edge[1])
         name = e["name"] if "name" in e else None
-        return bd.BranchDescription(angle, name)
+        return ld.LaneDescription(angle, name)
 
-    def get_branches_description_from_node(self, border):
+    def get_lanes_description_from_node(self, border):
         edges = [(border, nb) for nb in self.G.neighbors(border) if not self.has_edge((nb, border))]
-        return [self.get_branch_description_from_edge(e) for e in edges]
+        return [self.get_lane_description_from_edge(e) for e in edges]
 
     def get_radius(self):
         borders = [n for n in self.nodes if self.is_boundary_node(n) and n != self.get_center()]
@@ -74,7 +74,7 @@ class Crossroad(r.Region):
             radius = 0
             for nb in self.G.neighbors(center):
                 c = self.get_highway_classification((center, nb))
-                v = self.min_distance_boundary_polyline[c] / 2 # we reduce the impact of missing branches
+                v = self.min_distance_boundary_polyline[c] / 2 # we reduce the impact of missing lanes
                 if v > radius:
                     radius = v
             return radius
@@ -91,8 +91,8 @@ class Crossroad(r.Region):
 
         return result
 
-    def build_branches_description(self):
-        self.branches = []
+    def build_lanes_description(self):
+        self.lanes = []
 
         center = self.get_center()
         radius = self.get_radius()
@@ -101,13 +101,13 @@ class Crossroad(r.Region):
 
         for b in borders:
             if b != center:
-                self.branches = self.branches + self.get_branches_description_from_node(b)
+                self.lanes = self.lanes + self.get_lanes_description_from_node(b)
             else:
                 # go trough all possible paths starting from the center
-                # and add the corresponding branches
-                open_branches = self.get_open_paths(center, radius)
-                for ob in open_branches:
-                    self.branches.append(self.get_branch_description_from_edge((ob[len(ob) - 2], ob[len(ob) - 1])))
+                # and add the corresponding lanes
+                open_lanes = self.get_open_paths(center, radius)
+                for ol in open_lanes:
+                    self.lanes.append(self.get_lane_description_from_edge((ol[len(ol) - 2], ol[len(ol) - 1])))
         
 
     def build_crossroads(G):
@@ -330,8 +330,8 @@ class Crossroad(r.Region):
 
         # if no strong boundary has been identified, consider similar branches
         # orthogonal to the junction
-        for b1 in self.branches:
-            for b2 in crossroad.branches:
+        for b1 in self.lanes:
+            for b2 in crossroad.lanes:
                 if b1.is_similar(b2) and b1.is_orthogonal(angle):
                     return True
 
@@ -423,7 +423,7 @@ class Crossroad(r.Region):
             self.center = new_center
         
         # finally rebuild the branch descriptions
-        self.build_branches_description()
+        self.build_lanes_description()
 
     def add_missing_paths(self, scale = 2):
         # add inner paths
@@ -441,5 +441,5 @@ class Crossroad(r.Region):
                         self.add_path(path)
 
         # finally rebuild the branch descriptions
-        self.build_branches_description()
+        self.build_lanes_description()
 
