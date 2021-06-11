@@ -58,25 +58,36 @@ class Crossroad(r.Region):
         text += str(self.to_json_data())
         return text
 
-    def to_json_data(self):
-        data = []
-
+    def to_json_array(tp, innerNodes, borderNodes, edges):
         crdata = {}
         crdata["type"] = "crossroad"
         crdata["nodes"] = {}
-        crdata["nodes"]["inner"] = []
-        crdata["nodes"]["border"] = []
-        for n in self.nodes:
-            if self.is_boundary_node(n):
-                crdata["nodes"]["border"].append(n)
-            else:
-                crdata["nodes"]["inner"].append(n)
+        crdata["nodes"]["inner"] = innerNodes
+        crdata["nodes"]["border"] = borderNodes
         crdata["edges_by_nodes"] = []
         for e in self.edges:
             crdata["edges_by_nodes"].append(e)
-        data.append(crdata)
+        return crdata
 
-        # TODO: for each branch
+    def to_json_data(self):
+        data = []
+
+        innerNodes = []
+        borderNodes = []
+        for n in self.nodes:
+            if self.is_boundary_node(n):
+                borderNodes.append(n)
+            else:
+                innerNodes.append(n)            
+
+        data.append(Crossroad.to_json_array("crossroad", innerNodes, borderNodes, self.edges))
+
+        # for each branch
+        for b in self.branches:
+            nodes = [] # TODO
+            edges = [] # TODO
+            data.append(Crossroad.to_json_array("branch", [], nodes, edges))
+
 
         return data
 
@@ -468,5 +479,7 @@ class Crossroad(r.Region):
         self.build_lanes_description()
 
     def compute_branches(self):
+
+        self.branches = []
         # TODO
         pass
