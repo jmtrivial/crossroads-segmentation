@@ -56,6 +56,12 @@ class Crossroad(r.Region):
         # TODO: improve by identifying similar branches
         return self.__str__()
 
+    def to_json_data(self):
+        data = {}
+        # TODO
+
+        return data
+
 
     def get_lane_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]
@@ -443,3 +449,6 @@ class Crossroad(r.Region):
         # finally rebuild the branch descriptions
         self.build_lanes_description()
 
+    def compute_branches(self):
+        # TODO
+        pass

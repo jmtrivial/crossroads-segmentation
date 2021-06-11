@@ -161,15 +161,23 @@ else:
 
 
 if to_text_all:
+    if verbose:
+            print("=== TEXT OUTPUT ===")
     print(seg.to_text_all())
 
 if to_text:
+    if verbose:
+            print("=== TEXT OUTPUT ===")
     print(seg.to_text(longitude, latitude))
 
 if to_json:
+    if verbose:
+            print("=== EXPORT IN JSON ===")
     seg.to_json(to_json.name, longitude, latitude)
 
 if to_json_all:
+    if verbose:
+            print("=== EXPORT IN JSON ===")
     seg.to_json_all(to_json_all.name)
 
 if display:

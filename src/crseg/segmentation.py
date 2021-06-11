@@ -4,6 +4,7 @@ import osmnx as ox
 import pandas as pd
 import random
 import math
+import json
 
 
 from . import crossroad as cr
@@ -61,8 +62,8 @@ class Segmentation:
         # TODO: add inner paths and missing boundaries (again)
 
         # create branch regions
-        # for rid in self.regions:
-        #    self.regions[rid].compute_branch_groups()
+        for rid in self.regions:
+            self.regions[rid].compute_branches()
             
 
 
@@ -301,10 +302,18 @@ class Segmentation:
 
     ######################### json descriptions ########################
 
-    def to_json_all(self, filename):
-        # TODO
-        pass
+    def to_json(self, filename, longitude, latitude):
+        data = self.get_crossroad(longitude, latitude).to_json_data()
 
-    def to_json(self, filename):
-        # TODO
-        pass
+        with open(filename, 'w') as outfile:
+            json.dump(data, outfile)
+
+
+    def to_json_all(self, filename):
+        data = []
+        for rid in self.regions:
+            entry = self.regions[rid].to_json_data()
+            data.append(entry)
+
+        with open(filename, 'w') as outfile:
+            json.dump(data, outfile)
