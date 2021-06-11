@@ -41,7 +41,7 @@ class Crossroad(r.Region):
             self.build_lanes_description()
 
     def __str__(self):
-        return "id: %s, center: %s, lanes: %s" % (self.id, self.center, self.lanes)
+        return "* id: %s\n* center: %s\n* lanes: %s" % (self.id, self.center, self.lanes)
 
     def __repr__(self):
         return "id: %s, center: %s" % (self.id, self.center)
@@ -53,8 +53,10 @@ class Crossroad(r.Region):
         return True
 
     def to_text(self):
-        # TODO: improve by identifying similar branches
-        return self.__str__()
+        text = "General description:\n" + self.__str__()
+        text += "\nDetails:\n"
+        text += str(self.to_json_data())
+        return text
 
     def to_json_data(self):
         data = {}

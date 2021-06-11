@@ -298,6 +298,7 @@ class Segmentation:
         for rid in self.regions:
             result += self.regions[rid].to_text()
             result += "\n"
+            result += "\n"
         return result
 
     ######################### json descriptions ########################
