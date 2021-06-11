@@ -59,8 +59,24 @@ class Crossroad(r.Region):
         return text
 
     def to_json_data(self):
-        data = {}
-        # TODO
+        data = []
+
+        crdata = {}
+        crdata["type"] = "crossroad"
+        crdata["nodes"] = {}
+        crdata["nodes"]["inner"] = []
+        crdata["nodes"]["border"] = []
+        for n in self.nodes:
+            if self.is_boundary_node(n):
+                crdata["nodes"]["border"].append(n)
+            else:
+                crdata["nodes"]["inner"].append(n)
+        crdata["edges_by_nodes"] = []
+        for e in self.edges:
+            crdata["edges_by_nodes"].append(e)
+        data.append(crdata)
+
+        # TODO: for each branch
 
         return data
 
