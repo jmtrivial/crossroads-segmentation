@@ -41,7 +41,7 @@ class Crossroad(r.Region):
             self.build_lanes_description()
 
     def __str__(self):
-        return "* id: %s\n* center: %s\n* lanes: %s" % (self.id, self.center, self.lanes)
+        return "* id: %s\n* center: %s\n* lanes: %s\n* branches: %s" % (self.id, self.center, len(self.lanes), len(self.branches))
 
     def __repr__(self):
         return "id: %s, center: %s" % (self.id, self.center)
@@ -60,12 +60,12 @@ class Crossroad(r.Region):
 
     def to_json_array(tp, innerNodes, borderNodes, edges):
         crdata = {}
-        crdata["type"] = "crossroad"
+        crdata["type"] = tp
         crdata["nodes"] = {}
         crdata["nodes"]["inner"] = innerNodes
         crdata["nodes"]["border"] = borderNodes
         crdata["edges_by_nodes"] = []
-        for e in self.edges:
+        for e in edges:
             crdata["edges_by_nodes"].append(e)
         return crdata
 
@@ -83,10 +83,13 @@ class Crossroad(r.Region):
         data.append(Crossroad.to_json_array("crossroad", innerNodes, borderNodes, self.edges))
 
         # for each branch
-        for b in self.branches:
-            nodes = [] # TODO
-            edges = [] # TODO
-            data.append(Crossroad.to_json_array("branch", [], nodes, edges))
+        for branch in self.branches:
+            nodes = set()
+            for lane in branch:
+                nodes.add(lane.edge[0])
+                nodes.add(lane.edge[1])
+            edges = [lane.edge for lane in branch]
+            data.append(Crossroad.to_json_array("branch", [], list(nodes), edges))
 
 
         return data
@@ -96,7 +99,7 @@ class Crossroad(r.Region):
         e = self.G[edge[0]][edge[1]][0]
         angle = u.Util.bearing(self.G, self.get_center(), edge[1])
         name = e["name"] if "name" in e else None
-        return ld.LaneDescription(angle, name)
+        return ld.LaneDescription(angle, name, edge)
 
     def get_lanes_description_from_node(self, border):
         edges = [(border, nb) for nb in self.G.neighbors(border) if not self.has_edge((nb, border))]
@@ -422,6 +425,7 @@ class Crossroad(r.Region):
         result = [r for r in result if len(r) > 1]
         return result
 
+    # add to the current crossing the direct paths that connect the given points
     def add_direct_paths_between_nodes(self, points):
 
         for p1 in points:
@@ -431,6 +435,7 @@ class Crossroad(r.Region):
                     if path[len(path) - 1] in points:
                         self.add_path(path)
 
+    # merge all given regions with the current one
     def merge(self, regions):
         # add nodes and edges from the other regions
         for region in regions:
@@ -460,6 +465,7 @@ class Crossroad(r.Region):
         # finally rebuild the branch descriptions
         self.build_lanes_description()
 
+    # add missing paths (inner paths and paths to boundaries)
     def add_missing_paths(self, scale = 2):
         # add inner paths
         self.add_direct_paths_between_nodes(self.nodes)
@@ -481,5 +487,25 @@ class Crossroad(r.Region):
     def compute_branches(self):
 
         self.branches = []
-        # TODO
-        pass
+        
+        # for each lane
+        for lane in self.lanes:
+            mbranches = []
+            # check if it's similar to a lane already in a built branch
+            for i, branch in enumerate(self.branches):
+                nb = len([l for l in branch if l.is_similar(lane)])
+                if nb > 0:
+                    mbranches.append(i)
+            # if not, create a new branch
+            if len(mbranches) == 0:
+                self.branches.append([lane])
+            else:
+                # merge the similar branches
+                self.branches[mbranches[0]].append(lane)
+                for idb in mbranches[1:]:
+                    self.branches[mbranches[0]] += self.branches[idb]
+                    self.branches[idb] = []
+            
+            # remove empty branches
+            self.branches = [ b for b in self.branches if len(b) > 0]
+

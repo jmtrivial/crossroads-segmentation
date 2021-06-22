@@ -3,9 +3,10 @@ from . import utils as u
 
 class LaneDescription:
 
-    def __init__(self, angle, name):
+    def __init__(self, angle, name, edge):
         self.angle = angle
         self.name = name
+        self.edge = edge
 
     def is_similar(self, bd, angle_similarity = 90):
         if self.name == None or bd.name == None:
