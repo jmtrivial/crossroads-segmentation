@@ -509,3 +509,15 @@ class Crossroad(r.Region):
             # remove empty branches
             self.branches = [ b for b in self.branches if len(b) > 0]
 
+    # if the given edge is not part of a branch, it returns -1
+    # otherwise, it returns the index of the branch (in this crossing) that contains the given edge
+    def get_branch_id(self, e):
+
+        for i, branch in enumerate(self.branches):
+            for lane in branch:
+                if lane.equals(e):
+                    return i
+
+        return -1
+
+

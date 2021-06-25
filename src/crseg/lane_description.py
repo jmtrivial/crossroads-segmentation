@@ -25,6 +25,10 @@ class LaneDescription:
             return True
         return False
 
+    def equals(self, edge):
+        return (self.edge[0] == edge[0] and self.edge[1] == edge[1]) or \
+                (self.edge[1] == edge[0] and self.edge[0] == edge[1])
+
     def __str__(self):
         return "%s : %s" % (self.name, self.angle)
 
