@@ -69,20 +69,18 @@ class Segmentation:
                 del self.regions[o.id]
 
         # add inner paths and missing boundaries
-        for rid in self.regions:
-            region = self.regions[rid]
-            if region.is_crossroad():
-                region.add_missing_paths()
+        self.add_missing_paths()
         
         # build links between regions
         links = rf.RegionFactory.build_links_between_crossings(self.G, self.regions)
         self.regions.update(links)
         self.set_tags_only_regions()
 
+        # merge crossings
+        self.merge_linked_crossings()
 
-        # TODO: second pass to merge main crossroad and small adjacent parts (such as access branches with forks)
-
-        # TODO: add inner paths and missing boundaries (again)
+        # add inner paths and missing boundaries (again)
+        self.add_missing_paths(False)
 
         # create branch regions
         for rid in self.regions:
@@ -90,6 +88,15 @@ class Segmentation:
                 self.regions[rid].compute_branches()
             
 
+    def merge_linked_crossings(self):
+        # TODO
+        pass
+
+    def add_missing_paths(self, boundaries = True):
+        for rid in self.regions:
+            region = self.regions[rid]
+            if region.is_crossroad():
+                region.add_missing_paths(boundaries = boundaries)
 
 
     def in_crossroad_region(self, e):

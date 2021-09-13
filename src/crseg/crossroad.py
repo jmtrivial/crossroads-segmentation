@@ -466,20 +466,20 @@ class Crossroad(r.Region):
         self.build_lanes_description()
 
     # add missing paths (inner paths and paths to boundaries)
-    def add_missing_paths(self, scale = 2):
+    def add_missing_paths(self, scale = 2, boundaries = True):
         # add inner paths
         self.add_direct_paths_between_nodes(self.nodes)
 
-
-        # add paths to missing boundaries within the given scale
-        max_length = scale * self.get_radius()
-        for p1 in self.nodes:
-            for n in self.G.neighbors(p1):
-                if not self.has_edge((p1, n)):
-                    path = rl.Reliability.get_path_to_boundary(self.G, p1, n)
-                    # find a boundary node inside the path and cut it
-                    if len(path) > 0 and u.Util.length(self.G, path) < max_length:
-                        self.add_path(path)
+        if boundaries:
+            # add paths to missing boundaries within the given scale
+            max_length = scale * self.get_radius()
+            for p1 in self.nodes:
+                for n in self.G.neighbors(p1):
+                    if not self.has_edge((p1, n)):
+                        path = rl.Reliability.get_path_to_boundary(self.G, p1, n)
+                        # find a boundary node inside the path and cut it
+                        if len(path) > 0 and u.Util.length(self.G, path) < max_length:
+                            self.add_path(path)
 
         # finally rebuild the branch descriptions
         self.build_lanes_description()
