@@ -32,7 +32,7 @@ class Region:
     def is_crossroad(self):
         return False
 
-    def is_branch(self):
+    def is_link(self):
         return False
 
     def clear_region(self):
@@ -83,8 +83,17 @@ class Region:
     def has_edge(self, e):
         return e in self.edges or (e[1], e[0]) in self.edges
 
+    def has_node(self, n):
+        return n in self.nodes
+
     def is_boundary_node(self, n):
         nbnb = len(list(self.G.neighbors(n)))
         nbEdgesInside = len([e for e in self.edges if e[0] == n or e[1] == n])
         return nbnb != nbEdgesInside
 
+    def boundary_nodes(self):
+        result = []
+        for n in self.nodes:
+            if self.is_boundary_node(n):
+                result.append(n)
+        return result

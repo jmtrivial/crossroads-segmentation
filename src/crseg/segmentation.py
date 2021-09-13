@@ -24,6 +24,24 @@ class Segmentation:
             self.regions = rf.RegionFactory.rebuild_regions_from_tags(self.G)
 
 
+    def set_tags_only_regions(self):
+        # clear tags
+        for n in self.G.nodes:
+            self.G.nodes[n][rg.Region.label_region] = -1
+        for u, v, a in self.G.edges(data = True):
+            self.G[u][v][0][rg.Region.label_region] = -1
+
+        # set tags wrt crossroad regions
+        for rid in self.regions:
+            region = self.regions[rid]
+            if region.is_crossroad():
+                for n in region.nodes:
+                    self.G.nodes[n][rg.Region.label_region] = rid
+                for e in region.edges:
+                    self.G[e[0]][e[1]][0][rg.Region.label_region] = rid
+                
+
+
     def process(self):
 
         # init flags
@@ -55,7 +73,12 @@ class Segmentation:
             region = self.regions[rid]
             if region.is_crossroad():
                 region.add_missing_paths()
-            
+        
+        # build links between regions
+        links = rf.RegionFactory.build_links_between_crossings(self.G, self.regions)
+        self.regions.update(links)
+        self.set_tags_only_regions()
+
 
         # TODO: second pass to merge main crossroad and small adjacent parts (such as access branches with forks)
 
@@ -63,7 +86,8 @@ class Segmentation:
 
         # create branch regions
         for rid in self.regions:
-            self.regions[rid].compute_branches()
+            if self.regions[rid].is_crossroad():
+                self.regions[rid].compute_branches()
             
 
 

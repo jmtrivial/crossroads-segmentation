@@ -1,5 +1,6 @@
 import osmnx as ox
 
+from . import region as r
 
 class Util:
 
@@ -106,3 +107,10 @@ class Util:
                         return True
 
         return False
+
+    def has_non_labeled_adjacent_edge(G, n):
+        for nb in G.neighbors(n):
+            if G[n][nb][0][r.Region.label_region] == -1:
+                return True
+        return False
+

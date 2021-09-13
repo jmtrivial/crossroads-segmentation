@@ -1,5 +1,7 @@
 from . import crossroad as cr
 from . import region as rg
+from . import utils as u
+from . import link as lk
 
 
 class RegionFactory:
@@ -28,3 +30,26 @@ class RegionFactory:
                 regions[id].add_node(e[1])
 
         return regions
+
+    def build_links_between_crossings(G, crossings):
+        links = {}
+
+        for rid in crossings:
+            for b in crossings[rid].boundary_nodes():
+                # if some edges are not in a region                    
+                if u.Util.has_non_labeled_adjacent_edge(G, b):
+                    # for each edge outside of a region, create a link region
+                    for nb in G.neighbors(b):
+                        if G[b][nb][0][rg.Region.label_region] == -1:
+                            l = lk.Link(G, b, nb)
+                            l.propagate()
+                            links[l.id] = l
+                else:
+                    # create a link region with a single node (if not yet created)
+                    exists = len([idl for idl in links if links[idl].has_node(b)])
+                    if exists == 0:
+                        l = lk.Link(G, b)
+                        links[l.id] = l
+                    
+
+        return links
