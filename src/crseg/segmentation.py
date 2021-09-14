@@ -11,6 +11,7 @@ from . import crossroad as cr
 from . import region as rg
 from . import regionfactory as rf
 from . import reliability as rel
+from . import crossroad_connections as cc
 
 class Segmentation:
 
@@ -77,7 +78,7 @@ class Segmentation:
         self.set_tags_only_regions()
 
         # merge crossings
-        self.merge_linked_crossings()
+        self.merge_linked_crossroads()
 
         # add inner paths and missing boundaries (again)
         self.add_missing_paths(False)
@@ -88,9 +89,15 @@ class Segmentation:
                 self.regions[rid].compute_branches()
             
 
-    def merge_linked_crossings(self):
-        # TODO
-        pass
+    def merge_linked_crossroads(self):
+        cconnections = cc.CrossroadConnections(self.regions)
+
+        # merge bi-connected crossings
+        for pairs in cconnections.get_pairs():
+            self.regions[pairs[0]].merge([self.regions[pairs[1]]])
+            del self.regions[pairs[1]]
+
+        # TODO: merge multi crossings (triangles, rings, etc)
 
     def add_missing_paths(self, boundaries = True):
         for rid in self.regions:
