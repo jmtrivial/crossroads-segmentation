@@ -6,6 +6,18 @@ from . import link as lk
 
 class RegionFactory:
 
+    def clone(region):
+        if region.is_crossroad():
+            result = cr.Crossroad(region.G)
+        elif region.is_link():
+            result = lk.Link(region.G)
+            result.filled = region.filled
+        else:
+            result = rg.Region(region.G)
+        result.nodes = region.nodes
+        result.edges = region.edges
+
+        return result
 
     def rebuild_regions_from_tags(G):
         # rebuild regions from metadata

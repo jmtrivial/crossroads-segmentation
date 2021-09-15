@@ -90,14 +90,32 @@ class Segmentation:
             
 
     def merge_linked_crossroads(self):
+        self.inner_regions = {}
+        newIDs = {}
+
         cconnections = cc.CrossroadConnections(self.regions)
 
         # merge bi-connected crossings
         for pairs in cconnections.get_pairs():
-            self.regions[pairs[0]].merge([self.regions[pairs[1]]])
-            del self.regions[pairs[1]]
+            id1 = pairs[0] if pairs[0] in self.regions else newIDs[pairs[0]]
+            id2 = pairs[1] if pairs[1] in self.regions else newIDs[pairs[1]]
+            if id1 != id2:
+                self.add_inner_region(self.regions[id1])
+                self.add_inner_region(self.regions[id2])
+                # TODO: add paths that are connecting these two regions
+                self.regions[id1].merge([self.regions[id2]])
+                del self.regions[id2]
+                newIDs[id2] = id1
+                for nid in newIDs:
+                    if newIDs[nid] == id2:
+                        newIDs[nid] = id1
 
         # TODO: merge multi crossings (triangles, rings, etc)
+
+    def add_inner_region(self, region):
+        # clone the given region and add it to the inner_regions structure
+        newRegion = rf.RegionFactory.clone(region)
+        self.inner_regions[newRegion.id] = newRegion
 
     def add_missing_paths(self, boundaries = True):
         for rid in self.regions:

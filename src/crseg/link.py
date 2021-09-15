@@ -9,15 +9,16 @@ from . import lane_description as ld
 
 class Link(r.Region):
     
-    def __init__(self, G, node1, node2 = None, target_id = -1):
+    def __init__(self, G, node1 = None, node2 = None, target_id = -1):
         r.Region.__init__(self, G, target_id)
-        self.add_node(node1)
-        self.filled = False
-        if node2 != None:
-            if G.nodes[node2][r.Region.label_region] != -1:
-                self.filled = True
-            self.add_node(node2)
-            self.add_edge((node1, node2))
+        if node1 != None:
+            self.add_node(node1)
+            self.filled = False
+            if node2 != None:
+                if G.nodes[node2][r.Region.label_region] != -1:
+                    self.filled = True
+                self.add_node(node2)
+                self.add_edge((node1, node2))
 
     def is_link(self):
         return True
@@ -31,6 +32,8 @@ class Link(r.Region):
     def propagate_from_node(self, start):
         for nb in self.G.neighbors(start):
             if self.G[start][nb][0][r.Region.label_region] == -1:
+                open = self.G.nodes[nb][r.Region.label_region] == -1
                 self.add_node(nb)
                 self.add_edge((start, nb))
-                self.propagate_from_node(nb)
+                if open:
+                    self.propagate_from_node(nb)
