@@ -44,6 +44,12 @@ class Region:
         for n in self.nodes:
             self.G.nodes[n][Region.label_region] = -1
     
+    # return true if all the nodes of the given region are part of the current region
+    def contains(self, region):
+        for n in region.nodes:
+            if not n in self.nodes:
+                return False
+        return True
 
     def init_attr(G):
         nx.set_edge_attributes(G, values=-1, name=Region.label_region)

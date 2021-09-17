@@ -87,6 +87,9 @@ class Segmentation:
         for rid in self.regions:
             if self.regions[rid].is_crossroad():
                 self.regions[rid].compute_branches()
+        
+        for rid in self.inner_regions:
+            self.inner_regions[rid].compute_branches()
             
 
     def merge_linked_crossroads(self):
@@ -372,44 +375,72 @@ class Segmentation:
 
     ######################### text descriptions ########################
 
-    def get_crossroad(self, longitude, latitude):
+    def get_crossroad(self, longitude, latitude, multiscale = False):
         distance = -1
         middle = -1
         for rid in self.regions:
-            region = self.regions[rid]
-            x1 = self.G.nodes[region.get_center()]["x"]
-            y1 = self.G.nodes[region.get_center()]["y"]
-            d = ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=latitude, lng2=longitude)
-            if distance < 0 or d < distance:
-                distance = d
-                middle = rid
-        return self.regions[middle]
+            if self.regions[rid].is_crossroad():
+                region = self.regions[rid]
+                x1 = self.G.nodes[region.get_center()]["x"]
+                y1 = self.G.nodes[region.get_center()]["y"]
+                d = ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=latitude, lng2=longitude)
+                if distance < 0 or d < distance:
+                    distance = d
+                    middle = rid
 
-    def to_text(self, longitude, latitude):
-        return self.get_crossroad(longitude, latitude).to_text()
+        if multiscale:
+            result = []
+            result.append(self.regions[middle])
+            for rid in self.inner_regions:
+                if self.regions[middle].contains(self.inner_regions[rid]):
+                    result.append(self.inner_regions[rid])
+            return result
+        else:
+            return self.regions[middle]
 
-    def to_text_all(self):
+    def to_text(self, longitude, latitude, multiscale = False):
+        return self.get_crossroad(longitude, latitude, multiscale).to_text()
+
+    def to_text_all(self, multiscale = False):
         result = ""
         for rid in self.regions:
-            result += self.regions[rid].to_text()
+            if self.regions[rid].is_crossroad():
+                result += self.regions[rid].to_text()
+                result += "\n"
+                result += "\n"
+
+        if multiscale:
+            result = "Inner crossroads:"
             result += "\n"
-            result += "\n"
+            for rid in self.inner_regions:
+                result += self.inner_regions[rid].to_text()
+                result += "\n"
+                result += "\n"
         return result
 
     ######################### json descriptions ########################
 
-    def to_json(self, filename, longitude, latitude):
-        data = self.get_crossroad(longitude, latitude).to_json_data()
+    def to_json(self, filename, longitude, latitude, multiscale = False):
+        if multiscale:
+            data = [x.to_json_data() for x in self.get_crossroad(longitude, latitude, multiscale)]
+        else:
+            data = self.get_crossroad(longitude, latitude, multiscale).to_json_data()
 
         with open(filename, 'w') as outfile:
             json.dump(data, outfile)
 
 
-    def to_json_all(self, filename):
+    def to_json_all(self, filename, multiscale = False):
         data = []
         for rid in self.regions:
-            entry = self.regions[rid].to_json_data()
-            data.append(entry)
+            if self.regions[rid].is_crossroad():
+                entry = self.regions[rid].to_json_data()
+                data.append(entry)
+        
+        if multiscale:
+            for rid in self.inner_regions:
+                entry = self.inner_regions[rid].to_json_data()
+                data.append(entry)
 
         with open(filename, 'w') as outfile:
             json.dump(data, outfile)

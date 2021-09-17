@@ -27,6 +27,8 @@ parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_tr
 
 parser.add_argument('--skip-processing', help="Do not compute segmentation (can be useful to store OSM data without modification, or to use result of a previous run by loading a GraphML.", action='store_true')
 
+parser.add_argument('--multiscale', help="Display and save crossings with multiscale data (not only the main crossroad, but also the small crossroads part of the large one.", action='store_true')
+
 group_display = parser.add_argument_group("Display", "Activate a display")
 group_display.add_argument('-d', '--display', help='Display crossroads in the reconstructed region', action='store_true')
 group_display.add_argument('--display-reliability', help='Display reliability computed before any segmentation', action='store_true')
@@ -113,6 +115,7 @@ to_graphml = args.to_graphml
 to_json = args.to_json
 to_json_all = args.to_json_all
 skip_processing = args.skip_processing
+multiscale = args.multiscale
 
 
 # load data
@@ -167,6 +170,9 @@ else:
 if display_reliability:
     print("=== RENDERING RELIABILITY ===")
 
+    if multiscale:
+        print("Warning: this display do not handle multiscale option")
+
     ec = seg.get_edges_reliability_colors()
 
     nc = seg.get_nodes_reliability_colors()
@@ -187,26 +193,29 @@ else:
 if to_text_all:
     if verbose:
             print("=== TEXT OUTPUT ===")
-    print(seg.to_text_all())
+    print(seg.to_text_all(multiscale))
 
 if to_text:
     if verbose:
             print("=== TEXT OUTPUT ===")
-    print(seg.to_text(longitude, latitude))
+    print(seg.to_text(longitude, latitude, multiscale))
 
 if to_json:
     if verbose:
             print("=== EXPORT IN JSON ===")
-    seg.to_json(to_json.name, longitude, latitude)
+    seg.to_json(to_json.name, longitude, latitude, multiscale)
 
 if to_json_all:
     if verbose:
             print("=== EXPORT IN JSON ===")
-    seg.to_json_all(to_json_all.name)
+    seg.to_json_all(to_json_all.name, multiscale)
 
 if display:
     if verbose:
         print("=== RENDERING ===")
+
+    if multiscale:
+        print("Warning: this display do not handle multiscale option")
 
     ec = seg.get_regions_class_colors()
 
@@ -218,6 +227,8 @@ if display_segmentation:
     if verbose:
         print("=== RENDERING SEGMENTATION ===")
 
+    if multiscale:
+        print("Warning: this display do not handle multiscale option")
     ec = seg.get_regions_colors()
 
     nc = seg.get_nodes_regions_colors()
@@ -227,6 +238,9 @@ if display_segmentation:
 if display_main_crossroad:
     if verbose:
         print("=== RENDERING MAIN CROSSROAD ===")
+
+    if multiscale:
+        print("Warning: this display do not handle yet multiscale option")
 
     cr = seg.get_crossroad(longitude, latitude)
     

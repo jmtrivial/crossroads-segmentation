@@ -17,6 +17,8 @@ class RegionFactory:
         result.nodes = region.nodes
         result.edges = region.edges
 
+        result.lanes = region.lanes
+
         return result
 
     def rebuild_regions_from_tags(G):
