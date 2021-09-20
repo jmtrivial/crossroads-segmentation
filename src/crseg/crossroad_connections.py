@@ -38,6 +38,28 @@ class CrossroadConnections:
                 self.add_adjacencies(r1, n, self.regionsByNode[n])
 
         # compute a list of connections between crossroads
+        self.compute_connected_crossroads()
+
+    def compute_connected_crossroads(self):
+        self.compute_initial_connections()
+
+        merged = {}
+        
+
+        # merge multiple instances of the same pair of connected crossroads
+        for c in self.connected_crossroads:
+            if (c[0], c[1]) in merged:
+                merged[(c[0], c[1])].append(c[2])
+            else:
+                merged[(c[0], c[1])] = [c[2]]
+        
+        new_list = []
+        for c in merged:
+            new_list.append((c[0], c[1], merged[c]))
+        
+        self.connected_crossroads = new_list
+
+    def compute_initial_connections(self):
         self.connected_crossroads = []
         # for each crossroad region
         for cr in self.crossroads:
@@ -47,9 +69,18 @@ class CrossroadConnections:
                 for cr2 in self.adjacencies[l]:
                     # only considering the ones with an ID higher to the ID of the initial crossroad region
                     if self.regions[cr].id < self.regions[cr2].id:
-                        #add them as a pair
-                        self.connected_crossroads.append((cr, cr2))
+                        path, distance = self.get_path_in_link(l, cr, cr2)
+                        # add them as a pair with the corresponding path only if the path is not too long
+                        if distance < max([self.regions[cr].diameter(), self.regions[cr2].diameter()]) * 2: # magic threshold :(
+                            self.connected_crossroads.append((cr, cr2, path))
 
+    # return a path (defined by a list of nodes) contained in the given link l that connects
+    # the two given crossroad regions (cr1 and cr2)
+    def get_path_in_link(self, l, cr1, cr2):
+        cr1n = [n for n in self.regions[l].nodes if cr1 in self.regionsByNode[n]]
+        cr2n = [n for n in self.regions[l].nodes if cr2 in self.regionsByNode[n]]
+
+        return self.regions[l].get_path(cr1n, cr2n)
 
     def add_adjacencies(self, r1, node, regions):
         if not r1 in self.adjacencies:
@@ -75,15 +106,5 @@ class CrossroadConnections:
         self.regionsByNode[nid].append(rid)
 
     def get_pairs(self):
-        seen = {}
-        dupes = []
+        return [connected for connected in self.connected_crossroads if len(connected[2]) > 1]
 
-        for x in self.connected_crossroads:
-            if x not in seen:
-                seen[x] = 1
-            else:
-                if seen[x] == 1:
-                    dupes.append(x)
-                seen[x] += 1
-
-        return dupes

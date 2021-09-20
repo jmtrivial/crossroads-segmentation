@@ -103,11 +103,16 @@ class Segmentation:
             id1 = pairs[0] if pairs[0] in self.regions else newIDs[pairs[0]]
             id2 = pairs[1] if pairs[1] in self.regions else newIDs[pairs[1]]
             if id1 != id2:
+                # add the two regions to the inner regions (of a bigger one)
                 self.add_inner_region(self.regions[id1])
                 self.add_inner_region(self.regions[id2])
-                # TODO: add paths that are connecting these two regions
+                # add paths that are connecting these two regions
+                self.regions[id1].add_paths(pairs[2])
+                # merge the two regions
                 self.regions[id1].merge([self.regions[id2]])
+                # remove the old one
                 del self.regions[id2]
+                # update IDs
                 newIDs[id2] = id1
                 for nid in newIDs:
                     if newIDs[nid] == id2:

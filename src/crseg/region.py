@@ -70,6 +70,16 @@ class Region:
     def clear_node_region_in_grah(G, n):
         G.nodes[n][Region.label_region] = -1
 
+    def add_path(self, path):
+        for n in path:
+            self.add_node(n)
+        for n1, n2 in zip(path, path[1:]):
+            self.add_edge((n1, n2))
+
+    def add_paths(self, paths):
+        for path in paths:
+            self.add_path(path)
+
     def add_node(self, n):
         if n not in self.nodes:
             self.nodes.append(n)
@@ -103,3 +113,33 @@ class Region:
             if self.is_boundary_node(n):
                 result.append(n)
         return result
+
+    def diameter(self):
+        # TODO: not optimized
+        result = 0
+        for n1 in self.nodes:
+            for n2 in self.nodes:
+                d = u.Util.distance(self.G, n1, n2)
+                if d > result:
+                    result = d
+        return result
+
+    # return a shortest path inside the current region that connects a node from nodes1 and a node from nodes2
+    # if no such path exists, it returns an empty path
+    def get_path(self, nodes1, nodes2):
+        if len(nodes1) == 0 or len(nodes2) == 0:
+            return []
+
+        cutoff = 3 * self.diameter() # large number in case of non straight paths
+        # get all possible paths in the current region from the input nodes
+        distances, paths = nx.multi_source_dijkstra(self.G, nodes1, 
+            weight = lambda n1, n2, d: u.Util.distance(self.G, n1, n2) if self.has_edge((n1, n2)) else None, 
+            cutoff = cutoff)
+
+        # keep paths that reach one of the given nodes
+        distances = {k: v for k, v in distances.items() if k in nodes2}
+        if len(distances) == 0:
+            return None
+        # keep the best one
+        best_target = min(distances, key=distances.get)
+        return paths[best_target], distances[best_target]

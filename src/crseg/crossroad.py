@@ -427,12 +427,12 @@ class Crossroad(r.Region):
 
     # add to the current crossing the direct paths that connect the given points
     def add_direct_paths_between_nodes(self, points):
-
+        # TODO: avoid too long paths
         for p1 in points:
             for n in self.G.neighbors(p1):
                 if not self.has_edge((p1, n)):
                     path = u.Util.get_path_to_biffurcation(self.G, p1, n)
-                    if path[len(path) - 1] in points:
+                    if path[len(path) - 1] in points and u.Util.length(self.G, path) < self.diameter():
                         self.add_path(path)
 
     # merge all given regions with the current one
