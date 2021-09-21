@@ -340,8 +340,10 @@ class Segmentation:
 
         return pd.Series(result)
 
-    def get_regions_colors_from_crossroad(self, cr, multiscale):        
+    # input: a list of crossroads (main crossroad and possibly contained crossroads)
+    def get_regions_colors_from_crossroad(self, cr):
         crids = [ c.id for c in cr ]
+        mainCR = max(cr, key=lambda x: len(x.nodes))
         maxID = max(crids)
         result = {}
         color = {}
@@ -349,9 +351,7 @@ class Segmentation:
             tag = self.G[e[0]][e[1]][e[2]][rg.Region.label_region]
             if not tag in crids:
                 # check if it's a branch of the main crossroad
-                # TODO
-                lcr = [ ]
-                bid = cr.get_branch_id(e)
+                bid = mainCR.get_branch_id(e)
                 if bid == -1:
                     result[e] = (0.5, 0.5, 0.5, 0.1)
                 else:
@@ -360,11 +360,14 @@ class Segmentation:
                         color[tag] = Segmentation.random_color()
                     result[e] = color[tag]
             else:
-                result[e] = (1 - 1 / len(crids), 0, 0, 1)
+                ncrs = len([ c for c in cr if c.has_edge(e) ])
+                result[e] = (math.sqrt(ncrs / len(crids)), 0, 0, 1)
         return pd.Series(result)
 
-    def get_nodes_regions_colors_from_crossroad(self, cr, multiscale):
+    # input: a list of crossroads (main crossroad and possibly contained crossroads)
+    def get_nodes_regions_colors_from_crossroad(self, cr):
         crids = [ c.id for c in cr ]
+        mainCR = max(cr, key=lambda x: len(x.nodes))
         result = {}
         for n in self.G.nodes:
             if len(list(self.G.neighbors(n))) <= 2:
@@ -374,17 +377,18 @@ class Segmentation:
                 if not label in crids:
                     result[n] = (0, 0, 0, 0)
                 else:
-                    # TODO: not consolidated
-                    nb_edge_in_region = len([nb for nb in self.G[n] if self.G[n][nb][0][rg.Region.label_region] == label])
-                    if nb_edge_in_region == 0:
-                        result[n] = Segmentation.random_color()
-                    else:
+                    # get regions that contains this node with no adjacent edge
+                    ncrn = len([ r for r in cr if r.has_node(n) and len(r.edges_with_node(n)) == 0])
+                    if ncrn == 0:
                         result[n] = (0, 0, 0, 0)
+                    else:
+                        result[n] = (math.sqrt(ncrn / len(crids)), 0, 0, 1)
 
         return pd.Series(result)
 
     ######################### text descriptions ########################
 
+    # return a list of crossroads (main crossroad and possibly contained crossroads)
     def get_crossroad(self, longitude, latitude, multiscale = False):
         distance = -1
         middle = -1
@@ -406,10 +410,16 @@ class Segmentation:
                     result.append(self.inner_regions[rid])
             return result
         else:
-            return self.regions[middle]
+            return [self.regions[middle]]
 
     def to_text(self, longitude, latitude, multiscale = False):
-        return self.get_crossroad(longitude, latitude, multiscale).to_text()
+        cs = self.get_crossroad(longitude, latitude, multiscale)
+        result = ""
+        for i, c in enumerate(cs):
+            if i != 0:
+                result += "\n\n"
+            result += c.to_text()
+        return result
 
     def to_text_all(self, multiscale = False):
         result = ""
@@ -431,10 +441,7 @@ class Segmentation:
     ######################### json descriptions ########################
 
     def to_json(self, filename, longitude, latitude, multiscale = False):
-        if multiscale:
-            data = [x.to_json_data() for x in self.get_crossroad(longitude, latitude, multiscale)]
-        else:
-            data = self.get_crossroad(longitude, latitude, multiscale).to_json_data()
+        data = [x.to_json_data() for x in self.get_crossroad(longitude, latitude, multiscale)]
 
         with open(filename, 'w') as outfile:
             json.dump(data, outfile)

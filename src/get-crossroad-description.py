@@ -242,9 +242,9 @@ if display_main_crossroad:
 
     cr = seg.get_crossroad(longitude, latitude, multiscale)
     
-    ec = seg.get_regions_colors_from_crossroad(cr, multiscale)
+    ec = seg.get_regions_colors_from_crossroad(cr)
 
-    nc = seg.get_nodes_regions_colors_from_crossroad(cr, multiscale)
+    nc = seg.get_nodes_regions_colors_from_crossroad(cr)
 
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 

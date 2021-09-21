@@ -14,10 +14,11 @@ class RegionFactory:
             result.filled = region.filled
         else:
             result = rg.Region(region.G)
-        result.nodes = region.nodes
-        result.edges = region.edges
+        result.nodes = region.nodes.copy()
+        result.edges = region.edges.copy()
 
-        result.lanes = region.lanes
+        result.lanes = region.lanes.copy()
+        result.center = region.center
 
         return result
 

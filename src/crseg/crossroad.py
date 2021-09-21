@@ -44,7 +44,7 @@ class Crossroad(r.Region):
         return "* id: %s\n* center: %s\n* lanes: %s\n* branches: %s" % (self.id, self.center, len(self.lanes), len(self.branches))
 
     def __repr__(self):
-        return "id: %s, center: %s" % (self.id, self.center)
+        return "id: %s, center: %s, #nodes: %s" % (self.id, self.center, len(self.nodes))
 
     def get_center(self):
         return self.center

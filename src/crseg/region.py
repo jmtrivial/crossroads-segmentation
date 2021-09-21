@@ -97,10 +97,13 @@ class Region:
             self.add_edge((p1, p2))
 
     def has_edge(self, e):
-        return e in self.edges or (e[1], e[0]) in self.edges
+        return (e[0], e[1]) in self.edges or (e[1], e[0]) in self.edges
 
     def has_node(self, n):
         return n in self.nodes
+
+    def edges_with_node(self, n):
+        return [ e for e in self.edges if e[0] == n or e[1] == n]
 
     def is_boundary_node(self, n):
         nbnb = len(list(self.G.neighbors(n)))
