@@ -239,14 +239,12 @@ if display_main_crossroad:
     if verbose:
         print("=== RENDERING MAIN CROSSROAD ===")
 
-    if multiscale:
-        print("Warning: this display do not handle yet multiscale option")
 
-    cr = seg.get_crossroad(longitude, latitude)
+    cr = seg.get_crossroad(longitude, latitude, multiscale)
     
-    ec = seg.get_regions_colors_from_crossroad(cr)
+    ec = seg.get_regions_colors_from_crossroad(cr, multiscale)
 
-    nc = seg.get_nodes_regions_colors_from_crossroad(cr)
+    nc = seg.get_nodes_regions_colors_from_crossroad(cr, multiscale)
 
     ox.plot.plot_graph(G, edge_color=ec, node_color=nc)
 

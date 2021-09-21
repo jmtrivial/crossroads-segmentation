@@ -340,36 +340,41 @@ class Segmentation:
 
         return pd.Series(result)
 
-    def get_regions_colors_from_crossroad(self, cr):
+    def get_regions_colors_from_crossroad(self, cr, multiscale):        
+        crids = [ c.id for c in cr ]
+        maxID = max(crids)
         result = {}
         color = {}
         for e in self.G.edges:
             tag = self.G[e[0]][e[1]][e[2]][rg.Region.label_region]
-            if tag != cr.id:
+            if not tag in crids:
+                # check if it's a branch of the main crossroad
+                # TODO
+                lcr = [ ]
                 bid = cr.get_branch_id(e)
                 if bid == -1:
                     result[e] = (0.5, 0.5, 0.5, 0.1)
                 else:
-                    tag = cr.id + bid + 1
+                    tag = maxID + bid + 1
                     if not tag in color:
                         color[tag] = Segmentation.random_color()
                     result[e] = color[tag]
             else:
-                if not tag in color:
-                    color[tag] = (1, 0, 0, 1)
-                result[e] = color[tag]
+                result[e] = (1 - 1 / len(crids), 0, 0, 1)
         return pd.Series(result)
 
-    def get_nodes_regions_colors_from_crossroad(self, cr):
+    def get_nodes_regions_colors_from_crossroad(self, cr, multiscale):
+        crids = [ c.id for c in cr ]
         result = {}
         for n in self.G.nodes:
             if len(list(self.G.neighbors(n))) <= 2:
                 result[n] = (0, 0, 0, 0)
             else:
                 label = self.G.nodes[n][rg.Region.label_region]
-                if label != cr.id:
+                if not label in crids:
                     result[n] = (0, 0, 0, 0)
                 else:
+                    # TODO: not consolidated
                     nb_edge_in_region = len([nb for nb in self.G[n] if self.G[n][nb][0][rg.Region.label_region] == label])
                     if nb_edge_in_region == 0:
                         result[n] = Segmentation.random_color()
