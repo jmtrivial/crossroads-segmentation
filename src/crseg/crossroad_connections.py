@@ -72,7 +72,7 @@ class CrossroadConnections:
                         path, distance = self.get_path_in_link(l, cr, cr2)
                         # add them as a pair with the corresponding path only if the path is not too long
                         if distance < max([self.regions[cr].diameter(), self.regions[cr2].diameter()]) * 2: # magic threshold :(
-                            self.connected_crossroads.append((cr, cr2, path))
+                            self.connected_crossroads.append((cr, cr2, (path, l)))
 
     # return a path (defined by a list of nodes) contained in the given link l that connects
     # the two given crossroad regions (cr1 and cr2)
@@ -107,4 +107,67 @@ class CrossroadConnections:
 
     def get_pairs(self):
         return [connected for connected in self.connected_crossroads if len(connected[2]) > 1]
+
+    def get_cycles(self, max_length = 5):
+        results = []
+
+        for c in self.crossroads:
+            results += self.get_cycles_from_crossroad(c, max_length)
+
+        results = self.get_unique_cycles(results)
+
+        return results
+
+    def get_unique_cycles(self, cycles):
+        result = []
+        seen = []
+
+        for c in cycles:
+            celems = set([e[0] for e in c])
+            if not celems in seen:
+                result.append(c)
+                seen.append(celems)
+
+        return result
+
+    def get_connected_crossroads(self, cr):
+        result = []
+        for connected in self.connected_crossroads:
+            if connected[0] == cr:
+                result.append((connected[1], connected[2]))
+            elif connected[1] == cr:
+                result.append((connected[0], connected[2]))
+        return result
+
+    def get_cycles_from_crossroad(self, cr, max_length):
+        paths = [ [(cr, [])] ]
+        results = []
+
+        # increase step by step the possible paths
+        for l in range(0, max_length):
+            new_paths = []
+            # for each existing path, compute all possible extensions (without backward)
+            for p in paths:
+                # check all possible next steps
+                for next in self.get_connected_crossroads(p[-1][0]):
+                    if len(p) == 1 or p[-2][0] != next[0] and not self.contains_link(next[1], p):
+                        if next[0] == p[0][0]:
+                            # loop detection
+                            results.append(p + [next])
+                        else:
+                            # ongoing loop
+                            new_paths.append(p + [next])
+            paths = new_paths
+
+        return results
+
+    def contains_link(self, nextpathlinks, path):
+        n_links = [c[1] for c in nextpathlinks]
+
+
+        for p in path:
+            for l in p[1]:
+                if l[1] in n_links:
+                    return True
+        return False
 

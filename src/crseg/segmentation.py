@@ -107,7 +107,7 @@ class Segmentation:
                 self.add_inner_region(self.regions[id1])
                 self.add_inner_region(self.regions[id2])
                 # add paths that are connecting these two regions
-                self.regions[id1].add_paths(pairs[2])
+                self.regions[id1].add_paths([x[0] for x in pairs[2]])
                 # merge the two regions
                 self.regions[id1].merge([self.regions[id2]])
                 # remove the old one
@@ -118,6 +118,8 @@ class Segmentation:
                     if newIDs[nid] == id2:
                         newIDs[nid] = id1
 
+        cycles = cconnections.get_cycles()
+        print(cycles)
         # TODO: merge multi crossings (triangles, rings, etc)
 
     def add_inner_region(self, region):
