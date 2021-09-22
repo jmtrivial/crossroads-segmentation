@@ -15,9 +15,10 @@ from . import crossroad_connections as cc
 
 class Segmentation:
 
-    def __init__(self, G, init=True):
+    def __init__(self, G, init=True, connection_intensity = 2):
         self.G = G
         self.regions = {}
+        self.connection_intensity = connection_intensity
         random.seed()
         if init:
             rel.Reliability.init_attr(self.G)
@@ -96,7 +97,7 @@ class Segmentation:
         self.inner_regions = {}
         newIDs = {}
 
-        cconnections = cc.CrossroadConnections(self.regions, 2)
+        cconnections = cc.CrossroadConnections(self.regions, self.connection_intensity)
 
         # merge bi-connected crossings
         for pairs in cconnections.get_pairs():

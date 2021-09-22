@@ -23,6 +23,7 @@ input_params.add_argument('--from-graphml', help='Load road graph from a GraphML
 
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
+parser.add_argument('--connection-intensity', help='Intensity of the connection (2: small intensiy, 5: strong intensity)', type=float, default=2)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
 
 parser.add_argument('--skip-processing', help="Do not compute segmentation (can be useful to store OSM data without modification, or to use result of a previous run by loading a GraphML.", action='store_true')
@@ -116,7 +117,7 @@ to_json = args.to_json
 to_json_all = args.to_json_all
 skip_processing = args.skip_processing
 multiscale = args.multiscale
-
+connection_intensity = args.connection_intensity
 
 # load data
 
@@ -165,7 +166,7 @@ else:
         print("=== INITIALISATION ===")
 
     # segment it using topology and semantic
-    seg = cs.Segmentation(G)
+    seg = cs.Segmentation(G, connection_intensity = connection_intensity)
 
 if display_reliability:
     print("=== RENDERING RELIABILITY ===")
