@@ -475,8 +475,10 @@ class Crossroad(r.Region):
             max_length = scale * self.get_radius()
             for p1 in self.nodes:
                 for n in self.G.neighbors(p1):
-                    if not self.has_edge((p1, n)):
+                    if not self.has_edge((p1, n)) and self.G[p1][n][0][r.Region.label_region] == -1:
                         path = rl.Reliability.get_path_to_boundary(self.G, p1, n)
+                        while len(path) > 2 and self.G[path[-2]][path[-1]][0][r.Region.label_region] != -1:
+                            path.pop()
                         # find a boundary node inside the path and cut it
                         if len(path) > 0 and u.Util.length(self.G, path) < max_length:
                             self.add_path(path)
@@ -520,4 +522,15 @@ class Crossroad(r.Region):
 
         return -1
 
+    # get the maximum estimated width of a branch
+    def max_branch_width(self):
+        if not hasattr(self, "branches"):
+            self.compute_branches()
+        return max([self.estimate_branch_width(b) for b in self.branches])
 
+
+    def estimate_branch_width(self, branch):
+        return sum([self.estimate_lane_width(l) for l in branch])
+            
+    def estimate_lane_width(self, lane):
+        return u.Util.estimate_edge_width(self.G, lane.edge)

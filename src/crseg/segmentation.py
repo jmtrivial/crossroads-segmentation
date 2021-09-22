@@ -96,7 +96,7 @@ class Segmentation:
         self.inner_regions = {}
         newIDs = {}
 
-        cconnections = cc.CrossroadConnections(self.regions)
+        cconnections = cc.CrossroadConnections(self.regions, 2)
 
         # merge bi-connected crossings
         for pairs in cconnections.get_pairs():
@@ -119,8 +119,31 @@ class Segmentation:
                         newIDs[nid] = id1
 
         cycles = cconnections.get_cycles()
-        print(cycles)
-        # TODO: merge multi crossings (triangles, rings, etc)
+
+        # merge multi crossings (triangles, rings, etc)
+        for cycle in cycles:
+            cWithIDs = [cr if cr[0] in self.regions else (newIDs[cr[0]], cr[1]) for cr in cycle][:-1]
+            ids = [x[0] for x in cWithIDs]
+            
+            if len(set(ids)) > 1:
+                firstID = ids[0]
+                # add all regions as inner regions (of a bigger one)
+                for id in ids:
+                    self.add_inner_region(self.regions[id])
+
+                for cr1, cr2 in zip(cWithIDs, cWithIDs[1:]):
+                    id2 = newIDs[cr2[0]] if cr2[0] in newIDs else cr2[0]
+
+                    # add paths that connects cr1 and cr2
+                    self.regions[firstID].add_paths([x[0] for x in cr2[1]])
+                    if id2 != firstID:
+                        self.regions[firstID].merge([self.regions[id2]])
+                        del self.regions[id2]
+                        newIDs[id2] = firstID
+                        for nid in newIDs:
+                            if newIDs[nid] == id2:
+                                newIDs[nid] = firstID
+
 
     def add_inner_region(self, region):
         # clone the given region and add it to the inner_regions structure

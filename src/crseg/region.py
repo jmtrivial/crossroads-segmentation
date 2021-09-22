@@ -83,12 +83,12 @@ class Region:
     def add_node(self, n):
         if n not in self.nodes:
             self.nodes.append(n)
-            self.G.nodes[n][Region.label_region] = self.id
+        self.G.nodes[n][Region.label_region] = self.id
 
     def add_edge(self, e):
         if not self.has_edge(e):
             self.edges.append(e)
-            self.G[e[0]][e[1]][0][Region.label_region] = self.id
+        self.G[e[0]][e[1]][0][Region.label_region] = self.id
 
     def add_path(self, path):
         for p in path:

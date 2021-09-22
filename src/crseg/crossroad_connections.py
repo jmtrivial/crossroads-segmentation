@@ -5,8 +5,12 @@ class CrossroadConnections:
     typology_link = 2
     typology_unknown = 0
 
-    def __init__(self, regions):
+    # the connection_threshold corresponds to a coefficient used for connection
+    # between crossroads, multiplied by an estimation of the size of a crossroad
+    # defined by an estimation of the branch width
+    def __init__(self, regions, connection_threshold = 2):
         self.regions = regions
+        self.connection_threshold = connection_threshold
 
         self.init_structure()
 
@@ -71,7 +75,7 @@ class CrossroadConnections:
                     if self.regions[cr].id < self.regions[cr2].id:
                         path, distance = self.get_path_in_link(l, cr, cr2)
                         # add them as a pair with the corresponding path only if the path is not too long
-                        if distance < max([self.regions[cr].diameter(), self.regions[cr2].diameter()]) * 2: # magic threshold :(
+                        if distance < max([self.regions[cr].max_branch_width(), self.regions[cr2].max_branch_width()]) * self.connection_threshold:
                             self.connected_crossroads.append((cr, cr2, (path, l)))
 
     # return a path (defined by a list of nodes) contained in the given link l that connects
