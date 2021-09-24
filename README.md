@@ -21,7 +21,7 @@ Several outputs are possible:
 
 * to display the segmentation with all the crossings in the region (```--display-segmentation```), or only focussing on the main crossroad (```--display-main-crossroad```) closest to the input coordinate. This second display gives also the branches of the crossroad.
 * to produce a text version of the selection (```--to-text```, ```--to-text-all```) in the standard output
-* to produce a ```json``` file that contains all the detected crossroads (```--to-json-all```) or only the main one (```--to-json```). Branches are also contained in this output.
+* to produce a ```json``` file that contains all the detected crossroads (```--to-json-all FILENAME```) or only the main one (```--to-json FILENAME```). Branches are also contained in this output.
 
 The last stage of the segmentation algorithm consists in merging small crossroads into large one if specific structures are detected, and considering a connection intensity (```--connection-intensity NB```) with typical values between 2 and 5, corresponding to distance threshold defined by this coefficient multiplied by an estimation of the branches width.
 
