@@ -154,7 +154,7 @@ class CrossroadConnections:
             for p in paths:
                 # check all possible next steps
                 for next in self.get_connected_crossroads(p[-1][0]):
-                    if len(p) == 1 or p[-2][0] != next[0] and not self.contains_link(next[1], p):
+                    if len(p) == 1 or p[-2][0] != next[0] and not self.intersects_path_link(next[1], p):
                         if next[0] == p[0][0]:
                             # loop detection
                             results.append(p + [next])
@@ -165,13 +165,12 @@ class CrossroadConnections:
 
         return results
 
-    def contains_link(self, nextpathlinks, path):
-        n_links = [c[1] for c in nextpathlinks]
-
+    def intersects_path_link(self, nextpathlinks, path):
+        n_links = set([n for c in nextpathlinks for n in c[0]])
 
         for p in path:
             for l in p[1]:
-                if l[1] in n_links:
+                if len(set.intersection(set(l[0]), n_links)) > 0:
                     return True
         return False
 
