@@ -15,10 +15,11 @@ from . import crossroad_connections as cc
 
 class Segmentation:
 
-    def __init__(self, G, init=True, connection_intensity = 2):
+    def __init__(self, G, init=True, connection_intensity = 2, max_cycle_elements = 5):
         self.G = G
         self.regions = {}
         self.connection_intensity = connection_intensity
+        self.max_cycle_elements = max_cycle_elements
         random.seed()
         if init:
             rel.Reliability.init_attr(self.G)
@@ -119,7 +120,7 @@ class Segmentation:
                     if newIDs[nid] == id2:
                         newIDs[nid] = id1
 
-        cycles = cconnections.get_cycles()
+        cycles = cconnections.get_cycles(self.max_cycle_elements)
 
         # merge multi crossings (triangles, rings, etc)
         for cycle in cycles:
