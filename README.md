@@ -37,5 +37,8 @@ Several of these outputs (```--to-json```, ```--to-json-all```, ```--display-mai
 ![POC1](images/POC1.png)
 
 
+```./get-crossroad-description.py --by-name obélisque  --display-segmentation -r 1000```
+
+![R1000](images/R1000.png)
 
 
