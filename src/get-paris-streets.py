@@ -9,8 +9,7 @@ import osmnx as ox
 
 import crseg.segmentation as cs
 
-parser = argparse.ArgumentParser(description="Download OpenStreetMap data within Paris city, only preserving streets.")
-parser.add_argument('-o', '--output', help='Geopackage file where data will be saved', type=argparse.FileType('w'), required=True)
+parser = argparse.ArgumentParser(description="Download OpenStreetMap data within Paris city, only preserving streets. Result will be saved in data/graph.gpkg")
 
 # load and validate parameters
 args = parser.parse_args()
@@ -22,5 +21,5 @@ G = ox.graph_from_place("Paris, France", network_type="all", retain_all=False, t
 keep_all_components = False
 G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
 
-
-osmnx.io.save_graph_geopackage(G, args.output)
+# save data
+ox.io.save_graph_geopackage(G)
