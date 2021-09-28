@@ -116,7 +116,8 @@ class Util:
 
     def estimate_edge_width(G, edge):
         gEdge = G[edge[0]][edge[1]][0]
-        if "width" in gEdge:
+        import re
+        if "width" in gEdge and not re.match(r'^-?\d+(?:\.\d+)$', gEdge["width"]) is None:
             return float(gEdge["width"])
         elif "lanes" in gEdge:
             nb = int(gEdge["lanes"])
