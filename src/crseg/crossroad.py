@@ -58,7 +58,7 @@ class Crossroad(r.Region):
         text += str(self.to_json_data())
         return text
 
-    def to_json_array(tp, innerNodes, borderNodes, edges):
+    def to_json_array(tp, innerNodes, borderNodes, edges, G):
         crdata = {}
         crdata["type"] = tp
         crdata["nodes"] = {}
@@ -67,6 +67,7 @@ class Crossroad(r.Region):
         crdata["edges_by_nodes"] = []
         for e in edges:
             crdata["edges_by_nodes"].append(e)
+        crdata["coordinates"] = {n: {"x": G.nodes[n]["x"], "y": G.nodes[n]["y"]} for n in innerNodes + borderNodes}
         return crdata
 
     def to_json_data(self):
@@ -80,7 +81,7 @@ class Crossroad(r.Region):
             else:
                 innerNodes.append(n)            
 
-        data.append(Crossroad.to_json_array("crossroad", innerNodes, borderNodes, self.edges))
+        data.append(Crossroad.to_json_array("crossroad", innerNodes, borderNodes, self.edges, self.G))
 
         # for each branch
         for branch in self.branches:
@@ -89,7 +90,7 @@ class Crossroad(r.Region):
                 nodes.add(lane.edge[0])
                 nodes.add(lane.edge[1])
             edges = [lane.edge for lane in branch]
-            data.append(Crossroad.to_json_array("branch", [], list(nodes), edges))
+            data.append(Crossroad.to_json_array("branch", [], list(nodes), edges, self.G))
 
 
         return data
