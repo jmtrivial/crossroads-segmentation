@@ -11,6 +11,13 @@
             
         
         <script>
+            settings_questions = '{ \
+                                    "scale": {"question": "Crossroad scale", "values": ["correct", "too large", "too small"], "default": "correct" }, \
+                                    "branches": { "question": "Number of branches", "values": ["correct", "too few", "too much"], "default": "correct" }, \
+                                    "edges": {"question": "Edge position", "values": ["correct", "too far", "too close"], "default": "correct" }, \
+                                    "completness": {"question": "Completness", "values": ["correct", "missing parts", "excess parts"], "default": "correct" } \
+                                  }';
+            
             function shuffle(array) {
                 let currentIndex = array.length,  randomIndex;
 
@@ -30,17 +37,87 @@
             }
             
             function build_question_interface() {
-                // TODO
+                questions = "";
+                
+                window.q_json = JSON.parse(settings_questions);
+                
+                qid = 0;
+                for(var key in window.q_json){
+                    if (window.q_json.hasOwnProperty(key)){
+                        var q = window.q_json[key];
+                        var question_text = q["question"];
+                        var values = q["values"];
+                        var default_value = q["default"];
+                        
+                        
+                        questions += '<div class="mb-3">';
+                        questions += '<label for="question-' + qid + '" class="form-label">' + question_text + '</label>';
+                        questions += '<select  id="question-' + qid + '" class="form-select" aria-label="' + question_text + '">';
+                        i = 0;
+
+                        for(var k in values) {
+                            element = values[k];
+                            questions += "<option";
+                            if (default_value == element) {
+                                questions += " selected";
+                            }
+                            questions += ' id="q' + qid + '-o' + i+ '" value="' + i + '">' + element + '</option>';
+                            i += 1;
+                        }
+
+                        questions += "</select>";
+                        questions += "</div>";
+                        qid += 1;
+                    }
+                }
+
+                
+                $("#questions").html(questions);
+                
             }
             
             function update_question_interface() {
                 $("#crossroad_title").text("Crossroad #" + window.crossroads_index[window.current_id]);
-                // TODO
+                
+                if (window.nb_processed != 0) {
+                    $("#download").prop("disabled", false);
+                }
+                else
+                    $("#download").prop('disabled', true); 
+
+                qid = 0;
+                for(var key in window.q_json){
+                    if (window.q_json.hasOwnProperty(key)){
+                        var q = window.q_json[key];
+                        var values = q["values"];
+                        var default_value = q["default"];
+                        i = 0;
+                        for(var k in values) {
+                            option = $('#q' + qid + '-o' + i);
+                            option.prop("selected", option.text() == default_value);
+                            i += 1;
+                        }
+                        qid += 1;
+                    }
+                }
             }
             
             function set_current_crossroad_evaluation() {
-                window.crossroads[window.crossroads_index[window.current_id]]["evaluation"] = {};
-                // TODO
+                result = {"type": "evaluation"};
+                
+                qid = 0;
+                for(var key in window.q_json){
+                    if (window.q_json.hasOwnProperty(key)){
+                        var q = window.q_json[key];
+                        var values = q["values"];
+                        var default_value = q["default"];
+                        option = $('#question-' + qid + " option:selected");
+                        result[key] = option.text();
+                        qid += 1;
+                    }
+                }
+
+                window.crossroads[window.crossroads_index[window.current_id]].push(result);
             }
             
             
@@ -62,13 +139,18 @@
                 find_next_open_question();
                 
                 $("#nb_processed").text(window.nb_processed);
-                if (window.nb_processed != 0) {
-                    $("#download").prop("disabled", false);
-                }
-                //$("#next").prop("disabled", true);
                 
                 update_question_interface();
                 
+            }
+            
+            function download(evt) {
+                    var a = document.createElement("a");
+                    var file = new Blob([JSON.stringify(window.crossroads)], { type: "text/plain;charset=utf-8" });
+                    a.href = URL.createObjectURL(file);
+                    var d = new Date();
+                    a.download = window.input_filename.replace(/\.[^/.]+$/, "") + "-evaluation-" + d.toISOString() + ".json";
+                    a.click();
             }
             
             // init interface
@@ -108,9 +190,8 @@
                     }
                 });
                 
-                $("#download").click(function(evt) {
-                    // TODO
-                });
+                $("#download").click(download);
+                $("#download_end").click(download);
                 
                 $("#regular").click(function(evt) {
                     build_index();
@@ -155,6 +236,7 @@
                     });
 
                     fr.readAsText(file);
+                    window.input_filename = evt.target.files[0].name;
                 });
                 
                 build_question_interface();
@@ -221,7 +303,7 @@
                 <div class="container mt-3">
                     <div class="row">
                     <div class="col-6">
-                        <button id="download" class="btn btn-secondary" style="width: 100%" type="button" disabled>Download evaluations (<span id="nb_processed">0</span> / <span id="nb_crossroads">-</span>)</button>
+                        <button id="download" class="btn btn-secondary" style="width: 100%" type="button" disabled="true">Download evaluations (<span id="nb_processed">0</span> / <span id="nb_crossroads">-</span>)</button>
                     </div>
                     <div  class="col-6">
                         <button id="next" class="btn btn-primary" style="width: 100%" type="button">Next crossroad</button>
