@@ -170,7 +170,7 @@ class CrossroadConnections:
 
         for p in path:
             for l in p[1]:
-                if len(set.intersection(set(l[0]), n_links)) > 0:
+                if len(set.intersection(set(l[0]), n_links)) > 1:
                     return True
         return False
 
