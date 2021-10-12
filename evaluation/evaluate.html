@@ -5,10 +5,24 @@
         <title>Crossroad quality evaluation</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
-        
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+            integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+            crossorigin=""/>
+                
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-kQtW33rZJAHjgefvhyyzcGF3C5TFyBQBA13V1RKPf4uH+bwyzQxZ6CmMZHmNBEfJ" crossorigin="anonymous"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-            
+        
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
+        
+        <!-- Library Leaflet -->
+        <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+        <script src="node_modules/leaflet/dist/leaflet.js"></script>
+
+        <!-- Extension Géoportail pour Leaflet -->
+        <script src="node_modules/geoportal-extensions-leaflet/dist/GpPluginLeaflet.js"></script>
+        <link rel="stylesheet" data-key="VOTRE-CLEF"  href="node_modules/geoportal-extensions-leaflet/dist/GpPluginLeaflet.css" />
         
         <script>
             settings_questions = '{ \
@@ -76,7 +90,11 @@
                 
             }
             
+
             function update_question_interface() {
+            
+                // left side
+                
                 $("#crossroad_title").text("Crossroad #" + window.crossroads_index[window.current_id]);
                 
                 if (window.nb_processed != 0) {
@@ -100,6 +118,74 @@
                         qid += 1;
                     }
                 }
+                
+                // right side
+                current_crossroad = window.crossroads[window.crossroads_index[window.current_id]];
+                
+                if (typeof window.map === 'undefined') {
+                    window.map = L.map('mapid').setView([45.75919, 3.11122], 18);
+
+                    L.tileLayer(
+                        "https://wxs.ign.fr/jhyvi0fgmnuxvfv0zjzorvdn/geoportail/wmts?" +
+                        "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
+                        "&STYLE=normal" +
+                        "&TILEMATRIXSET=PM" +
+                        "&FORMAT=image/jpeg"+
+                        "&LAYER=ORTHOIMAGERY.ORTHOPHOTOS"+
+                        "&TILEMATRIX={z}" +
+                        "&TILEROW={y}" +
+                        "&TILECOL={x}",
+                        {
+                            minZoom : 0,
+                            maxZoom : 19,
+                                    attribution : "IGN-F/Geoportail",
+                            tileSize : 256 
+                        }
+                    ).addTo(window.map);
+                }
+                else {
+                                        
+                    // remove the existing crossroad layer
+                    if (typeof window.layergroup !== 'undefined') {
+                        window.map.removeLayer(window.layergroup);
+                    }
+                    
+                    // TODO remove footer
+                }
+                
+                window.crossroad_layers = [];
+                
+                // for each element of the crossroad create a layer                
+                for(var eid in current_crossroad) {
+                    element = current_crossroad[eid];
+                    
+                    // build latlng
+                    latlng = [];
+                    for (var eid in element["edges_by_nodes"]) {
+                        edge = element["edges_by_nodes"][eid];
+                        latlng.push([[element["coordinates"][edge[0]]["y"], element["coordinates"][edge[0]]["x"]],
+                                     [element["coordinates"][edge[1]]["y"], element["coordinates"][edge[1]]["x"]]]);
+                    }
+                    
+                    // choose color
+                    if (element["type"] == "branch") {
+                        options = {color:'yellow'}; // TODO: set a random color (one per branch)
+                    }
+                    else if (element["type"] == "crossroad") {
+                        options = {color:'red'};
+                    }
+                                        
+                    // create crossroad layer
+                    window.crossroad_layers.push(L.polyline(latlng, options));
+                }
+                // create a layergroup
+                window.layergroup = L.featureGroup(window.crossroad_layers).addTo(window.map);
+                
+                // set the zoom adjusted on this layergroup
+                window.map.fitBounds(window.layergroup.getBounds());
+
+                // TODO add a footer with a link on google street view
+                
             }
             
             function set_current_crossroad_evaluation() {
@@ -128,11 +214,20 @@
                 }).length;
             }
             
+            function has_evaluation_current_crossroad() {
+                current = window.crossroads[window.crossroads_index[window.current_id]];
+                for (var idc in current) {
+                    if (current[idc]["type"] == "evaluation")
+                        return true;
+                }
+                return false;
+            }
             
             function find_next_open_question() {
-                while(window.crossroads[window.crossroads_index[window.current_id]].hasOwnProperty("evaluation")) {
+                while(has_evaluation_current_crossroad()) {
                     window.current_id += 1;
                 }
+                console.log(window.crossroads[window.crossroads_index[window.current_id]]);
             }
             
             function set_next_question() {
@@ -247,6 +342,7 @@
         <style>
             #question, #chargement, #settings, #the_end { display: none; }
             
+            #mapid { height: 100%; }
         </style>
 
     </head>
@@ -292,8 +388,8 @@
                                 <div class="col-6" id="questions">
                                 
                                 </div>
-                                <div class="col-6" id="map">
-                                
+                                <div class="col-6">
+                                     <div id="mapid"></div>
                                 </div>
                             </div>
                         </div>
