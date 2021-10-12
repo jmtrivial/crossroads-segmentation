@@ -18,7 +18,11 @@ group_input = parser.add_argument_group('Input region', "Define the input region
 input_params = group_input.add_mutually_exclusive_group(required=True)
 input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM using the given latitude', type=float)
 
-input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", "Lafayette", "Gauthier", "Pasteur-Duclaux", "POC1", "POC2Toulouse", "POC2Toulousea", "POC2Toulouseb", "POC2Toulousec", "Delille", "Salford"])
+input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", \
+                        "Lafayette", "Gauthier", "Pasteur-Duclaux", "POC1", \
+                        "POC2Toulouse", "POC2Toulousea", "POC2Toulouseb", "POC2Toulousec", \
+                        "Delille", "Salford", \
+                        "POC2a", "POC2b", "POC2c", "POC2d", "POC2e"])
 input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
 
 
@@ -99,6 +103,21 @@ elif byname == "Delille":
 elif byname == "Salford":
     latitude = 45.77953
     longitude = 3.09239
+elif byname == "POC2a":
+    latitude = 45.7669361
+    longitude = 3.106775
+elif byname == "POC2b":
+    latitude = 45.7860956
+    longitude = 3.0797253
+elif byname == "POC2c":
+    latitude = 45.7732173
+    longitude = 3.0952728
+elif byname == "POC2d":
+    latitude = 45.7809848
+    longitude = 3.0762451
+elif byname == "POC2e":
+    latitude = 45.7821967
+    longitude = 3.0728419
 
 from_graphml = args.from_graphml
 
