@@ -33,6 +33,18 @@
                 - add a link to street view
             */
             
+            
+        
+        
+            settings_questions = '{ \
+                                    "scale": {"question": "Crossroad scale", "type": "multiple_choice", "values": ["correct", "too large", "too small"], "default": "correct" }, \
+                                    "nb_branches": { "question": "Number of branches", "type": "multiple_choice", "values": ["correct", "too few", "too much"], "default": "correct" }, \
+                                    "branches": { "question": "Branches configuration", "type": "multiple_choice", "values": ["correct", "two or more branches are merged", "one or more branch is split", "merged and split branches"], "default": "correct" }, \
+                                    "edges": {"question": "Edge position", "type": "multiple_choice", "values": ["correct", "too far", "too close"], "default": "correct" }, \
+                                    "completness": {"question": "Completness", "type": "multiple_choice", "values": ["correct", "missing parts", "excess parts"], "default": "correct" } \
+                                  }';
+            
+            
         
             // from jquery.color.js plugin
             Colors = {};
@@ -68,16 +80,6 @@
             };
 
 
-        
-        
-            settings_questions = '{ \
-                                    "scale": {"question": "Crossroad scale", "values": ["correct", "too large", "too small"], "default": "correct" }, \
-                                    "nb_branches": { "question": "Number of branches", "values": ["correct", "too few", "too much"], "default": "correct" }, \
-                                    "branches": { "question": "Branches configuration", "values": ["correct", "two or more branches are merged", "one or more branch is split", "merged and split branches"], "default": "correct" }, \
-                                    "edges": {"question": "Edge position", "values": ["correct", "too far", "too close"], "default": "correct" }, \
-                                    "completness": {"question": "Completness", "values": ["correct", "missing parts", "excess parts"], "default": "correct" } \
-                                  }';
-            
             function shuffle(array) {
                 let currentIndex = array.length,  randomIndex;
 
