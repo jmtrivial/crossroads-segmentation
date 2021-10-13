@@ -31,7 +31,6 @@
                 - add a back button
                 - add a free field for comments
                 - add a link to street view
-                - add a field to identify crossroads with split branches or merged branches
             */
             
         
@@ -73,7 +72,8 @@
         
             settings_questions = '{ \
                                     "scale": {"question": "Crossroad scale", "values": ["correct", "too large", "too small"], "default": "correct" }, \
-                                    "branches": { "question": "Number of branches", "values": ["correct", "too few", "too much"], "default": "correct" }, \
+                                    "nb_branches": { "question": "Number of branches", "values": ["correct", "too few", "too much"], "default": "correct" }, \
+                                    "branches": { "question": "Branches configuration", "values": ["correct", "two or more branches are merged", "one or more branch is split", "merged and split branches"], "default": "correct" }, \
                                     "edges": {"question": "Edge position", "values": ["correct", "too far", "too close"], "default": "correct" }, \
                                     "completness": {"question": "Completness", "values": ["correct", "missing parts", "excess parts"], "default": "correct" } \
                                   }';
