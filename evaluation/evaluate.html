@@ -25,6 +25,42 @@
         <link rel="stylesheet" data-key="VOTRE-CLEF"  href="node_modules/geoportal-extensions-leaflet/dist/GpPluginLeaflet.css" />
         
         <script>
+            // from jquery.color.js plugin
+            Colors = {};
+            Colors.names = {
+                blue: "#0000ff",
+                green: "#008000",
+                yellow: "#ffff00",
+                azure: "#f0ffff",
+                magenta: "#ff00ff",
+                brown: "#a52a2a",
+                cyan: "#00ffff",
+                black: "#000000",
+                white: "#ffffff",
+                indigo: "#4b0082",
+                khaki: "#f0e68c",
+                lime: "#00ff00",
+                olive: "#808000",
+                orange: "#ffa500",
+                pink: "#ffc0cb",
+                violet: "#800080",
+                silver: "#c0c0c0"
+            };
+            // from https://stackoverflow.com/a/10014969/5319942
+            Colors.list = function(nb) {
+                var result = [];
+                for (var key in Colors.names) {
+                    result.push(Colors.names[key]);
+                    if (result.length == nb)
+                        break;
+                }
+                return result;
+
+            };
+
+
+        
+        
             settings_questions = '{ \
                                     "scale": {"question": "Crossroad scale", "values": ["correct", "too large", "too small"], "default": "correct" }, \
                                     "branches": { "question": "Number of branches", "values": ["correct", "too few", "too much"], "default": "correct" }, \
@@ -121,9 +157,11 @@
                 
                 // right side
                 current_crossroad = window.crossroads[window.crossroads_index[window.current_id]];
+                // sort using first branches, then crossroad core
+                current_crossroad.sort((x1, x2) => x1["type"].localeCompare(x2["type"]));
                 
                 if (typeof window.map === 'undefined') {
-                    window.map = L.map('mapid').setView([45.75919, 3.11122], 18);
+                    window.map = L.map('mapid');
 
                     L.tileLayer(
                         "https://wxs.ign.fr/jhyvi0fgmnuxvfv0zjzorvdn/geoportail/wmts?" +
@@ -155,29 +193,43 @@
                 
                 window.crossroad_layers = [];
                 
-                // for each element of the crossroad create a layer                
+                console.log(current_crossroad);
+                
+                // build a random list of colors
+                colors = Colors.list(current_crossroad.length);
+                
+                // for each element of the crossroad create a layer     
                 for(var eid in current_crossroad) {
                     element = current_crossroad[eid];
                     
                     // build latlng
                     latlng = [];
-                    for (var eid in element["edges_by_nodes"]) {
-                        edge = element["edges_by_nodes"][eid];
-                        latlng.push([[element["coordinates"][edge[0]]["y"], element["coordinates"][edge[0]]["x"]],
-                                     [element["coordinates"][edge[1]]["y"], element["coordinates"][edge[1]]["x"]]]);
+                    if (element["edges_by_nodes"].length == 0) {
+                        if (element["nodes"].length != 0 && element["nodes"]["border"].length != 0) {
+                            coord = element["coordinates"][element["nodes"]["border"][0]];
+                            latlng.unshift([[coord["y"], coord["x"]], [coord["y"], coord["x"]]]);
+                        }
+                    }
+                    else {
+                        for (var eidi in element["edges_by_nodes"]) {
+                            edge = element["edges_by_nodes"][eidi];
+                            latlng.push([[element["coordinates"][edge[0]]["y"], element["coordinates"][edge[0]]["x"]],
+                                        [element["coordinates"][edge[1]]["y"], element["coordinates"][edge[1]]["x"]]]);
+                        }
                     }
                     
                     // choose color
                     if (element["type"] == "branch") {
-                        options = {color:'yellow'}; // TODO: set a random color (one per branch)
+                        options = {color: colors[eid]};
                     }
                     else if (element["type"] == "crossroad") {
-                        options = {color:'red'};
+                        options = {color: 'red', weight: '10', opacity: '0.6'};
                     }
                                         
                     // create crossroad layer
                     window.crossroad_layers.push(L.polyline(latlng, options));
                 }
+                
                 // create a layergroup
                 window.layergroup = L.featureGroup(window.crossroad_layers).addTo(window.map);
                 
@@ -227,7 +279,6 @@
                 while(has_evaluation_current_crossroad()) {
                     window.current_id += 1;
                 }
-                console.log(window.crossroads[window.crossroads_index[window.current_id]]);
             }
             
             function set_next_question() {
