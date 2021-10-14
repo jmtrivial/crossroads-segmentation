@@ -10,6 +10,12 @@ import osmnx as ox
 import crseg.segmentation as cs
 import crseg.reliability as r
 import crseg.region as rg
+import json
+
+
+with open("crossroads-by-name.json") as f:
+    coordsByName = json.load(f)
+
 
 # set parser
 parser = argparse.ArgumentParser(description="Build a basic description of the crossroad located at the requested coordinate.")
@@ -18,11 +24,7 @@ group_input = parser.add_argument_group('Input region', "Define the input region
 input_params = group_input.add_mutually_exclusive_group(required=True)
 input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM using the given latitude', type=float)
 
-input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=["Manon", "Nicolas", "Jérémy-master", "Jérémy-thèse1", "obélisque", \
-                        "Lafayette", "Gauthier", "Pasteur-Duclaux", "POC1", \
-                        "POC2Toulouse", "POC2Toulousea", "POC2Toulouseb", "POC2Toulousec", \
-                        "Delille", "Salford", \
-                        "POC2a", "POC2b", "POC2c", "POC2d", "POC2e"])
+input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=[n for n in coordsByName])
 input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
 
 
@@ -58,66 +60,9 @@ if args.by_coordinates:
     longitude = args.by_coordinates[1]
 byname = args.by_name
 
-if byname == "Nicolas":
-    latitude = 45.77204
-    longitude = 3.08085
-elif byname == "Manon":
-    latitude = 45.77725
-    longitude = 3.07279
-elif byname == "Jérémy-master":
-    latitude = 45.77631
-    longitude = 3.09015
-elif byname == "Jérémy-thèse1":
-    latitude = 45.77351
-    longitude = 3.09015
-elif byname == "obélisque":
-    latitude = 45.77373
-    longitude  = 3.08685
-elif byname == "Lafayette":
-    latitude = 45.77338
-    longitude = 3.09226
-elif byname == "Gauthier":
-    latitude = 45.77712
-    longitude = 3.09622
-elif byname == "Pasteur-Duclaux":
-    latitude = 45.77364
-    longitude = 3.07525
-elif byname == "POC1":
-    latitude = 45.77725
-    longitude = 3.07279
-elif byname == "POC2Toulouse":
-    latitude = 43.60088
-    longitude = 1.45647
-elif byname == "POC2Toulousea":
-    latitude = 43.60081
-    longitude = 1.45614
-elif byname == "POC2Toulouseb":
-    latitude = 43.60088
-    longitude = 1.45661
-elif byname == "POC2Toulousec":
-    latitude = 43.60114
-    longitude = 1.45686
-elif byname == "Delille":
-    latitude = 45.78048
-    longitude = 3.09126
-elif byname == "Salford":
-    latitude = 45.77953
-    longitude = 3.09239
-elif byname == "POC2a":
-    latitude = 45.7669361
-    longitude = 3.106775
-elif byname == "POC2b":
-    latitude = 45.7860956
-    longitude = 3.0797253
-elif byname == "POC2c":
-    latitude = 45.7732173
-    longitude = 3.0952728
-elif byname == "POC2d":
-    latitude = 45.7809848
-    longitude = 3.0762451
-elif byname == "POC2e":
-    latitude = 45.7821967
-    longitude = 3.0728419
+if byname in coordsByName:
+    latitude = coordsByName[byname]["latitude"]
+    longitude = coordsByName[byname]["longitude"]
 
 from_graphml = args.from_graphml
 

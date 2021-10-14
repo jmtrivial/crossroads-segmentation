@@ -1,0 +1,62 @@
+{ 
+"Nicolas": { 
+    "latitude": 45.77204,
+    "longitude": 3.08085},
+"Manon" : { 
+    "latitude" : 45.77725,
+    "longitude" : 3.07279},
+"Jérémy-master" : { 
+    "latitude" : 45.77631,
+    "longitude" : 3.09015},
+"Jérémy-thèse1" : { 
+    "latitude" : 45.77351,
+    "longitude" : 3.09015},
+"obélisque" : { 
+    "latitude" : 45.77373,
+    "longitude" : 3.08685},
+"Lafayette" : { 
+    "latitude" : 45.77338,
+    "longitude" : 3.09226},
+"Gauthier" : { 
+    "latitude" : 45.77712,
+    "longitude" : 3.09622},
+"Pasteur-Duclaux" : { 
+    "latitude" : 45.77364,
+    "longitude" : 3.07525},
+"POC1" : { 
+    "latitude" : 45.77725,
+    "longitude" : 3.07279},
+"POC2Toulouse" : { 
+    "latitude" : 43.60088,
+    "longitude" : 1.45647},
+"POC2Toulousea" : { 
+    "latitude" : 43.60081,
+    "longitude" : 1.45614},
+"POC2Toulouseb" : { 
+    "latitude" : 43.60088,
+    "longitude" : 1.45661},
+"POC2Toulousec" : { 
+    "latitude" : 43.60114,
+    "longitude" : 1.45686},
+"Delille" : { 
+    "latitude" : 45.78048,
+    "longitude" : 3.09126},
+"Salford" : { 
+    "latitude" : 45.77953,
+    "longitude" : 3.09239},
+"POC2a" : { 
+    "latitude" : 45.7669361,
+    "longitude" : 3.106775},
+"POC2b" : { 
+    "latitude" : 45.7860956,
+    "longitude" : 3.0797253},
+"POC2c" : { 
+    "latitude" : 45.7732173,
+    "longitude" : 3.0952728},
+"POC2d" : { 
+    "latitude" : 45.7809848,
+    "longitude" : 3.0762451},
+"POC2e" : { 
+    "latitude" : 45.7821967,
+    "longitude" : 3.0728419}
+}
