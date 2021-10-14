@@ -79,7 +79,7 @@
 
             };
 
-
+            // shuffle crossroad indexes to browse them in a random order
             function shuffle(array) {
                 let currentIndex = array.length,  randomIndex;
 
@@ -98,6 +98,7 @@
                 return array;
             }
             
+            // create the question interface (used only once, corresponds to the form in the left panel)
             function build_question_interface() {
                 questions = "";
                 
@@ -138,7 +139,7 @@
                 
             }
             
-
+            // update the question interface. Used at each step to update both form and map
             function update_question_interface() {
             
                 // left side
@@ -253,6 +254,7 @@
                 
             }
             
+            // get answers from the form and store them in the data structure (that contains the initial json)
             function set_current_crossroad_evaluation() {
                 result = {"type": "evaluation"};
                 
