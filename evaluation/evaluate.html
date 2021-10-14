@@ -99,7 +99,7 @@
             
             // create the question interface (used only once, corresponds to the form in the left panel)
             function build_question_interface() {
-                questions = "";
+                questions = '<p id="head_question"></p>';
                 
                 window.q_json = JSON.parse(settings_questions);
                 
@@ -152,31 +152,46 @@
                 
                 $("#crossroad_title").text("Crossroad #" + window.crossroads_index[window.current_id]);
                 
-                if (window.nb_processed != 0) {
+                if (window.current_id != 0) {
                     $("#download").prop("disabled", false);
                 }
                 else
                     $("#download").prop('disabled', true); 
+
+                exist_eval = has_evaluation_current_crossroad();
+                if (exist_eval) {
+                    $("#head_question").text("Edition of an existing evaluation");
+                }
+                else {
+                    $("#head_question").text("");
+                }
 
                 qid = 0;
                 for(var key in window.q_json){
                     if (window.q_json.hasOwnProperty(key)){
                         var q = window.q_json[key];
                         var values = q["values"];
-                        var default_value = q["default"];
                         var question_type = q["type"];
+                        
+                        var value = q["default"];
+                        if (exist_eval) {
+                            v = get_current_crossroad_evalution(key);
+                            if (v != null) {
+                                value = v;
+                            }
+                        }
                         
                         if (question_type == "multiple_choice") {
                             i = 0;
                             for(var k in values) {
                                 option = $('#q' + qid + '-o' + i);
-                                option.prop("selected", option.text() == default_value);
+                                option.prop("selected", option.text() == value);
                                 i += 1;
                             }
                         }
                         else if (question_type == "text") {
                             text = $('#question-' + qid);
-                            text.val(default_value);
+                            text.val(value);
                         }
                         qid += 1;
                     }
@@ -227,39 +242,41 @@
                 // build a random list of colors
                 colors = Colors.list(current_crossroad.length);
                 
-                // for each element of the crossroad create a layer     
+                // for each element of the crossroad create a layer
                 for(var eid in current_crossroad) {
                     element = current_crossroad[eid];
-                    
-                    // build latlng
-                    latlng = [];
-                    if (element["edges_by_nodes"].length == 0) {
-                        if (element["nodes"].length != 0 && element["nodes"]["border"].length != 0) {
-                            coord = element["coordinates"][element["nodes"]["border"][0]];
-                            latlng.unshift([[coord["y"], coord["x"]], [coord["y"], coord["x"]]]);
+                    if (element["type"] != "evaluation") {
+                        
+                        // build latlng
+                        latlng = [];
+                        if (element["edges_by_nodes"].length == 0) {
+                            if (element["nodes"].length != 0 && element["nodes"]["border"].length != 0) {
+                                coord = element["coordinates"][element["nodes"]["border"][0]];
+                                latlng.unshift([[coord["y"], coord["x"]], [coord["y"], coord["x"]]]);
+                            }
                         }
-                    }
-                    else {
-                        for (var eidi in element["edges_by_nodes"]) {
-                            edge = element["edges_by_nodes"][eidi];
-                            latlng.push([[element["coordinates"][edge[0]]["y"], element["coordinates"][edge[0]]["x"]],
-                                        [element["coordinates"][edge[1]]["y"], element["coordinates"][edge[1]]["x"]]]);
+                        else {
+                            for (var eidi in element["edges_by_nodes"]) {
+                                edge = element["edges_by_nodes"][eidi];
+                                latlng.push([[element["coordinates"][edge[0]]["y"], element["coordinates"][edge[0]]["x"]],
+                                            [element["coordinates"][edge[1]]["y"], element["coordinates"][edge[1]]["x"]]]);
+                            }
                         }
-                    }
-                    
-                    // choose color
-                    if (element["type"] == "branch") {
-                        options = {color: colors[eid]};
-                    }
-                    else if (element["type"] == "crossroad") {
-                        options = {color: 'red', weight: '10', opacity: '0.6'};
-                    }
-                                        
-                    // create crossroad layer
-                    layer = L.polyline(latlng, options);
-                    window.crossroad_layers.push(layer);
-                    if (element["type"] == "crossroad") {
-                        center = layer.getBounds().getCenter();
+                        
+                        // choose color
+                        if (element["type"] == "branch") {
+                            options = {color: colors[eid]};
+                        }
+                        else if (element["type"] == "crossroad") {
+                            options = {color: 'red', weight: '10', opacity: '0.6'};
+                        }
+                                            
+                        // create crossroad layer
+                        layer = L.polyline(latlng, options);
+                        window.crossroad_layers.push(layer);
+                        if (element["type"] == "crossroad") {
+                            center = layer.getBounds().getCenter();
+                        }
                     }
                 }
                 
@@ -274,7 +291,6 @@
                 if (typeof center !== "undefined") {
                     // see https://stackoverflow.com/questions/387942/google-street-view-url for details
                     zoom = window.map.getZoom();
-                    console.log(zoom);
                     st_url = 'http://maps.google.com/maps?q=&layer=c&cbll=' + center.lat + "," + center.lng + '&cbp=11,0,0,0,0';
                     gm_url = 'https://www.google.fr/maps/@'+ center.lat + "," + center.lng + ',' + zoom + 'z';
                     osm_url = 'https://www.openstreetmap.org/?zoom=' + zoom + '&mlat=' + center.lat + '&mlon=' + center.lng;
@@ -316,33 +332,34 @@
                 window.crossroads[window.crossroads_index[window.current_id]].push(result);
             }
             
-            
-            function compute_nb_processed() {
-                nb = 0;
-                return window.crossroads.filter(function(item){
-                    return item.hasOwnProperty("evaluation");
-                }).length;
-            }
-            
-            function has_evaluation_current_crossroad() {
-                current = window.crossroads[window.crossroads_index[window.current_id]];
-                for (var idc in current) {
-                    if (current[idc]["type"] == "evaluation")
+            function has_evaluation_crossroad(crossroad) {
+                for (var idc in crossroad) {
+                    if (crossroad[idc]["type"] == "evaluation")
                         return true;
                 }
                 return false;
             }
             
-            function find_next_open_question() {
-                while(has_evaluation_current_crossroad()) {
-                    window.current_id += 1;
+            function has_evaluation_current_crossroad() {
+                return has_evaluation_crossroad(window.crossroads[window.crossroads_index[window.current_id]]);
+            }
+
+            function get_crossroad_evaluation(crossroad, key) {
+                for (var idc in crossroad) {
+                    if (crossroad[idc]["type"] == "evaluation")
+                        return crossroad[idc][key];
                 }
+                return null;
+            }
+
+            
+            function get_current_crossroad_evalution(key) {
+                return get_crossroad_evaluation(window.crossroads[window.crossroads_index[window.current_id]], key);
             }
             
             function set_next_question() {
-                find_next_open_question();
                 
-                $("#nb_processed").text(window.nb_processed);
+                $("#nb_processed").text(window.current_id);
                 
                 update_question_interface();
                 
@@ -369,8 +386,15 @@
             }
 
             function ask_settings() {
-                $("#main-container>div").css("display", "none");
-                $("#settings").css("display", "block");
+                if (exists_evaluated_crossroad()) {
+                    $("#main-container>div").css("display", "none");
+                    $("#settings").css("display", "block");
+                }
+                else {
+                    ask_shuffle_or_not();
+                }
+
+                
             }
             
             function build_index() {
@@ -381,12 +405,34 @@
                 $("#main-container>div").css("display", "none");
                 $("#the_end").css("display", "block");
             }
+            
+            function ask_shuffle_or_not() {
+                $("#main-container>div").css("display", "none");
+                $("#settings2").css("display", "block");
+            }
+            
+            function exists_evaluated_crossroad() {
+                return window.crossroads.filter(function(item){
+                    return has_evaluation_crossroad(item);
+                }).length > 0;
+            }
+            
+            
+            function remove_evaluted_crossroads() {
+                window.crossroads_index = window.crossroads_index.filter(function(item) {
+                                                return ! has_evaluation_crossroad(crossroads[item]);
+                                                });
+                $("#nb_crossroads").text(window.crossroads_index.length);
+                $("#settings_nb_crossroads").text(window.crossroads_index.length);
+                nb = window.crossroads.length - window.crossroads_index.length;
+                $("#prev_crossroads").text(" and " + nb);
+            }
         
             $(document).ready(function () {
                 $("#next").click(function(evt) {
                     set_current_crossroad_evaluation();
-                    window.nb_processed += 1;
-                    if (window.crossroads.length == window.nb_processed) {
+                    window.current_id += 1;
+                    if (window.crossroads_index.length == window.current_id) {
                         the_end();
                     }
                     else {
@@ -398,16 +444,23 @@
                 $("#download_end").click(download);
                 
                 $("#regular").click(function(evt) {
-                    build_index();
                     start_questions();
                 });
 
                 $("#shuffle").click(function(evt) {
-                    build_index();
                     shuffle(window.crossroads_index);
                     start_questions();
                 });
 
+                $("#evaluate-all").click(function(evt) {
+                    ask_shuffle_or_not();
+                });
+                $("#evaluate-blank").click(function(evt) {
+                    remove_evaluted_crossroads();
+                    ask_shuffle_or_not();
+                });
+                
+                
                 $("#inputFile").on("change", function handleFileSelect(evt) {
                     if (evt == null || evt.target == null || evt.target.files == null || evt.target.files.length == 0) {
                         console.log("no input file");
@@ -433,9 +486,11 @@
                         // set numbers
                         $("#nb_crossroads").text(window.crossroads.length);
                         $("#settings_nb_crossroads").text(window.crossroads.length);
-                        window.nb_processed = compute_nb_processed();
-                        $("#nb_processed").text(window.nb_processed);
+                        $("#nb_processed").text(0);
 
+                        
+                        build_index();
+                        
                         ask_settings();
                     });
 
@@ -449,7 +504,7 @@
             
         </script>
         <style>
-            #question, #chargement, #settings, #the_end { display: none; }
+            #question, #chargement, #settings, #settings2, #the_end { display: none; }
             
             #mapid { height: 100%; }
         </style>
@@ -474,6 +529,21 @@
                  <div class="position-absolute top-50 start-50 translate-middle fs-1">Chargement des données...</div>
             </div>
             <div id="settings">
+                <div class="position-absolute top-50 start-50 translate-middle fs-1 col-6">
+                    <p>Some crossroads has been already evaluated. Do you want to reevaluate them?</p>
+                    <div class="container mt-3">
+                        <div class="row">
+                        <div class="col-6">
+                            <button id="evaluate-all" class="btn btn-primary btn-block form-control" type="button">Evaluate all crossroads</button>
+                        </div>
+                        <div  class="col-6">
+                            <button id="evaluate-blank" class="btn btn-primary btn-block form-control" type="button">Evaluate only blank crossroads</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="settings2">
                 <div class="position-absolute top-50 start-50 translate-middle fs-1 col-6">
                     <p>Do you want to shuffle the <span id="settings_nb_crossroads"></span> crossroads, or evaluate them in regular order?</p>
                     <div class="container mt-3">
@@ -506,7 +576,7 @@
                 <div class="container mt-3">
                     <div class="row">
                     <div class="col-6">
-                        <button id="download" class="btn btn-secondary" style="width: 100%" type="button" disabled="true">Download evaluations (<span id="nb_processed">0</span> / <span id="nb_crossroads">-</span>)</button>
+                        <button id="download" class="btn btn-secondary" style="width: 100%" type="button" disabled="true">Download evaluations (<span id="nb_processed">0</span> / <span id="nb_crossroads">-</span><span id="prev_crossroads"></span>)</button>
                     </div>
                     <div  class="col-6">
                         <button id="next" class="btn btn-primary" style="width: 100%" type="button">Next crossroad</button>
