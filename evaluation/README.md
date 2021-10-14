@@ -8,4 +8,4 @@ In this directory, install leaflet:
 
 Leaflet will be installed in ```node_modules/leaflet/dist/```
 
-Install on your computer an http server (such as apache), or move this directory in a web server, such that ```evaluate.html``` is reachable via ```https``` protocol.
+Install on your computer an http server (such as apache), or move this directory in a web server, such that ```evaluate.html``` is reachable via ```http``` or ```https``` protocol.
