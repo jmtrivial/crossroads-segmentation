@@ -58,5 +58,15 @@
     "longitude" : 3.0762451},
 "POC2e" : { 
     "latitude" : 45.7821967,
-    "longitude" : 3.0728419}
+    "longitude" : 3.0728419},
+"carre-rotonde" : {
+    "latitude" : 45.76948,
+    "longitude" : 3.09092},
+"quasi-rondpoint-chamalières" : {
+    "latitude" : 45.77361,
+    "longitude" : 3.07533},
+"triangle-bellevue-salins" : {
+    "latitude" : 45.76907,
+    "longitude" : 3.07755}
+
 }
