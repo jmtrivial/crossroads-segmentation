@@ -28,12 +28,6 @@
         
         
         <script>
-            /* TODO
-                - add a back button
-                - capture "back" from navigator
-            */
-            
-            
         
         
             settings_questions = '{ \
@@ -99,7 +93,7 @@
             
             // create the question interface (used only once, corresponds to the form in the left panel)
             function build_question_interface() {
-                questions = '<p id="head_question"></p>';
+                questions = '';
                 
                 window.q_json = JSON.parse(settings_questions);
                 
@@ -154,16 +148,25 @@
                 
                 if (window.current_id != 0) {
                     $("#download").prop("disabled", false);
+                    $("#prev").prop("disabled", false);
                 }
-                else
+                else {
                     $("#download").prop('disabled', true); 
+                    $("#prev").prop("disabled", true);
+                }
+                if (window.current_id == window.crossroads_index.length - 1) {
+                    $("#next").html("Finish");
+                }
+                else {
+                    $("#next").html("Next");
+                }
 
                 exist_eval = has_evaluation_current_crossroad();
                 if (exist_eval) {
-                    $("#head_question").text("Edition of an existing evaluation");
+                    $("#crossroad_status").text("(edit)");
                 }
                 else {
-                    $("#head_question").text("");
+                    $("#crossroad_status").text("");
                 }
 
                 qid = 0;
@@ -357,8 +360,10 @@
                 return get_crossroad_evaluation(window.crossroads[window.crossroads_index[window.current_id]], key);
             }
             
-            function set_next_question() {
+            function set_question(history_state = true) {
                 
+                if (history_state)
+                    history.pushState({question: window.current_id}, "titre " + window.current_id, "#" + window.current_id);
                 $("#nb_processed").text(window.current_id);
                 
                 update_question_interface();
@@ -381,12 +386,14 @@
                 
                 window.current_id = 0;
                 
-                
-                set_next_question();
+                set_question();
             }
 
-            function ask_settings() {
+            function ask_settings(history_state = true) {
                 if (exists_evaluated_crossroad()) {
+                    if (history_state)
+                        history.pushState({question: "all"}, "all", "#all");
+
                     $("#main-container>div").css("display", "none");
                     $("#settings").css("display", "block");
                 }
@@ -400,13 +407,20 @@
             function build_index() {
                 window.crossroads_index = Array.from(Array(window.crossroads.length).keys());
             }
+            
+            function restart() {
+                $("#main-container>div").css("display", "none");
+                $("#start").css("display", "block");
+             }
 
             function the_end() {
                 $("#main-container>div").css("display", "none");
                 $("#the_end").css("display", "block");
             }
             
-            function ask_shuffle_or_not() {
+            function ask_shuffle_or_not(history_state = true) {
+                if (history_state)
+                    history.pushState({question: "shuffle"}, "shuffle", "#shuffle");
                 $("#main-container>div").css("display", "none");
                 $("#settings2").css("display", "block");
             }
@@ -436,9 +450,66 @@
                         the_end();
                     }
                     else {
-                        set_next_question();
+                        set_question();
                     }
                 });
+                
+
+                $("#prev").click(function(evt) {
+                    set_current_crossroad_evaluation();
+                    window.current_id -= 1;
+                    set_question();
+                });
+                
+                window.addEventListener('popstate', function(event) {
+                    if (event.state == null) {
+                        restart();
+                    }
+                    else {
+                        question = event.state.question;
+                        if (typeof question !== "undefined") {
+                            if (question == "all") {
+                                ask_settings(false);
+                            }
+                            else if (question == "shuffle") {
+                                ask_shuffle_or_not(false);
+                            }
+                            else {
+                                window.current_id = question;
+                                set_question(false);
+                            }
+                        }
+                        else {
+                            restart();
+                        }
+                    }
+                
+                }, false);
+                
+                window.addEventListener('pushstate', function(event) {
+                    if (event.state == null) {
+                        console.log("status ?");
+                    }
+                    else {
+                        question = event.state.question;
+                        if (typeof question !== "undefined") {
+                            if (question == "all") {
+                                ask_settings(false);
+                            }
+                            else if (question == "shuffle") {
+                                ask_shuffle_or_not(false);
+                            }
+                            else {
+                                window.current_id = question;
+                                set_question(false);
+                            }
+                        }
+                        else {
+                            console.log("status ?");
+                        }
+                    }
+                }, false);
+                
                 
                 $("#download").click(download);
                 $("#download_end").click(download);
@@ -561,7 +632,7 @@
             <div id="question">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title"><span id="crossroad_title"></span> <span id="crossroad_link"></span></h2>
+                        <h2 class="card-title"><span id="crossroad_title"></span> <span id="crossroad_status"></span> <span id="crossroad_link"></span></h2>
                         <div class="row">
                             <div class="col-6" id="questions">
                             
@@ -573,13 +644,16 @@
                     </div>
                 </div>
                 
-                <div class="container mt-3">
+                <div class="container-xxl mt-3">
                     <div class="row">
                     <div class="col-6">
                         <button id="download" class="btn btn-secondary" style="width: 100%" type="button" disabled="true">Download evaluations (<span id="nb_processed">0</span> / <span id="nb_crossroads">-</span><span id="prev_crossroads"></span>)</button>
                     </div>
-                    <div  class="col-6">
-                        <button id="next" class="btn btn-primary" style="width: 100%" type="button">Next crossroad</button>
+                    <div  class="col-3">
+                        <button id="prev" class="btn btn-primary" style="width: 100%" type="button">Previous</button>
+                    </div>
+                    <div  class="col-3">
+                        <button id="next" class="btn btn-primary" style="width: 100%" type="button">Next</button>
                     </div>
                     </div>
                 </div>
