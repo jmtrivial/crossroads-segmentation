@@ -30,8 +30,6 @@
         <script>
             /* TODO
                 - add a back button
-                - add a free field for comments
-                - add a link to street view (new tab) ou google maps
                 - capture "back" from navigator
             */
             
@@ -206,10 +204,13 @@
                             minZoom : 0,
                             maxNativeZoom: 19,
                             maxZoom : 21,
-                                    attribution : "IGN-F/Geoportail",
+                            attribution : "IGN-F/Geoportail",
                             tileSize : 256 
                         }
                     ).addTo(window.map);
+                    
+                    var scale = L.control.scale();
+                    scale.addTo(window.map);
                 }
                 else {
                                         
@@ -218,7 +219,6 @@
                         window.map.removeLayer(window.layergroup);
                     }
                     
-                    // TODO remove footer
                 }
                 
                 window.crossroad_layers = [];
@@ -256,7 +256,11 @@
                     }
                                         
                     // create crossroad layer
-                    window.crossroad_layers.push(L.polyline(latlng, options));
+                    layer = L.polyline(latlng, options);
+                    window.crossroad_layers.push(layer);
+                    if (element["type"] == "crossroad") {
+                        center = layer.getBounds().getCenter();
+                    }
                 }
                 
                 // create a layergroup
@@ -264,8 +268,23 @@
                 
                 // set the zoom adjusted on this layergroup
                 window.map.fitBounds(window.layergroup.getBounds());
+                
 
-                // TODO add a footer with a link on google street view
+                // add a footer with a link on google street view
+                if (typeof center !== "undefined") {
+                    // see https://stackoverflow.com/questions/387942/google-street-view-url for details
+                    zoom = window.map.getZoom();
+                    console.log(zoom);
+                    st_url = 'http://maps.google.com/maps?q=&layer=c&cbll=' + center.lat + "," + center.lng + '&cbp=11,0,0,0,0';
+                    gm_url = 'https://www.google.fr/maps/@'+ center.lat + "," + center.lng + ',' + zoom + 'z';
+                    osm_url = 'https://www.openstreetmap.org/?zoom=' + zoom + '&mlat=' + center.lat + '&mlon=' + center.lng;
+                    $("#crossroad_link").html('<span class="badge bg-secondary"><a href="' + osm_url + '" target=”_blank”>osm</a></span> \
+                                                <span class="badge bg-secondary"><a href="' + gm_url + '" target=”_blank”>gmaps</a></span> \
+                                                <span class="badge bg-secondary"><a href="' + st_url + '" target=”_blank”>streetview</a></span>');
+                }
+                else {
+                    $("#crossroad_link").html("");
+                }
                 
             }
             
@@ -472,7 +491,7 @@
             <div id="question">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title" id="crossroad_title"></h2>
+                        <h2 class="card-title"><span id="crossroad_title"></span> <span id="crossroad_link"></span></h2>
                         <div class="row">
                             <div class="col-6" id="questions">
                             
