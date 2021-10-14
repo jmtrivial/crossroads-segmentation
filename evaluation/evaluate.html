@@ -43,7 +43,8 @@
                                     "nb_branches": { "question": "Number of branches", "type": "multiple_choice", "values": ["correct", "too few", "too much"], "default": "correct" }, \
                                     "branches": { "question": "Branches configuration", "type": "multiple_choice", "values": ["correct", "two or more branches are merged", "one or more branch is split", "merged and split branches"], "default": "correct" }, \
                                     "edges": {"question": "Edge position", "type": "multiple_choice", "values": ["correct", "too far", "too close"], "default": "correct" }, \
-                                    "completness": {"question": "Completness", "type": "multiple_choice", "values": ["correct", "missing parts", "excess parts"], "default": "correct" } \
+                                    "completness": {"question": "Completness", "type": "multiple_choice", "values": ["correct", "missing parts", "excess parts"], "default": "correct" }, \
+                                    "comments": {"question": "Comments", "type": "text", "default": "" } \
                                   }';
             
             
@@ -109,27 +110,34 @@
                     if (window.q_json.hasOwnProperty(key)){
                         var q = window.q_json[key];
                         var question_text = q["question"];
-                        var values = q["values"];
+                        var question_type = q["type"];
                         var default_value = q["default"];
-                        
                         
                         questions += '<div class="mb-3">';
                         questions += '<label for="question-' + qid + '" class="form-label">' + question_text + '</label>';
-                        questions += '<select  id="question-' + qid + '" class="form-select" aria-label="' + question_text + '">';
-                        i = 0;
+                        if (question_type == "multiple_choice") {
+                            var values = q["values"];
+                            questions += '<select  id="question-' + qid + '" class="form-select" aria-label="' + question_text + '">';
+                            i = 0;
 
-                        for(var k in values) {
-                            element = values[k];
-                            questions += "<option";
-                            if (default_value == element) {
-                                questions += " selected";
+                            for(var k in values) {
+                                element = values[k];
+                                questions += "<option";
+                                if (default_value == element) {
+                                    questions += " selected";
+                                }
+                                questions += ' id="q' + qid + '-o' + i+ '" value="' + i + '">' + element + '</option>';
+                                i += 1;
                             }
-                            questions += ' id="q' + qid + '-o' + i+ '" value="' + i + '">' + element + '</option>';
-                            i += 1;
-                        }
 
-                        questions += "</select>";
+                            questions += "</select>";
+                            
+                        }
+                        else if (question_type == "text") {
+                            questions +=  '<textarea class="form-control" id="question-' + qid + '" rows="3"></textarea>';
+                        }
                         questions += "</div>";
+                        
                         qid += 1;
                     }
                 }
@@ -158,11 +166,19 @@
                         var q = window.q_json[key];
                         var values = q["values"];
                         var default_value = q["default"];
-                        i = 0;
-                        for(var k in values) {
-                            option = $('#q' + qid + '-o' + i);
-                            option.prop("selected", option.text() == default_value);
-                            i += 1;
+                        var question_type = q["type"];
+                        
+                        if (question_type == "multiple_choice") {
+                            i = 0;
+                            for(var k in values) {
+                                option = $('#q' + qid + '-o' + i);
+                                option.prop("selected", option.text() == default_value);
+                                i += 1;
+                            }
+                        }
+                        else if (question_type == "text") {
+                            text = $('#question-' + qid);
+                            text.val(default_value);
                         }
                         qid += 1;
                     }
@@ -262,9 +278,18 @@
                     if (window.q_json.hasOwnProperty(key)){
                         var q = window.q_json[key];
                         var values = q["values"];
+                        var question_type = q["type"];
                         var default_value = q["default"];
-                        option = $('#question-' + qid + " option:selected");
-                        result[key] = option.text();
+                        
+                        if (question_type == "multiple_choice") {
+                            var values = q["values"];
+                            option = $('#question-' + qid + " option:selected");
+                            result[key] = option.text();
+                        }
+                        else if (question_type == "text") {
+                            text = $('#question-' + qid);
+                            result[key] = text.val();;
+                        }
                         qid += 1;
                     }
                 }
