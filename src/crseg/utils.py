@@ -137,5 +137,13 @@ class Util:
         else:
             width = 3
         
-        # TODO: NetworkX do not provide cycleway = track (such as "Piste cyclable temporaire")
-        return nb * width
+        result = 0
+        # TODO: improve integration of cycleways in this computation
+        if ("cycleway" in gEdge and gEdge["cycleway"] == "track") or \
+            ("cycleway:left" in gEdge and gEdge["cycleway:left"] == "track") or \
+            ("cycleway:right" in gEdge and gEdge["cycleway:right"] == "track"):
+            result = (nb + 1) * width # ~ COVID tracks
+        else:
+            result = nb * width
+        
+        return result

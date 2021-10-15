@@ -6,6 +6,11 @@ import argcomplete, argparse
 
 import networkx as nx
 import osmnx as ox
+# add information about cycleways
+cycletags = ["cycleway", "cycleway:right", "cycleway:left"]
+ox.utils.config(osm_xml_way_tags = ox.settings.osm_xml_way_tags + cycletags,
+                useful_tags_way = ox.settings.useful_tags_way + cycletags)
+
 
 import crseg.segmentation as cs
 import crseg.reliability as r
