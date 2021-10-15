@@ -24,8 +24,6 @@ for i in `cat ../src/crossroads-by-name.json|python3 -c 'import sys, json; print
     NB=$((NB + 1))
 done
 
-if [ $NBERROR -ne 0 ]; then
-    print ""
-    print ""
-    print "Conclusion: $NBERROR error(s) on $NB crossroads"
-fi
+echo ""
+echo ""
+echo "Conclusion: $NBERROR error(s) on $NB crossroads"
