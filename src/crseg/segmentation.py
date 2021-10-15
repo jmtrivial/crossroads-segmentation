@@ -60,7 +60,7 @@ class Segmentation:
 
 
         # group subparts of crossroads together if they are part of the same crossing
-        scale = 4
+        scale = 4 # magic number? :(
         clusters = cr.Crossroad.get_clusters(crossroads, scale)
 
         # for each cluster
