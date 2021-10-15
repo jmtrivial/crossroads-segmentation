@@ -12,7 +12,7 @@ import crseg.reliability as r
 import crseg.region as rg
 import json
 
-
+# load predefined crossroad coordinates
 with open("crossroads-by-name.json") as f:
     coordsByName = json.load(f)
 
