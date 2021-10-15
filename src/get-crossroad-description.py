@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import argparse
+import argcomplete, argparse
 
 
 import networkx as nx
@@ -51,6 +51,8 @@ group_output.add_argument('--to-graphml', help='Generate a GraphML file with the
 group_output.add_argument('--to-json-all', help='Generate a json description of the crossings', type=argparse.FileType('w'))
 group_output.add_argument('--to-json', help='Generate a json description of the crossing in the middle of the map', type=argparse.FileType('w'))
 
+# handle bash autocomplete
+argcomplete.autocomplete(parser)
 # load and validate parameters
 args = parser.parse_args()
 
