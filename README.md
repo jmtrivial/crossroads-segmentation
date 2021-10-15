@@ -31,6 +31,16 @@ The last stage of the segmentation algorithm consists in merging a ring of small
 
 Several of these outputs (```--to-json```, ```--to-json-all```, ```--display-main-crossroad```) can be adjusted using the parameter ```--multiscale``` to describe the small crossroad that has been merged to produce the large ones.
 
+## Non regression tests
+
+A very basic non regression test is provided in ```test``` directory. Usage:
+
+* run first ```./regenerate_references.sh```
+* run ```./test.sh``` each time you want to check for regressions
+
+## Visual evaluation
+
+A separated project has been split from this one in order to evaluate segmentation quality. See [crossroads-evaluation](https://gitlab.limos.fr/jmafavre/crossroads-evaluation).
 
 ## Examples
 
