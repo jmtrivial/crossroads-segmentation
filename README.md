@@ -35,7 +35,7 @@ Several of these outputs (```--to-json```, ```--to-json-all```, ```--display-mai
 ## Examples
 
 
-```./get-crossroad-description.py --by-name POC1  --display-main-crossroad --connection-intensity 5 --multiscale```
+```./get-crossroad-description.py --by-name POC1  --display-main-crossroad --multiscale```
 
 ![POC1](images/POC1.png)
 
