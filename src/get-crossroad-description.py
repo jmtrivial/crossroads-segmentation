@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import argcomplete, argparse
-
+import os
 
 import networkx as nx
 import osmnx as ox
@@ -18,7 +18,7 @@ import crseg.region as rg
 import json
 
 # load predefined crossroad coordinates
-with open("crossroads-by-name.json") as f:
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "crossroads-by-name.json")) as f:
     coordsByName = json.load(f)
 
 
