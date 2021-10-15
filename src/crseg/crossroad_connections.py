@@ -1,3 +1,4 @@
+from . import reliability as rel
 
 class CrossroadConnections:
 
@@ -84,7 +85,16 @@ class CrossroadConnections:
         cr1n = [n for n in self.regions[l].nodes if cr1 in self.regionsByNode[n]]
         cr2n = [n for n in self.regions[l].nodes if cr2 in self.regionsByNode[n]]
 
-        return self.regions[l].get_path(cr1n, cr2n)
+        path = self.regions[l].get_path(cr1n, cr2n)
+        # if we identify a node which was classified as a possible crossroad, the
+        # probability that this path is probably an inner path of a crossroad increases.
+        # We thus reduce the path length
+        for p in path[0][1:-1]:
+            r = self.regions[l].G.nodes[p][rel.Reliability.crossroad_reliability]
+            if r <= rel.Reliability.strongly_yes and r > rel.Reliability.strongly_no:
+                path = (path[0], path[1] / 3)
+
+        return path
 
     def add_adjacencies(self, r1, node, regions):
         if not r1 in self.adjacencies:
