@@ -13,28 +13,12 @@ class Util:
             y += G.nodes[p]["y"]
         return (x / len(points), y / len(points))
 
-    def point_distance(point1, point2):
-        x1 = point1[0]
-        y1 = point1[1]
-        x2 = point2[0]
-        y2 = point2[1]
-        return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
-
-
     def distance_to(G, node, point):
         x1 = G.nodes[node]["x"]
         y1 = G.nodes[node]["y"]
         x2 = point[0]
         y2 = point[1]
         return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
-
-    def edge_distance(G, edge1, edge2):
-        # use an approximation: for each edge, consider its middle and extremity, and compute the smallest 
-        # distance between one point from edge1 and one point from edge2
-        points1 = [[G.nodes[p]["x"], G.nodes[p]["y"]] for p in edge1] + [Util.centroid(G, edge1)]
-        points2 = [[G.nodes[p]["x"], G.nodes[p]["y"]] for p in edge2] + [Util.centroid(G, edge2)]
-        return min([Util.point_distance(p1, p2) for (p1, p2) in zip(points1, points2)])
-
 
     def distance(G, node1, node2):
         x1 = G.nodes[node1]["x"]

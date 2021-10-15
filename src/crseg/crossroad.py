@@ -533,16 +533,7 @@ class Crossroad(r.Region):
 
 
     def estimate_branch_width(self, branch):
-        result = sum([self.estimate_lane_width(l) for l in branch])
-        # in case of separated tracks, the distance between these tracks is considered
-
-        if len(branch) > 1:
-            # for each pair of lane in the branch
-            # compute min distance between the two edges
-            # get the max
-            result += max([u.Util.edge_distance(self.G, pair[0].edge, pair[1].edge) for pair in itertools.product(branch, repeat=2)])
-
-        return result
+        return sum([self.estimate_lane_width(l) for l in branch])
             
     def estimate_lane_width(self, lane):
         return u.Util.estimate_edge_width(self.G, lane.edge)
