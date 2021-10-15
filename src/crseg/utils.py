@@ -136,4 +136,6 @@ class Util:
                 width = 3
         else:
             width = 3
+        
+        # TODO: NetworkX do not provide cycleway = track (such as "Piste cyclable temporaire")
         return nb * width
