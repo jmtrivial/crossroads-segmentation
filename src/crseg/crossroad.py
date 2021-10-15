@@ -531,6 +531,7 @@ class Crossroad(r.Region):
 
 
     def estimate_branch_width(self, branch):
+        # TODO: in case of separated tracks, the distance between these tracks migt be considered
         return sum([self.estimate_lane_width(l) for l in branch])
             
     def estimate_lane_width(self, lane):
