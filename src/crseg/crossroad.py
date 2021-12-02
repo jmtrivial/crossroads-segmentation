@@ -43,7 +43,10 @@ class Crossroad(r.Region):
             self.build_lanes_description()
 
     def __str__(self):
-        return "* id: %s\n* center: %s\n* lanes: %s\n* branches: %s" % (self.id, self.center, len(self.lanes), len(self.branches))
+        if hasattr(self, "branches"):
+            return "* id: %s\n* center: %s\n* lanes: %s\n* branches: %s" % (self.id, self.center, len(self.lanes), len(self.branches))
+        else:
+            return "* id: %s\n* center: %s\n* lanes: %s\n" % (self.id, self.center, len(self.lanes))
 
     def __repr__(self):
         return "id: %s, center: %s, #nodes: %s" % (self.id, self.center, len(self.nodes))
