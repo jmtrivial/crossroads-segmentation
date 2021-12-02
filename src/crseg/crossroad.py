@@ -103,7 +103,7 @@ class Crossroad(r.Region):
 
     def get_lane_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]
-        angle = u.Util.bearing(self.G, self.get_center(), edge[1])
+        angle = u.Util.bearing(self.G, self.get_center(), edge[0 if self.get_center() == edge[1] else 1])
         name = e["name"] if "name" in e else None
         return ld.LaneDescription(angle, name, edge)
 
