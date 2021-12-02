@@ -148,7 +148,7 @@ class Crossroad(r.Region):
                 # and add the corresponding lanes
                 open_lanes = self.get_open_paths(center, radius)
                 for ol in open_lanes:
-                    self.lanes.append(self.get_lane_description_from_edge((ol[len(ol) - 2], ol[len(ol) - 1])))
+                    self.lanes.append(self.get_lane_description_from_edge((ol[1], ol[0])))
         
 
     def build_crossroads(G):
