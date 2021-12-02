@@ -200,7 +200,7 @@ class Segmentation:
                     G.nodes[u]["highway"] = "crossing"
                 if not "highway" in G.nodes[v]:
                     G.nodes[v]["highway"] = "crossing"
-            if ("highway" in a and a["highway"] in ["cycleway", "path"]):
+            if ("highway" in a and a["highway"] in ["cycleway", "path", "pedestrian", "steps"]):
                 to_remove.append((u, v))
             #elif "service" in a and a["service"] in ["parking_aisle"]:
             #    to_remove.append((u, v))                
