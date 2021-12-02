@@ -379,10 +379,6 @@ class Crossroad(r.Region):
                 if b1.is_similar(b2) and b1.is_orthogonal(angle):
                     return True
 
-        # if their distance is less than their combinded radius
-        if u.Util.distance(self.G, self.get_center(), crossroad.get_center()) < self.get_radius() + crossroad.get_radius():
-            return True
-
         return False
 
     # merge crossroads if they are in a neigborhood defined by scale times the radius of the crossroad
