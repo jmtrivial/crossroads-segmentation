@@ -67,6 +67,8 @@
     "longitude" : 3.07533},
 "triangle-bellevue-salins" : {
     "latitude" : 45.76907,
-    "longitude" : 3.07755}
-
+    "longitude" : 3.07755},
+"Châtelet": {
+    "latitude" : 48.86118,
+    "longitude": 2.34686}
 }
