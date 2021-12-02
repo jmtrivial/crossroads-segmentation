@@ -58,7 +58,7 @@ class Segmentation:
         for c in crossroads:
             self.regions[c.id] = c
 
-
+        # TODO: can we merge this step in the merging process?
         # group subparts of crossroads together if they are part of the same crossing
         scale = 4 # magic number? :(
         clusters = cr.Crossroad.get_clusters(crossroads, scale)
