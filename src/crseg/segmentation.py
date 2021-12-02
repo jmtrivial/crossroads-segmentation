@@ -206,7 +206,7 @@ class Segmentation:
             #    to_remove.append((u, v))                
         G.remove_edges_from(to_remove)
         G = ox.utils_graph.remove_isolated_nodes(G)
-        if not keep_all_components:
+        if not keep_all_components and len(G.nodes) != 0:
             G = ox.utils_graph.get_largest_component(G)
         return G
 

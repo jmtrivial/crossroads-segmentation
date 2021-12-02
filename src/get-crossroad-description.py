@@ -113,12 +113,20 @@ if from_graphml:
 else:
     G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
+    if len(G.nodes) == 0:
+        print("There is no street in this region")
+        exit(1)
+
     if verbose:
         print("=== PREPROCESSING (1) ===")
 
     # remove sidewalks, cycleways
     keep_all_components = False
     G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
+
+    if len(G.nodes) == 0:
+        print("There is no street in this region")
+        exit(1)
 
     if verbose:
         print("=== PREPROCESSING (2) ===")
