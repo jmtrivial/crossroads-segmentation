@@ -34,7 +34,7 @@ input_params.add_argument('--from-graphml', help='Load road graph from a GraphML
 
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
-parser.add_argument('--connection-intensity', help='Intensity of the connection (2: small intensiy, 5: strong intensity). Default: 2.', type=float, default=2)
+parser.add_argument('--connection-intensity', help='Intensity of the connection (2: small intensiy, 7: strong intensity). Default: 2.', type=float, default=4)
 parser.add_argument('--max-cycle-elements', help='Maximum number of small crossroads to be combined as a ring in a large crossroad. Default: 10.', type=int, default=10)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
 

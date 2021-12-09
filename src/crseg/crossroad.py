@@ -105,6 +105,23 @@ class Crossroad(r.Region):
         e = self.G[edge[0]][edge[1]][0]
         angle = u.Util.bearing(self.G, self.get_center(), edge[0 if self.get_center() == edge[1] else 1])
         name = e["name"] if "name" in e else None
+        if name == None:
+            # build the path starting from this edge
+            path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
+            # consider the last node of this path
+            end = path[-1]
+            # and check if it exists other paths between this end and the crossroad
+            other_paths = []
+            for nb in self.G.neighbors(end):
+                op = u.Util.get_path_to_biffurcation(self.G, end, nb)
+                if self.has_node(op[-1]):
+                    # TODO: check if they are parallel
+                    other_paths.append(op)
+            # if only one path exists
+            if len(other_paths) == 1:
+                o_e = self.G[other_paths[0][0]][other_paths[0][1]][0]
+                # if yes, the current edge has probably the same name
+                name = o_e["name"] if "name" in o_e else None
         return ld.LaneDescription(angle, name, edge)
 
     def get_lanes_description_from_node(self, border):
@@ -376,7 +393,7 @@ class Crossroad(r.Region):
         # orthogonal to the junction
         for b1 in self.lanes:
             for b2 in crossroad.lanes:
-                if b1.is_similar(b2) and b1.is_orthogonal(angle):
+                if b1.is_similar(b2) and (b1.is_orthogonal(angle) or b2.is_orthogonal(angle)):
                     return True
 
         return False
@@ -495,6 +512,7 @@ class Crossroad(r.Region):
         # for each lane
         for lane in self.lanes:
             mbranches = []
+
             # check if it's similar to a lane already in a built branch
             for i, branch in enumerate(self.branches):
                 nb = len([l for l in branch if l.is_similar(lane)])

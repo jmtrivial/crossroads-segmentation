@@ -13,12 +13,27 @@ class Util:
             y += G.nodes[p]["y"]
         return (x / len(points), y / len(points))
 
+    def coords_distance(point1, point2):
+        x1 = point1[0]
+        y1 = point1[1]
+        x2 = point2[0]
+        y2 = point2[1]
+        return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
+
     def distance_to(G, node, point):
         x1 = G.nodes[node]["x"]
         y1 = G.nodes[node]["y"]
         x2 = point[0]
         y2 = point[1]
         return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
+
+    # links are shorter than real paths
+    def distance_with_shortcut(G, node1, node2):
+        gEdge = G[node1][node2][0]
+        coef = 1
+        if "highway" in gEdge and gEdge["highway"] in ["primary_link", "secondary_link", "tertiary_link", "trunk_link", "motorway_link"]:
+            coef = 0.5
+        return Util.distance(G, node1, node2) * coef
 
     def distance(G, node1, node2):
         x1 = G.nodes[node1]["x"]
@@ -122,7 +137,7 @@ class Util:
         elif "lanes" in gEdge:
             nb = int(gEdge["lanes"])
         else:
-            if "oneway" in gEdge:
+            if "oneway" in gEdge and gEdge["oneway"]:
                 nb = 1
             else:
                 nb = 2
@@ -131,9 +146,11 @@ class Util:
             if gEdge["highway"] in ["motorway", "trunk"]:
                 width = 3.5
             elif gEdge["highway"] in ["primary", "secondary"]:
-                width = 3.25
-            else:
                 width = 3
+            elif gEdge["highway"] in ["service"]:
+                width = 2.25
+            else:
+                width = 2.75
         else:
             width = 3
         
@@ -145,5 +162,5 @@ class Util:
             result = (nb + 1) * width # ~ COVID tracks
         else:
             result = nb * width
-        
+
         return result

@@ -73,5 +73,11 @@
     "longitude": 2.34686},
 "Littré": {
     "latitude" : 45.76814355107168,
-    "longitude":3.0792893716596326}
+    "longitude": 3.0792893716596326},
+"Carmes": {
+    "latitude" : 45.78221380496758,
+    "longitude": 3.0953730289756627},
+"Montpied": {
+    "latitude" : 45.76097,
+    "longitude": 3.08957}
 }
