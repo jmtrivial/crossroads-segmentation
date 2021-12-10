@@ -108,20 +108,30 @@ class Crossroad(r.Region):
         if name == None:
             # build the path starting from this edge
             path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
-            # consider the last node of this path
-            end = path[-1]
-            # and check if it exists other paths between this end and the crossroad
-            other_paths = []
-            for nb in self.G.neighbors(end):
-                op = u.Util.get_path_to_biffurcation(self.G, end, nb)
-                if self.has_node(op[-1]):
-                    # TODO: check if they are parallel
-                    other_paths.append(op)
-            # if only one path exists
-            if len(other_paths) == 1:
-                o_e = self.G[other_paths[0][0]][other_paths[0][1]][0]
-                # if yes, the current edge has probably the same name
-                name = o_e["name"] if "name" in o_e else None
+
+            # if one of the edges has a name, it's the name of the lane
+            for p1, p2 in zip(path, path[1:]):
+                 e = self.G[p1][p2][0]
+                 if "name" in e:
+                     name = e["name"]
+                     break
+
+            if name == None:
+                # if not found,
+                # consider the last node of this path
+                end = path[-1]
+                # and check if it exists other paths between this end and the crossroad
+                other_paths = []
+                for nb in self.G.neighbors(end):
+                    op = u.Util.get_path_to_biffurcation(self.G, end, nb)
+                    if self.has_node(op[-1]):
+                        # TODO: check if they are parallel
+                        other_paths.append(op)
+                # if only one path exists
+                if len(other_paths) == 1:
+                    o_e = self.G[other_paths[0][0]][other_paths[0][1]][0]
+                    # if yes, the current edge has probably the same name
+                    name = o_e["name"] if "name" in o_e else None
         return ld.LaneDescription(angle, name, edge)
 
     def get_lanes_description_from_node(self, border):
