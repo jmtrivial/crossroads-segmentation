@@ -31,6 +31,7 @@ input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM
 
 input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=[n for n in coordsByName])
 input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
+input_params.add_argument('--from-osmxml', help='Load road graph from an OSM XML file', type=argparse.FileType('r'))
 
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
@@ -72,6 +73,7 @@ if byname in coordsByName:
     longitude = coordsByName[byname]["longitude"]
 
 from_graphml = args.from_graphml
+from_osmxml = args.from_osmxml
 
 # set input parameters
 radius = args.radius
@@ -111,7 +113,13 @@ if from_graphml:
 
     print(type(G))    
 else:
-    G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+    if from_osmxml:
+        # load parameters from filename (lat_lon_date.osm)
+        latitude = float(os.path.basename(from_osmxml.name).split('_')[0])
+        longitude = float(os.path.basename(from_osmxml.name).split('_')[1])
+        G = ox.graph_from_xml(from_osmxml.name, simplify=False)
+    else:
+        G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
     if len(G.nodes) == 0:
         print("There is no street in this region")
