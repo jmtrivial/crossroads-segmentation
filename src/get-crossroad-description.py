@@ -253,11 +253,13 @@ if to_gexf:
 if to_graphml:
     if verbose:
         print("=== EXPORT IN GraphML ===")
-        # Store parameters
-        G.graph["cr.latitude"] = latitude
-        G.graph["cr.longitude"] = longitude
-        G.graph["cr.radius"] = radius
-        for r in seg.regions:
-            G.graph[rg.Region.regiontag_prefix + str(r)] = "crossroad" if seg.regions[r].is_crossroad() else "branch"
-        # TODO: store for each region id its kind (crossing or branch)
-        ox.io.save_graphml(G, to_graphml.name)
+    # Store parameters
+    G.graph["cr.latitude"] = latitude
+    G.graph["cr.longitude"] = longitude
+    G.graph["cr.radius"] = radius
+    for r in seg.regions:
+        G.graph[rg.Region.regiontag_prefix + str(r)] = "crossroad" if seg.regions[r].is_crossroad() else "branch"
+    # TODO: store for each region id its kind (crossing or branch)
+    ox.io.save_graphml(G, to_graphml.name)
+
+
