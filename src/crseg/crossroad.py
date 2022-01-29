@@ -100,6 +100,32 @@ class Crossroad(r.Region):
 
         return data
 
+    def set_graph_attributes(self, crossroad_attr, branch_attr = None):
+        rid = self.id
+        # set crossroad attribute
+        for n in self.nodes:
+            if len(self.G.nodes[n][crossroad_attr]) == 0:
+                self.G.nodes[n][crossroad_attr] = str(rid)
+            else:
+                self.G.nodes[n][crossroad_attr] += ";" + str(rid)
+        
+        for e in self.edges:
+            if len(self.G[e[0]][e[1]][0][crossroad_attr]) == 0:
+                self.G[e[0]][e[1]][0][crossroad_attr] = str(rid)
+            else:
+                self.G[e[0]][e[1]][0][crossroad_attr] += ";" + str(rid)
+
+        if branch_attr != None:
+            for bid, branch in enumerate(self.branches):
+                cid = str(rid) + "-" + str(bid)
+                for lane in branch:
+                    if len(self.G[lane.edge[0]][lane.edge[1]][0][branch_attr]) == 0:
+                        self.G[lane.edge[0]][lane.edge[1]][0][branch_attr] = cid
+                    else:
+                        self.G[lane.edge[0]][lane.edge[1]][0][branch_attr] += ";" + cid
+
+ 
+
 
     def get_lane_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]

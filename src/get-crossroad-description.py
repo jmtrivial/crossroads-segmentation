@@ -11,6 +11,19 @@ cycletags = ["cycleway", "cycleway:right", "cycleway:left"]
 ox.utils.config(osm_xml_way_tags = ox.settings.osm_xml_way_tags + cycletags,
                 useful_tags_way = ox.settings.useful_tags_way + cycletags)
 
+# a trick to avoid the creation of files given as parameters
+class FileOpener(argparse.FileType):
+    # delayed FileType;
+    # sample use:
+    # with args.input.open() as f: f.read()
+    def __call__(self, string):
+        # optionally test string
+        self.filename = string
+        return self
+    def open(self):
+        return super(FileOpener,self).__call__(self.filename)
+    file =  property(open, None, None, 'open file property')
+
 
 import crseg.segmentation as cs
 import crseg.reliability as r
@@ -56,6 +69,7 @@ group_output.add_argument('--to-gexf', help='Generate a GEXF file with the compu
 group_output.add_argument('--to-graphml', help='Generate a GraphML file with the computed graph (contains reliability scores for edges and nodes)', type=argparse.FileType('w'))
 group_output.add_argument('--to-json-all', help='Generate a json description of the crossings', type=argparse.FileType('w'))
 group_output.add_argument('--to-json', help='Generate a json description of the crossing in the middle of the map', type=argparse.FileType('w'))
+group_output.add_argument('--to-geopackage', help='Generate a geopackage of the complete region (.gpkg)', type=FileOpener('w'))
 
 # handle bash autocomplete
 argcomplete.autocomplete(parser)
@@ -89,6 +103,7 @@ to_gexf = args.to_gexf
 to_graphml = args.to_graphml
 to_json = args.to_json
 to_json_all = args.to_json_all
+to_geopackage = args.to_geopackage
 skip_processing = args.skip_processing
 multiscale = args.multiscale
 connection_intensity = args.connection_intensity
@@ -121,6 +136,7 @@ else:
     else:
         G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
 
+
     if len(G.nodes) == 0:
         print("There is no street in this region")
         exit(1)
@@ -141,6 +157,7 @@ else:
 
     # build an undirected version of the graph
     G = ox.utils_graph.get_undirected(G)
+
 
 if verbose:
     print("Coordinates:", latitude, longitude)
@@ -174,7 +191,7 @@ if skip_processing:
     print("=== SKIP SEGMENTATION ===")
 else:
     if display or display_segmentation or to_text or to_text_all or to_gexf or \
-     to_json or to_json_all or to_graphml or display_main_crossroad: # or any other next step
+     to_json or to_json_all or to_graphml or display_main_crossroad or to_geopackage: # or any other next step
         if verbose:
             print("=== SEGMENTATION ===")
         seg.process()
@@ -199,6 +216,11 @@ if to_json_all:
     if verbose:
             print("=== EXPORT IN JSON ===")
     seg.to_json_all(to_json_all.name, multiscale)
+
+if to_geopackage:
+    if verbose:
+        print("=== EXPORT IN GeoPackage ===")
+    seg.to_geopackage(to_geopackage.filename)
 
 if display:
     if verbose:

@@ -485,3 +485,27 @@ class Segmentation:
 
         with open(filename, 'w') as outfile:
             json.dump(data, outfile)
+
+    
+    ######################### geopackage description ########################
+
+    def to_geopackage(self, filename):
+        # add new attributes
+        nx.set_node_attributes(self.G, values = "", name = "crossroad")
+        nx.set_node_attributes(self.G, values = "", name = "sub_crossroad")
+        nx.set_edge_attributes(self.G, values = "", name = "crossroad")
+        nx.set_edge_attributes(self.G, values = "", name = "sub_crossroad")
+        nx.set_edge_attributes(self.G, values = "", name = "branch")
+
+        # fill attributes according to the computed regions
+        for rid in self.regions:
+            if self.regions[rid].is_crossroad():
+                self.regions[rid].set_graph_attributes("crossroad", "branch")
+
+        for rid in self.inner_regions:
+            self.inner_regions[rid].set_graph_attributes("sub_crossroad")
+
+        # save graph
+        ox.io.save_graph_geopackage(self.G, filename)
+
+
