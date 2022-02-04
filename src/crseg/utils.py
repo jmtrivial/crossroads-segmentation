@@ -54,6 +54,9 @@ class Util:
     def length(G, path):
         return sum([Util.distance(G, p1, p2) for p1, p2 in zip(path, path[1:])])
 
+    def length_with_shortcut(G, path):
+        return sum([Util.distance_with_shortcut(G, p1, p2) for p1, p2 in zip(path, path[1:])])
+
     def angular_distance(angle1, angle2):
         a = angle1 - angle2
         if a > 180:

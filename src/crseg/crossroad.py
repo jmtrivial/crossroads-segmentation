@@ -483,7 +483,7 @@ class Crossroad(r.Region):
             for n in self.G.neighbors(p1):
                 if not self.has_edge((p1, n)):
                     path = u.Util.get_path_to_biffurcation(self.G, p1, n)
-                    if path[len(path) - 1] in points and u.Util.length(self.G, path) < self.diameter():
+                    if path[len(path) - 1] in points and u.Util.length_with_shortcut(self.G, path) < self.diameter():
                         self.add_path(path)
 
     # merge all given regions with the current one
