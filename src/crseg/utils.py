@@ -33,6 +33,8 @@ class Util:
         coef = 1
         if "highway" in gEdge and gEdge["highway"] in ["primary_link", "secondary_link", "tertiary_link", "trunk_link", "motorway_link"]:
             coef = 0.5
+        if "junction" in gEdge:
+            coef = 0.5
         return Util.distance(G, node1, node2) * coef
 
     def distance(G, node1, node2):
