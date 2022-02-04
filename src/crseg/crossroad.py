@@ -231,10 +231,6 @@ class Crossroad(r.Region):
     def is_reliable_crossroad_node(G, n):
         if rl.Reliability.is_weakly_in_crossroad(G, n):
             return True
-
-        for nb in G.neighbors(n):
-            if rl.Reliability.is_weakly_in_crossroad_edge(G, (nb, n)):
-                return True
         
         return False
 
