@@ -68,6 +68,8 @@ class Util:
         for nb in G.neighbors(node):
             if "name" in G[node][nb][0]:
                 streetnames.add(G[node][nb][0]["name"])
+            elif "ref" in G[node][nb][0]:
+                streetnames.add(G[node][nb][0]["ref"])
             else:
                 streetnames.add(None)
         return list(streetnames)
