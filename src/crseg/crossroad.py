@@ -10,9 +10,15 @@ from . import lane_description as ld
 
 
 class Crossroad(r.Region):
+    
 
     def __init__(self, G, node = None, target_id = -1):
         r.Region.__init__(self, G, target_id)
+
+        # multiplicative coefficient applied to street width 
+        # to obtain distance between the center of the crossroad
+        # and the boundary
+        self.ratio_boundary = 4
 
         self.max_distance_boundary_polyline = { "motorway": 100, 
                                                 "trunk": 100,
@@ -24,18 +30,6 @@ class Crossroad(r.Region):
                                                 "living_street": 15,
                                                 "service": 10,
                                                 "default": 10
-                                                }
-
-        self.min_distance_boundary_polyline = { "motorway": 50, 
-                                                "trunk": 50,
-                                                "primary": 25, 
-                                                "secondary": 17, 
-                                                "tertiary": 15, 
-                                                "unclassified": 15, 
-                                                "residential": 12,
-                                                "living_street": 10,
-                                                "service": 6,
-                                                "default": 6
                                                 }
 
         if node != None:
@@ -164,14 +158,19 @@ class Crossroad(r.Region):
         edges = [(border, nb) for nb in self.G.neighbors(border) if not self.has_edge((nb, border))]
         return [self.get_lane_description_from_edge(e) for e in edges]
 
+    # estimate the width of the given edge, and deduce the maximum
+    # distance from the center of a crossroad to the boundary of the crossroad
+    def estimate_max_distance_to_boundary(self, edge):
+        w = u.Util.estimate_edge_width(self.G, edge)
+        return w * self.ratio_boundary
+
     def get_radius(self):
         borders = [n for n in self.nodes if self.is_boundary_node(n) and n != self.get_center()]
         center = self.get_center()
         if len(borders) == 0:
             radius = 0
             for nb in self.G.neighbors(center):
-                c = self.get_highway_classification((center, nb))
-                v = self.min_distance_boundary_polyline[c] / 2 # we reduce the impact of missing lanes
+                v = self.estimate_max_distance_to_boundary((center, nb)) / 2 # we reduce the impact of missing lanes
                 if v > radius:
                     radius = v
             return radius
@@ -251,20 +250,6 @@ class Crossroad(r.Region):
     def is_correct_inner_node(self, node):
         return not rl.Reliability.is_weakly_boundary(self.G, node)
 
-    def get_max_highway_classification_other(self, path):
-        if len(self.nodes) == 0:
-            return None
-        result = "default"
-        value = self.max_distance_boundary_polyline[result]
-        center = self.get_center()
-        for nb in self.G.neighbors(center):
-            if nb != path[1]:
-                c = self.get_highway_classification((center, nb))
-                v = self.max_distance_boundary_polyline[c]
-                if v > value:
-                    result = c
-                    value = v
-        return result
             
 
     def get_closest_possible_biffurcation(self, point):
@@ -279,17 +264,6 @@ class Crossroad(r.Region):
 
         return result
 
-    def get_highway_classification(self, e):
-        edge = self.G[e[0]][e[1]][0]
-        if not "highway" in edge:
-            return "default"
-        highway = edge["highway"]
-        highway_link = highway + "_link"
-        if highway_link in self.max_distance_boundary_polyline:
-            highway = highway_link
-        if not highway in self.max_distance_boundary_polyline:
-            highway = "default"
-        return highway
 
     def is_inner_path_by_osmdata(self, path):
         for p1, p2 in zip(path, path[1:]):
@@ -315,9 +289,10 @@ class Crossroad(r.Region):
             r = 1
             if len(list(self.G.neighbors(first))) > 4: # a crossroad with many lanes is larger, thus 
                 r = 2
-            highway = self.get_max_highway_classification_other(path)
-            if d < self.min_distance_boundary_polyline[highway] * r or \
-                (d < self.max_distance_boundary_polyline[highway] * r and \
+            # TODO: consider other edges on this crossroad rather than this one
+            dmax = self.estimate_max_distance_to_boundary((path[0], path[1]))
+            if d < dmax * r or \
+                (d < dmax * r and \
                 self.get_closest_possible_biffurcation(last) == first):
                 return True
             else:
