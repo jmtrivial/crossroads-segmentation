@@ -15,10 +15,12 @@ from . import crossroad_connections as cc
 
 class Segmentation:
 
-    def __init__(self, G, init=True, connection_intensity = 2, max_cycle_elements = 10):
+    def __init__(self, G, init=True, C0 = 2, C1 = 2.5, C2 = 4, max_cycle_elements = 10):
         self.G = G
         self.regions = {}
-        self.connection_intensity = connection_intensity
+        self.C0 = C0
+        self.C1 = C1
+        self.C2 = C2
         self.max_cycle_elements = max_cycle_elements
         random.seed()
         if init:
@@ -50,17 +52,15 @@ class Segmentation:
         # init flags
         rg.Region.init_attr(self.G)
 
-
         self.regions = {}
 
         # first build crossroads
-        crossroads = cr.Crossroad.build_crossroads(self.G)
+        crossroads = cr.Crossroad.build_crossroads(self.G, self.C0)
         for c in crossroads:
             self.regions[c.id] = c
 
         # group subparts of crossroads together if they are part of the same crossing (using street names)
-        scale = 3 # magic number to process only a small neigborhood
-        clusters = cr.Crossroad.get_clusters(crossroads, scale)
+        clusters = cr.Crossroad.get_clusters(crossroads, self.C1)
 
         # for each cluster
         for cluster in clusters:
@@ -70,8 +70,10 @@ class Segmentation:
             for o in cluster[1:]:
                 del self.regions[o.id]
 
+        # maximum length for missing maths
+        scale_missing = self.C0
         # add inner paths and missing boundaries
-        self.add_missing_paths()
+        self.add_missing_paths(scale = scale_missing)
         
         # build links between regions
         links = rf.RegionFactory.build_links_between_crossings(self.G, self.regions)
@@ -82,7 +84,7 @@ class Segmentation:
         self.merge_linked_crossroads()
 
         # add inner paths and missing boundaries (again)
-        self.add_missing_paths(False)
+        self.add_missing_paths(scale = scale_missing, boundaries = False)
 
         # create branch regions
         for rid in self.regions:
@@ -97,7 +99,7 @@ class Segmentation:
         self.inner_regions = {}
         newIDs = {}
 
-        cconnections = cc.CrossroadConnections(self.regions, self.connection_intensity)
+        cconnections = cc.CrossroadConnections(self.regions, self.C2)
 
         # merge multi crossings (triangles, rings, etc)
         for cycle in cconnections.get_cycles(self.max_cycle_elements):
@@ -149,11 +151,11 @@ class Segmentation:
         newRegion = rf.RegionFactory.clone(region)
         self.inner_regions[newRegion.id] = newRegion
 
-    def add_missing_paths(self, boundaries = True):
+    def add_missing_paths(self, boundaries = True, scale = 2):
         for rid in self.regions:
             region = self.regions[rid]
             if region.is_crossroad():
-                region.add_missing_paths(boundaries = boundaries)
+                region.add_missing_paths(boundaries = boundaries, scale = scale)
 
 
     def in_crossroad_region(self, e):
