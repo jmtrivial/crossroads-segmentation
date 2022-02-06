@@ -26,13 +26,13 @@ class Crossroad(r.Region):
                                                 "default": 25
                                                 }
 
-        self.min_distance_boundary_polyline = { "motorway": 100, 
-                                                "trunk": 100,
-                                                "primary": 50, 
-                                                "secondary": 25, 
-                                                "tertiary": 20, 
+        self.min_distance_boundary_polyline = { "motorway": 50, 
+                                                "trunk": 50,
+                                                "primary": 25, 
+                                                "secondary": 17, 
+                                                "tertiary": 15, 
                                                 "unclassified": 15, 
-                                                "residential": 15,
+                                                "residential": 12,
                                                 "living_street": 10,
                                                 "service": 6,
                                                 "default": 6
@@ -279,7 +279,8 @@ class Crossroad(r.Region):
 
         return result
 
-    def get_highway_classification(self, edge):
+    def get_highway_classification(self, e):
+        edge = self.G[e[0]][e[1]][0]
         if not "highway" in edge:
             return "default"
         highway = edge["highway"]
