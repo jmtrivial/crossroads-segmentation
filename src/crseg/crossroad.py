@@ -394,21 +394,21 @@ class Crossroad(r.Region):
         angle = u.Util.bearing(self.G, self.get_center(), crossroad.get_center())
 
 
-        # if their is no direct path between centers, or 
-        # if it exists a strong border between the two crossings, they are not
+        # if their is no direct path between centers, they are not
         # in the same cluster
         path = self.find_direct_path_to_possible_adjacent_biffurcation(crossroad.get_center())
-        if path == None or rl.Reliability.has_strong_boundary_in_path(self.G, path):
+        if path == None:
             return False
 
-
-
-        # if no strong boundary has been identified, consider similar branches
-        # orthogonal to the junction
+        # consider similar branches orthogonal to the junction
         for b1 in self.lanes:
             for b2 in crossroad.lanes:
                 if b1.is_similar(b2) and (b1.is_orthogonal(angle) or b2.is_orthogonal(angle)):
                     return True
+
+        # if not it exists a strong border between the two crossings
+        if not rl.Reliability.has_weakly_boundary_in_path(self.G, path):
+            return True
 
         return False
 

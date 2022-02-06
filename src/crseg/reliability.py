@@ -109,6 +109,12 @@ class Reliability:
                 return True
         return False
 
+    def has_weakly_boundary_in_path(G, path):
+        for p in path:
+            if Reliability.is_weakly_boundary(G, p):
+                return True
+        return False
+
     def is_strong_boundary(G, n):
         return G.nodes[n][Reliability.boundary_reliability] == Reliability.strongly_yes
 
