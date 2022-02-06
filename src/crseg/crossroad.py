@@ -16,14 +16,14 @@ class Crossroad(r.Region):
 
         self.max_distance_boundary_polyline = { "motorway": 100, 
                                                 "trunk": 100,
-                                                "primary": 80, 
-                                                "secondary": 80, 
-                                                "tertiary": 50, 
-                                                "unclassified": 40, 
-                                                "residential": 40,
-                                                "living_street": 30,
-                                                "service": 20,
-                                                "default": 25
+                                                "primary": 50, 
+                                                "secondary": 40, 
+                                                "tertiary": 30, 
+                                                "unclassified": 25, 
+                                                "residential": 20,
+                                                "living_street": 15,
+                                                "service": 10,
+                                                "default": 10
                                                 }
 
         self.min_distance_boundary_polyline = { "motorway": 50, 
@@ -342,10 +342,16 @@ class Crossroad(r.Region):
             if not self.unknown_region_node(next):
                 break
 
+        # if we reach a point with cardinality > 2, we do not consider it
+        if len(list(self.G.neighbors(path[len(path) - 1]))) > 2:
+            return results
+
         results.append(path)
 
+        # if we reach a strong boundary, we find our path
         if not self.is_middle_path_node(path[len(path) - 1], True):
             return results
+
         path = path.copy()
 
         # if it's a weak border, we continue until we reach a strong one

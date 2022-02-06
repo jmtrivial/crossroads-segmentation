@@ -15,7 +15,7 @@ from . import crossroad_connections as cc
 
 class Segmentation:
 
-    def __init__(self, G, init=True, connection_intensity = 2, max_cycle_elements = 5):
+    def __init__(self, G, init=True, connection_intensity = 2, max_cycle_elements = 10):
         self.G = G
         self.regions = {}
         self.connection_intensity = connection_intensity
