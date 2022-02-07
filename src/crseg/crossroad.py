@@ -400,18 +400,24 @@ class Crossroad(r.Region):
         if path == None:
             return False
 
-        # if it exists a strong border between the two crossings, 
-        # reduce the thresold distance by two
         center = self.get_center()
         d = u.Util.distance(self.G, center, crossroad.get_center())
         width = self.get_max_lane_width()
-        if rl.Reliability.has_weakly_boundary_in_path(self.G, path):
-            radius = width * scale
-            if d >= radius / 2:
+        threshold = width * scale
+        # if it does not exists a strong border between the two crossings, 
+        # reduce the thresold distance by two
+        if not rl.Reliability.has_weakly_boundary_in_path(self.G, path):
+            threshold = threshold / 2
+
+        # if the distance is up to the threshold (considering the possible reduction of the threshold)
+        # the merge cannot be applied
+        if d >= threshold:
                 return False
-        else:
-            if d <= width:
-                return True
+        
+        # if the distance is smaller than half the threshold
+        # we merge (without checking for similarity in the name)
+        if d <= threshold / 2:
+            return True
 
 
         # consider similar branches orthogonal to the junction
