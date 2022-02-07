@@ -402,12 +402,17 @@ class Crossroad(r.Region):
 
         # if it exists a strong border between the two crossings, 
         # reduce the thresold distance by two
+        center = self.get_center()
+        d = u.Util.distance(self.G, center, crossroad.get_center())
+        width = self.get_max_lane_width()
         if rl.Reliability.has_weakly_boundary_in_path(self.G, path):
-            center = self.get_center()
-            d = u.Util.distance(self.G, center, crossroad.get_center())
-            radius = self.get_max_lane_width() * scale
+            radius = width * scale
             if d >= radius / 2:
                 return False
+        else:
+            if d <= width:
+                return True
+
 
         # consider similar branches orthogonal to the junction
         for b1 in self.lanes:
