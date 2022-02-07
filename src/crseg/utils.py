@@ -65,6 +65,11 @@ class Util:
             a += 360 
         return abs(a)
 
+    def is_inside_parking(G, node):
+        for nb in G.neighbors(node):
+            if (not "service" in G[node][nb][0]) or (G[node][nb][0]["service"] != "parking_aisle"):
+                return False
+        return True
 
     def get_adjacent_streetnames(G, node):
         streetnames = set()

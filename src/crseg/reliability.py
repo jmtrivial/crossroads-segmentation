@@ -95,6 +95,11 @@ class Reliability:
                             else:
                                 G.nodes[n][Reliability.crossroad_reliability] = Reliability.moderate_yes
 
+            if nb_neighbors > 2:
+                # if all adjacent edges are service=parking_aisle, then it is not an intersection
+                if u.Util.is_inside_parking(G, n):
+                    G.nodes[n][Reliability.crossroad_reliability] = Reliability.strongly_no
+
 
     def get_best_reliability_node(G, n):
         
