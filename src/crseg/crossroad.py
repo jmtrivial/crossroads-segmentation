@@ -386,7 +386,7 @@ class Crossroad(r.Region):
                 return path
         return None
 
-    def in_same_cluster(self, crossroad):
+    def in_same_cluster(self, crossroad, scale):
 
         if self.id == crossroad.id:
             return False  
@@ -400,15 +400,21 @@ class Crossroad(r.Region):
         if path == None:
             return False
 
+        # if it exists a strong border between the two crossings, 
+        # reduce the thresold distance by two
+        if rl.Reliability.has_weakly_boundary_in_path(self.G, path):
+            center = self.get_center()
+            d = u.Util.distance(self.G, center, crossroad.get_center())
+            radius = self.get_max_lane_width() * scale
+            if d >= radius / 2:
+                return False
+
         # consider similar branches orthogonal to the junction
         for b1 in self.lanes:
             for b2 in crossroad.lanes:
                 if b1.is_similar(b2) and (b1.is_orthogonal(angle) or b2.is_orthogonal(angle)):
                     return True
 
-        # if not it exists a strong border between the two crossings
-        if not rl.Reliability.has_weakly_boundary_in_path(self.G, path):
-            return True
 
         return False
 
@@ -433,7 +439,7 @@ class Crossroad(r.Region):
 
             cr_in_neigborhood = crossroad.get_crossroads_in_neighborhood(crossroads, scale)
             for cr in cr_in_neigborhood:
-                if crossroad.in_same_cluster(cr):
+                if crossroad.in_same_cluster(cr, scale):
                     if not cr.id in visited:
                         visited.append(cr.id)
                         cluster.append(cr)

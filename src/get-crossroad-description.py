@@ -49,7 +49,7 @@ input_params.add_argument('--from-osmxml', help='Load road graph from an OSM XML
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
 parser.add_argument('--C0', help='First parameter to drive the boundary detection. Length distance is computed by multiplying this parameter by the width of the streets. Default: 2.', type=float, default=2)
-parser.add_argument('--C1', help='Second parameter to drive the first merge. Length distance is computed by multiplying this parameter by the width of the streets. Default: 2.5.', type=float, default=2.5)
+parser.add_argument('--C1', help='Second parameter to drive the first merge. Length distance is computed by multiplying this parameter by the width of the streets. Default: 2.', type=float, default=2)
 parser.add_argument('--C2', help='Third parameter to drive the final merge (2: small intensiy, 7: strong intensity). Default: 4.', type=float, default=4)
 parser.add_argument('--max-cycle-elements', help='Maximum number of small crossroads to be combined as a ring in a large crossroad. Default: 10.', type=int, default=10)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
