@@ -152,8 +152,10 @@ class Util:
         if "highway" in gEdge:
             if gEdge["highway"] in ["motorway", "trunk"]:
                 width = 3.5
-            elif gEdge["highway"] in ["primary", "secondary"]:
+            elif gEdge["highway"] in ["primary"]:
                 width = 3
+            elif gEdge["highway"] in ["secondary"]:
+                width = 2.75
             elif gEdge["highway"] in ["service"]:
                 width = 2.25
             else:
