@@ -150,12 +150,13 @@ class Reliability:
         path = [n1, n2]
         length = u.Util.distance(G, n1, n2)
 
+
         while (max < 0 or length < max) and u.Util.is_middle_polyline(G, path[len(path) - 1]):
-            path.append(u.Util.get_opposite_node(G, path[len(path) - 1], path[len(path) - 2]))
-            length += u.Util.distance(G, path[len(path) - 2], path[len(path) - 1])
             last = path[len(path) - 1]
             if Reliability.is_weakly_boundary(G, last):
                 return path
+            path.append(u.Util.get_opposite_node(G, path[len(path) - 1], path[len(path) - 2]))
+            length += u.Util.distance(G, path[len(path) - 2], path[len(path) - 1])
         # we reach a split node without reaching a boundary node
         return []
         
