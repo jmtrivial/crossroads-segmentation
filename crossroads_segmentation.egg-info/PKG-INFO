@@ -1,3 +1,17 @@
+Metadata-Version: 2.1
+Name: crossroads-segmentation
+Version: 0.1.1
+Summary: Crossroads segmentation is a python tool that produces automatic segmentations of data from OpenStreetMap.
+Home-page: https://gitlab.limos.fr/jmafavre/crossroads-segmentation/
+Author: Jean-Marie Favreau
+Author-email: j-marie.favreau@uca.fr
+License: AGPL-3.0
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Description-Content-Type: text/markdown
+
 # crossroads segmentation
 
 **Crossroads segmentation** is a python tool that produces automatic segmentations of data from OpenStreetMap.
@@ -52,5 +66,7 @@ A separated project has been split from this one in order to evaluate segmentati
 ```./get-crossroad-description.py --by-name obélisque  --display-segmentation -r 1000```
 
 ![R1000](images/R1000.png)
+
+
 
 
