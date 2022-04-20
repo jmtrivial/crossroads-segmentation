@@ -6,7 +6,7 @@
 
 Using pip, use the following command line to install crseg:
 
-* ```pip install crossroad-segmentation```
+* ```pip install crossroads-segmentation```
 
 Dependancies:
 
