@@ -2,4 +2,4 @@ include README.md
 include requirements.txt
 include images/*
 include examples/*
-exclude */.gitignore
+global-exclude .gitignore
