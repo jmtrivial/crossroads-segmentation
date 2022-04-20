@@ -13,13 +13,38 @@ Dependancies:
 * [OSMnx](https://osmnx.readthedocs.io/) that includes [NetworkX](https://networkx.org/) and [pandas](https://osmnx.readthedocs.io/)
 * [argparse](https://docs.python.org/3/library/argparse.html)
 
-## Associated publications
+## How it works
+
+The computation uses both geometric and semantic information to identify and segment crossroads.
+
+### Identify streets and classify nodes
+
+<img src="images/segmentation-step1.png" width="300px" alt="">
+
+### Build elementary intersections
+
+<img src="images/segmentation-step2.png" width="300px" alt="">
+
+### Merge intersections by proximity
+
+<img src="images/segmentation-step3.png" width="300px" alt="">
+
+### Merge intersections using multiple connectivity^
+
+<img src="images/segmentation-step4.png" width="300px" alt="">
+
+### Identify branches
+
+<img src="images/segmentation-step5.png" width="300px" alt="">
+
 
 A paper presenting the algorithms implemented in this tool has been accepted at the AGILE 2022 conference:
 
 * Favreau, J.-M. and Kalsron, J., *What are intersections for pedestrian users?*, in proceedings of the 25th AGILE International Conference on Geographic Information Science, Vilnius, Lithuania, 2022.
 
 This tool will also be presented at [SOTM-fr](https://sotm2022.openstreetmap.fr/) 2022.
+
+
 
 ## Usage
 
