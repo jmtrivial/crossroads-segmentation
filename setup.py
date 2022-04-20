@@ -14,7 +14,7 @@ setup(
     description="Crossroads segmentation is a python tool that produces automatic segmentations of data from OpenStreetMap.",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://gitlab.limos.fr/jmafavre/crossroads-segmentation/",
+    url="https://github.com/jmtrivial/crossroads-segmentation/",
     author="Jean-Marie Favreau",
     author_email="j-marie.favreau@uca.fr",
     license="AGPL-3.0",
@@ -25,4 +25,9 @@ setup(
     ],
     packages=["crseg"],
     include_package_data=True,
+    entry_points={
+        'console_scripts': [
+            'get_crossroad_segmentation = crseg.cmd:get_crossroad_segmentation_command',
+        ],
+    },
 )

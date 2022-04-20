@@ -2,6 +2,12 @@
 
 **Crossroads segmentation** is a python tool that produces automatic segmentations of data from OpenStreetMap.
 
+## Installation
+
+Using pip, use the following command line to install crseg:
+
+* ```pip install crossroad-segmentation```
+
 ## Dependancies
 
 * [OSMnx](https://osmnx.readthedocs.io/) that includes [NetworkX](https://networkx.org/) and [pandas](https://osmnx.readthedocs.io/)
@@ -9,9 +15,9 @@
 
 ## Examples
 
-The main example to use is ```get-crossroad-description.py```. You will find a complete description of the possible parameters using the following command:
+The main example to use is ```examples/get-crossroad-description.py```. You will find a complete description of the possible parameters using the following command:
 
-* ```get-crossroad-description.py --help```
+* ```PYTHONPATH=$PWD examples/get-crossroad-description.py --help```
 
 This tool is using OSMnx to download OpenStreetMap data from the selected region. It uses a cache, stored in ```cache/``` directory. If a region has already been asked, it will use the cached data and not download it again. You can of course delete the cache directory to download again the data.
 
@@ -39,18 +45,18 @@ A very basic non regression test is provided in ```test``` directory. Usage:
 
 ## Visual evaluation
 
-A separated project has been split from this one in order to evaluate segmentation quality. See [crossroads-evaluation](https://gitlab.limos.fr/jmafavre/crossroads-evaluation).
+A separated project is available to evaluate segmentation quality. See [crossroads-evaluation](https://github.com/jmtrivial/crossroads-evaluation).
 
 ## Examples
 
 
 ```./get-crossroad-description.py --by-name POC1  --display-main-crossroad --multiscale```
 
-![POC1](images/POC1.png)
+![POC1](https://raw.githubusercontent.com/jmtrivial/crossroads-segmentation/master/images/POC1.png)
 
 
 ```./get-crossroad-description.py --by-name obélisque  --display-segmentation -r 1000```
 
-![R1000](images/R1000.png)
+![R1000](https://raw.githubusercontent.com/jmtrivial/crossroads-segmentation/master/images/R1000.png)
 
 
