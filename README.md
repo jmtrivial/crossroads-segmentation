@@ -8,20 +8,26 @@ Using pip, use the following command line to install crseg:
 
 * ```pip install crossroad-segmentation```
 
-## Dependancies
+Dependancies:
 
 * [OSMnx](https://osmnx.readthedocs.io/) that includes [NetworkX](https://networkx.org/) and [pandas](https://osmnx.readthedocs.io/)
 * [argparse](https://docs.python.org/3/library/argparse.html)
 
-## Examples
+## Associated publications
 
-The main example to use is ```examples/get-crossroad-description.py```. You will find a complete description of the possible parameters using the following command:
+A paper presenting the algorithms implemented in this tool has been accepted at the AGILE 2022 conference:
 
-* ```PYTHONPATH=$PWD examples/get-crossroad-description.py --help```
+* Favreau, J.-M. and Kalsron, J., *What are intersections for pedestrian users?*, in proceedings of the 25th AGILE International Conference on Geographic Information Science, Vilnius, Lithuania, 2022.
+
+This tool will also be presented at [SOTM-fr](https://sotm2022.openstreetmap.fr/) 2022.
+
+## Usage
+
+If you installed crossroads-segmentation using pip, a console script is now available using ```get_crossroad_description```. A slightly more complete version is available in the examples folder (```PYTHONPATH=$PWD examples/get-crossroad-description.py```). You will find a complete description of the possible parameters using the ```--help``` parameter.
 
 This tool is using OSMnx to download OpenStreetMap data from the selected region. It uses a cache, stored in ```cache/``` directory. If a region has already been asked, it will use the cached data and not download it again. You can of course delete the cache directory to download again the data.
 
-The location of the region can be choosen using coordinates (```--by-coordinates LAT LNG```) or using an predefined coordinate defined by a name (```--by-name NAME```). A radius (```-r VALUE```) with a default value of 150 meters can be adjusted to choose the size of the region to consider.
+The location of the region can be choosen using coordinates (```--by-coordinates LAT LNG```) or using an predefined coordinate defined by a name in the example version (```--by-name NAME```). A radius (```-r VALUE```) with a default value of 150 meters can be adjusted to choose the size of the region to consider.
 
 Several outputs are possible:
 
@@ -30,7 +36,7 @@ Several outputs are possible:
 * to produce a ```json``` file that contains all the detected crossroads (```--to-json-all FILENAME```) or only the main one (```--to-json FILENAME```). Branches are also contained in this output.
 
 
-* 3 parameters (C0, C1 and C2) to drive the creation and merge of the crossroads
+* 3 parameters (C0, C1 and C2) to drive the creation and merge of the crossroads (see associated publication)
 * a maximum number of crossroads in a ring (```--max-cycle-elements NB```), with default value of 10 for the last step of the segmentation.
 
 
