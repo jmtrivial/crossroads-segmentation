@@ -7,10 +7,14 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
+# The version
+
+VERSION = (HERE / "crseg" / "__init__.py").read_text().split("'")[1]
+
 # This call to setup() does all the work
 setup(
     name="crossroads-segmentation",
-    version="0.1.2",
+    version=VERSION,
     description="Crossroads segmentation is a python tool that produces automatic segmentations of data from OpenStreetMap.",
     long_description=README,
     long_description_content_type="text/markdown",
