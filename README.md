@@ -10,7 +10,7 @@ Using pip, use the following command line to install crseg:
 
 Dependancies:
 
-* [OSMnx](https://osmnx.readthedocs.io/) that includes [NetworkX](https://networkx.org/) and [pandas](https://osmnx.readthedocs.io/)
+* [OSMnx](https://osmnx.readthedocs.io/) that includes [NetworkX](https://networkx.org/) and [pandas](https://osmnx.readthedocs.io/). The development has been realized with OSMnx 1.0.2, and some warnings can be shown in 1.1.2 about deprecated functions (```get_bearing```, ```frame.append```). These calls will be fixed in a near future.
 * [argparse](https://docs.python.org/3/library/argparse.html)
 
 ## How it works
