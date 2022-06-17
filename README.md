@@ -40,7 +40,7 @@ The computation uses both geometric and semantic information to identify and seg
 
 A paper presenting the algorithms implemented in this tool has been accepted at the AGILE 2022 conference:
 
-* Favreau, J.-M. and Kalsron, J., *[What are intersections for pedestrian users?](https://agile-giss.copernicus.org/articles/3/4/2022/)*, in proceedings of the 25th AGILE International Conference on Geographic Information Science, Vilnius, Lithuania, 2022. ([presentation](presentation/JM Favreau - AGILE2022 - presentation - What are intersections for pedestrian users.pdf)).
+* Favreau, J.-M. and Kalsron, J., *[What are intersections for pedestrian users?](https://agile-giss.copernicus.org/articles/3/4/2022/)*, in proceedings of the 25th AGILE International Conference on Geographic Information Science, Vilnius, Lithuania, 2022. ([presentation]([presentation/JM Favreau - AGILE2022 - presentation - What are intersections for pedestrian users.pdf](https://github.com/jmtrivial/crossroads-segmentation/raw/master/presentation/JM%20Favreau%20-%20AGILE2022%20-%20presentation%20-%20What%20are%20intersections%20for%20pedestrian%20users.pdf)).
 
 This tool has been also be presented at [SOTM-fr](https://sotm2022.openstreetmap.fr/) 2022.
 
