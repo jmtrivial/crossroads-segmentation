@@ -16,8 +16,8 @@ def get_crossroad_segmentation_command():
 
     # add information about cycleways
     cycletags = ["cycleway", "cycleway:right", "cycleway:left"]
-    ox.utils.config(osm_xml_way_tags = ox.settings.osm_xml_way_tags + cycletags,
-                    useful_tags_way = ox.settings.useful_tags_way + cycletags)
+    ox.settings.osm_xml_way_tags = ox.settings.osm_xml_way_tags + cycletags
+    ox.settings.useful_tags_way = ox.settings.useful_tags_way + cycletags
 
     # a trick to avoid the creation of files given as parameters
     class FileOpener(argparse.FileType):
