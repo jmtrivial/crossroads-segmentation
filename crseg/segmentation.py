@@ -186,23 +186,36 @@ class Segmentation:
 
     ######################### Functions used to prepare the graph ########################
 
-    def remove_footways_and_parkings(G, keep_all_components):
+    def prepare_network(G, keep_all_components=False, remove_non_highway=True,
+                        remove_parking_aisle=True,
+                        remove_footways=True, remove_cycleways=True):
             
 
         # remove footways and parkings
         to_remove = []
         for u, v, a in G.edges(data = True):
-            if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
-                to_remove.append((u, v))
-                # add missing crossings
-                if not "highway" in G.nodes[u]:
-                    G.nodes[u]["highway"] = "crossing"
-                if not "highway" in G.nodes[v]:
-                    G.nodes[v]["highway"] = "crossing"
-            if ("highway" in a and a["highway"] in ["cycleway", "path", "pedestrian", "steps"]):
-                to_remove.append((u, v))
-            #elif "service" in a and a["service"] in ["parking_aisle"]:
-            #    to_remove.append((u, v))                
+            present = True
+            if remove_non_highway:
+                if not "highway" in a:
+                    to_remove.append((u, v))
+                    present = False
+            if present:
+                if remove_footways:
+                    if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
+                        to_remove.append((u, v))
+                        # add missing crossings
+                        if not "highway" in G.nodes[u]:
+                            G.nodes[u]["highway"] = "crossing"
+                        if not "highway" in G.nodes[v]:
+                            G.nodes[v]["highway"] = "crossing"
+                    if ("highway" in a and a["highway"] in ["path", "pedestrian", "steps"]):
+                        to_remove.append((u, v))
+                if remove_cycleways and "highway" in a and a["highway"] in ["cycleway"]:
+                    to_remove.append((u, v))
+                if remove_parking_aisle:
+                    if "service" in a and a["service"] in ["parking_aisle"]:
+                        to_remove.append((u, v))
+
         G.remove_edges_from(to_remove)
         G = ox.utils_graph.remove_isolated_nodes(G)
         if not keep_all_components and len(G.nodes) != 0:

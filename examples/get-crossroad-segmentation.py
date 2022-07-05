@@ -149,8 +149,7 @@ else:
         print("=== PREPROCESSING (1) ===")
 
     # remove sidewalks, cycleways
-    keep_all_components = False
-    G = cs.Segmentation.remove_footways_and_parkings(G, keep_all_components)
+    G = cs.Segmentation.prepare_network(G)
 
     if len(G.nodes) == 0:
         print("There is no street in this region")
