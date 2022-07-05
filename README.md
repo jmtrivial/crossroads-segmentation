@@ -48,7 +48,7 @@ This tool has been also be presented at [SOTM-fr](https://sotm2022.openstreetmap
 
 ## Usage
 
-If you installed crossroads-segmentation using pip, a console script is now available using ```get_crossroad_description```. A slightly more complete version is available in the examples folder (```PYTHONPATH=$PWD examples/get-crossroad-description.py```). You will find a complete description of the possible parameters using the ```--help``` parameter.
+If you installed crossroads-segmentation using pip, a console script is now available using ```get_crossroad_segmentation```. A slightly more complete version is available in the examples folder (```PYTHONPATH=$PWD examples/get-crossroad-segmentation.py```). You will find a complete segmentation of the possible parameters using the ```--help``` parameter.
 
 This tool is using OSMnx to download OpenStreetMap data from the selected region. It uses a cache, stored in ```cache/``` directory. If a region has already been asked, it will use the cached data and not download it again. You can of course delete the cache directory to download again the data.
 
@@ -81,12 +81,12 @@ A separated project is available to evaluate segmentation quality. See [crossroa
 ## Examples
 
 
-```./get-crossroad-description.py --by-name POC1  --display-main-crossroad --multiscale```
+```./get-crossroad-segmentation.py --by-name POC1  --display-main-crossroad --multiscale```
 
 ![POC1](https://raw.githubusercontent.com/jmtrivial/crossroads-segmentation/master/images/POC1.png)
 
 
-```./get-crossroad-description.py --by-name obélisque  --display-segmentation -r 1000```
+```./get-crossroad-segmentation.py --by-name obélisque  --display-segmentation -r 1000```
 
 ![R1000](https://raw.githubusercontent.com/jmtrivial/crossroads-segmentation/master/images/R1000.png)
 
