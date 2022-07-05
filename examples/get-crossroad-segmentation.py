@@ -28,6 +28,7 @@ class FileOpener(argparse.FileType):
 import crseg.segmentation as cs
 import crseg.reliability as r
 import crseg.region as rg
+import crseg.utils as u
 import json
 
 # load predefined crossroad coordinates
@@ -45,7 +46,7 @@ input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM
 input_params.add_argument('--by-name', help='Load input from OSM using a predefined region', choices=[n for n in coordsByName])
 input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
 input_params.add_argument('--from-osmxml', help='Load road graph from an OSM XML file', type=argparse.FileType('r'))
-
+group_input.add_argument('--overpass', help='Use Overpass to download data instead of the OSM api', action='store_true')
 
 parser.add_argument('-r', '--radius', help='Radius (in meter) where the crossroads will be reconstructed. Default: 150m', type=float, default=150)
 parser.add_argument('--C0', help='First parameter to drive the boundary detection. Length distance is computed by multiplying this parameter by the width of the streets. Default: 2.', type=float, default=2)
@@ -90,6 +91,7 @@ if byname in coordsByName:
 
 from_graphml = args.from_graphml
 from_osmxml = args.from_osmxml
+overpass = args.overpass
 
 # set input parameters
 radius = args.radius
@@ -138,8 +140,10 @@ else:
         longitude = float(os.path.basename(from_osmxml.name).split('_')[1])
         G = ox.graph_from_xml(from_osmxml.name, simplify=False)
     else:
-        G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+        G = u.Util.get_osm_data(latitude, longitude, radius, overpass)
 
+    if G is None:
+        exit(2)
 
     if len(G.nodes) == 0:
         print("There is no street in this region")

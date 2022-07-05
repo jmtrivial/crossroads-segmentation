@@ -1,4 +1,8 @@
 import osmnx as ox
+import requests
+import tempfile
+import geopandas as gp
+from shapely.geometry import Point
 
 from . import region as r
 
@@ -178,3 +182,30 @@ class Util:
             result = nb * width
 
         return result
+
+
+    def get_osm_data(latitude, longitude, radius, overpass, tmpfile = None):
+        if overpass:
+            G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
+        else:
+            p = Point(longitude, latitude)
+            gdf_p = gp.GeoDataFrame(geometry=[p]).set_crs('EPSG:4326').to_crs('EPSG:3857')
+            pb = gdf_p.buffer(distance=radius).envelope
+            gdf_l = gp.GeoDataFrame(geometry=pb).to_crs('EPSG:4326')
+            poly = gdf_l['geometry'][0]
+            long1 = poly.exterior.coords.xy[0][0]
+            long2 = poly.exterior.coords.xy[0][1]
+            lat1 = poly.exterior.coords.xy[1][0]
+            lat2 = poly.exterior.coords.xy[1][2]
+            r = requests.get("https://www.openstreetmap.org/api/0.6/map?bbox=%s,%s,%s,%s"%(long1, lat1, long2, lat2), 
+                            allow_redirects=True)
+            if r.status_code != 200:
+                print("Error from OpenStreetMap API. You should try using overpass.")
+                return None
+            if tmpfile:
+                tmp = tmpfile
+            else:
+                tmp = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".xml")
+            open(tmp.name, 'wb').write(r.content)
+            G = ox.graph_from_xml(tmp.name, simplify=False)
+        return G
