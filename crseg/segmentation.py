@@ -189,17 +189,16 @@ class Segmentation:
     def prepare_network(G, keep_all_components=False, remove_non_highway=True,
                         remove_parking_aisle=True,
                         remove_footways=True, remove_cycleways=True):
-            
 
-        # remove footways and parkings
         to_remove = []
-        for u, v, a in G.edges(data = True):
-            present = True
-            if remove_non_highway:
-                if not "highway" in a:
-                    to_remove.append((u, v))
-                    present = False
-            if present:
+        # remove footways and parkings
+        for u, v, k, a in G.edges(data=True, keys=True):
+            if remove_non_highway and not "highway" in a:
+                # remove a specific edge. If k==0, it will remove the first edge, and it might remain supplementary edge with a key != 0.
+                # To solve this issue, at the end of this function, we use a trick by transforming data to a DiGraph, then to a MutliDiGraph (the original
+                # data structure used by the program)
+                to_remove.append((u, v, k))
+            else:
                 if remove_footways:
                     if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
                         to_remove.append((u, v))
@@ -220,7 +219,8 @@ class Segmentation:
         G = ox.utils_graph.remove_isolated_nodes(G)
         if not keep_all_components and len(G.nodes) != 0:
             G = ox.utils_graph.get_largest_component(G)
-        return G
+        # double transformation to fix keys != 0
+        return nx.MultiDiGraph(nx.DiGraph(G))
 
         
     ######################### Functions related to graph rendering (colors) ########################
