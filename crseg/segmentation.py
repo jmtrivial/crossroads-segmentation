@@ -201,13 +201,14 @@ class Segmentation:
             else:
                 if remove_footways:
                     if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
-                        to_remove.append((u, v))
+                        if not ("psv" in a and a["psv"] in ["yes"]):
+                            to_remove.append((u, v))
                         # add missing crossings
                         if not "highway" in G.nodes[u]:
                             G.nodes[u]["highway"] = "crossing"
                         if not "highway" in G.nodes[v]:
                             G.nodes[v]["highway"] = "crossing"
-                    if ("highway" in a and a["highway"] in ["path", "pedestrian", "steps"]):
+                    if ("highway" in a and a["highway"] in ["path", "pedestrian", "steps"]) and not ("psv" in a and a["psv"] in ["yes"]):
                         to_remove.append((u, v))
                 if remove_cycleways and "highway" in a and a["highway"] in ["cycleway"]:
                     to_remove.append((u, v))
