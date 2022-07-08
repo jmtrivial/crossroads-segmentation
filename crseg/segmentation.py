@@ -226,11 +226,10 @@ class Segmentation:
         return score
 
     def identify_best_way(G, u, v, ways):
-        edges = G[u][v]
         best = -1
         score = -1
         for w in ways:
-            s = Segmentation.get_score_from_tags(edges[w])
+            s = Segmentation.get_score_from_tags(w[2])
             if s > score:
                 score = s
                 best = w
@@ -242,11 +241,13 @@ class Segmentation:
 
         for u in G:
             for v in G[u]:
-                ways = [w for w in G[u][v] if "highway" in G[u][v][w]]
+                ways = [(w, 0, G[u][v][w]) for w in G[u][v] if "highway" in G[u][v][w]]
+                if u in G[v]:
+                    ways += [(w, 1, G[v][u][w]) for w in G[v][u] if "highway" in G[v][u][w]]
+
                 if len(ways) > 1:
                     best_way_id = Segmentation.identify_best_way(G, u, v, ways)
-                    to_remove += [(u, v, wid) for wid in ways if wid != best_way_id]
-
+                    to_remove += [(u, v, wid[0]) if wid[1] == 0 else (v, u, wid[0]) for wid in ways if not (wid[0] == best_way_id[0] and wid[1] == best_way_id[1])]
         G.remove_edges_from(to_remove)
                     
 
