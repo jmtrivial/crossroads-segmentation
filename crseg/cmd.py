@@ -15,11 +15,6 @@ import json
 def get_crossroad_segmentation_command():
 
 
-    # add information about cycleways
-    othertags = ["cycleway", "cycleway:right", "cycleway:left", "psv"]
-    ox.settings.osm_xml_way_tags = ox.settings.osm_xml_way_tags + othertags
-    ox.settings.useful_tags_way = ox.settings.useful_tags_way + othertags
-
     # a trick to avoid the creation of files given as parameters
     class FileOpener(argparse.FileType):
         # delayed FileType;

@@ -6,10 +6,6 @@ import os
 
 import networkx as nx
 import osmnx as ox
-# add information about cycleways
-othertags = ["cycleway", "cycleway:right", "cycleway:left", "psv"]
-ox.settings.osm_xml_way_tags = ox.settings.osm_xml_way_tags + othertags
-ox.settings.useful_tags_way = ox.settings.useful_tags_way + othertags
 
 # a trick to avoid the creation of files given as parameters
 class FileOpener(argparse.FileType):

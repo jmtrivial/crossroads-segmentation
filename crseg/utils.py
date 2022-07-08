@@ -188,6 +188,11 @@ class Util:
         if overpass:
             G = ox.graph_from_point((latitude, longitude), dist=radius, network_type="all", retain_all=False, truncate_by_edge=True, simplify=False)
         else:
+            # add information about cycleways
+            othertags = ["cycleway", "cycleway:right", "cycleway:left", "psv"]
+            ox.settings.osm_xml_way_tags = ox.settings.osm_xml_way_tags + othertags
+            ox.settings.useful_tags_way = ox.settings.useful_tags_way + othertags
+
             p = Point(longitude, latitude)
             gdf_p = gp.GeoDataFrame(geometry=[p]).set_crs('EPSG:4326').to_crs('EPSG:3857')
             pb = gdf_p.buffer(distance=radius).envelope
