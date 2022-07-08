@@ -186,35 +186,82 @@ class Segmentation:
 
     ######################### Functions used to prepare the graph ########################
 
-    def prepare_network(G, keep_all_components=False, remove_non_highway=True,
-                        remove_parking_aisle=True,
-                        remove_footways=True, remove_cycleways=True):
+    def prepare_network_remove_non_highway(G):
         to_remove = []
-        # remove footways and parkings
         for u, v, k, a in G.edges(data=True, keys=True):
-            if remove_non_highway and not "highway" in a:
+            if not "highway" in a:
                 # remove a specific edge. If k==0, it will remove the first edge, and it might remain supplementary edge with a key != 0.
                 # To solve this issue, at the end of this function, we use a trick by transforming data to a DiGraph, then to a MutliDiGraph (the original
                 # data structure used by the program)
                 to_remove.append((u, v, k))
-            else:
-                if remove_footways:
-                    if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
-                        if not ("psv" in a and a["psv"] in ["yes"]):
-                            to_remove.append((u, v))
-                        # add missing crossings
-                        if not "highway" in G.nodes[u]:
-                            G.nodes[u]["highway"] = "crossing"
-                        if not "highway" in G.nodes[v]:
-                            G.nodes[v]["highway"] = "crossing"
-                    if ("highway" in a and a["highway"] in ["path", "pedestrian", "steps"]) and not ("psv" in a and a["psv"] in ["yes"]):
-                        to_remove.append((u, v))
-                if remove_cycleways and "highway" in a and a["highway"] in ["cycleway"]:
-                    to_remove.append((u, v))
-                if remove_parking_aisle:
-                    if "service" in a and a["service"] in ["parking_aisle"]:
-                        to_remove.append((u, v))
         G.remove_edges_from(to_remove)
+
+    def prepare_network_remove_small_ways(G, remove_parking_aisle=True, remove_footways=True, remove_cycleways=True):
+        to_remove = []
+        # remove footways and parkings
+        for u, v, a in G.edges(data=True):
+            if remove_footways:
+                if "footway" in a or ("highway" in a and a["highway"] in ["footway"]):
+                    if not ("psv" in a and a["psv"] in ["yes"]):
+                        to_remove.append((u, v))
+                    # add missing crossings
+                    if not "highway" in G.nodes[u]:
+                        G.nodes[u]["highway"] = "crossing"
+                    if not "highway" in G.nodes[v]:
+                        G.nodes[v]["highway"] = "crossing"
+                if ("highway" in a and a["highway"] in ["path", "pedestrian", "steps"]) and not ("psv" in a and a["psv"] in ["yes"]):
+                    to_remove.append((u, v))
+            if remove_cycleways and "highway" in a and a["highway"] in ["cycleway"]:
+                to_remove.append((u, v))
+            if remove_parking_aisle:
+                if "service" in a and a["service"] in ["parking_aisle"]:
+                    to_remove.append((u, v))
+        G.remove_edges_from(to_remove)
+
+
+    def get_score_from_tags(tags):
+        score = len(tags)
+        if "name" in tags:
+            score += 10
+        return score
+
+    def identify_best_way(G, u, v, ways):
+        edges = G[u][v]
+        best = -1
+        score = -1
+        for w in ways:
+            s = Segmentation.get_score_from_tags(edges[w])
+            if s > score:
+                score = s
+                best = w
+        return best
+
+
+    def prepare_network_remove_supplementary_highways(G):
+        to_remove = []
+
+        for u in G:
+            for v in G[u]:
+                ways = [w for w in G[u][v] if "highway" in G[u][v][w]]
+                if len(ways) > 1:
+                    best_way_id = Segmentation.identify_best_way(G, u, v, ways)
+                    to_remove += [(u, v, wid) for wid in ways if wid != best_way_id]
+
+        G.remove_edges_from(to_remove)
+                    
+
+    def prepare_network(G, keep_all_components=False, remove_non_highway=True,
+                        remove_parking_aisle=True,
+                        remove_footways=True, remove_cycleways=True):
+
+        if remove_non_highway:
+            Segmentation.prepare_network_remove_non_highway(G)
+
+        if remove_footways or remove_cycleways or remove_parking_aisle:
+            Segmentation.prepare_network_remove_small_ways(G, remove_parking_aisle, remove_footways, remove_cycleways)
+
+        Segmentation.prepare_network_remove_supplementary_highways(G)
+
         G = ox.utils_graph.remove_isolated_nodes(G)
         if not keep_all_components and len(G.nodes) != 0:
             G = ox.utils_graph.get_largest_component(G)
