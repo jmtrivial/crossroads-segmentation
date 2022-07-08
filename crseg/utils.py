@@ -207,5 +207,5 @@ class Util:
             else:
                 tmp = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".xml")
             open(tmp.name, 'wb').write(r.content)
-            G = ox.graph_from_xml(tmp.name, simplify=False)
+            G = ox.graph_from_xml(tmp.name, simplify=False, retain_all=True)
         return G

@@ -189,7 +189,6 @@ class Segmentation:
     def prepare_network(G, keep_all_components=False, remove_non_highway=True,
                         remove_parking_aisle=True,
                         remove_footways=True, remove_cycleways=True):
-
         to_remove = []
         # remove footways and parkings
         for u, v, k, a in G.edges(data=True, keys=True):
@@ -215,7 +214,6 @@ class Segmentation:
                 if remove_parking_aisle:
                     if "service" in a and a["service"] in ["parking_aisle"]:
                         to_remove.append((u, v))
-
         G.remove_edges_from(to_remove)
         G = ox.utils_graph.remove_isolated_nodes(G)
         if not keep_all_components and len(G.nodes) != 0:
