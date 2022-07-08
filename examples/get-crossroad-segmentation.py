@@ -136,7 +136,7 @@ else:
         longitude = float(os.path.basename(from_osmxml.name).split('_')[1])
         G = ox.graph_from_xml(from_osmxml.name, simplify=False)
     else:
-        G = u.Util.get_osm_data(latitude, longitude, radius, overpass)
+        G = u.Util.get_osm_data(latitude, longitude, radius, overpass, ["cycleway", "cycleway:right", "cycleway:left", "psv"])
 
     if G is None:
         exit(2)
