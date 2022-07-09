@@ -242,9 +242,10 @@ class Segmentation:
         for u in G:
             for v in G[u]:
                 ways = [(w, 0, G[u][v][w]) for w in G[u][v] if "highway" in G[u][v][w]]
-                if u in G[v]:
-                    ways += [(w, 1, G[v][u][w]) for w in G[v][u] if "highway" in G[v][u][w]]
+                osmids = [w[2]["osmid"] for w in ways]
 
+                if u in G[v]:
+                    ways += [(w, 1, G[v][u][w]) for w in G[v][u] if "highway" in G[v][u][w] and G[v][u][w]["osmid"] not in osmids]
                 if len(ways) > 1:
                     best_way_id = Segmentation.identify_best_way(G, u, v, ways)
                     to_remove += [(u, v, wid[0]) if wid[1] == 0 else (v, u, wid[0]) for wid in ways if not (wid[0] == best_way_id[0] and wid[1] == best_way_id[1])]
