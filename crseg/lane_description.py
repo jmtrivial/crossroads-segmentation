@@ -8,7 +8,7 @@ class LaneDescription:
         self.name = name
         self.edge = edge
 
-    def is_similar(self, bd, angle_similarity = 90):
+    def is_similar(self, bd, angle_similarity = 45):
         if self.name == None or bd.name == None:
             return False
         if self.name != bd.name:

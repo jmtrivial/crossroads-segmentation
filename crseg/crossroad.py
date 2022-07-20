@@ -123,11 +123,13 @@ class Crossroad(r.Region):
 
     def get_lane_description_from_edge(self, edge):
         e = self.G[edge[0]][edge[1]][0]
-        angle = u.Util.bearing(self.G, self.get_center(), edge[0 if self.get_center() == edge[1] else 1])
+        # build the path starting from this edge
+        path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
+
+        angle = u.Util.bearing(self.G, self.get_center(), path[-1])
+
         name = e["name"] if "name" in e else None
         if name == None:
-            # build the path starting from this edge
-            path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
 
             # if one of the edges has a name, it's the name of the lane
             for p1, p2 in zip(path, path[1:]):
