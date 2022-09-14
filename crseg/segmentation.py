@@ -283,7 +283,7 @@ class Segmentation:
                 result[e] = (0.5, 0.5, 0.5, 0.5)
             else:
                 if not tag in color:
-                    color[tag] = Segmentation.random_color()
+                    color[tag] = Segmentation.predefined_color(len(color))
                 result[e] = color[tag]
         return pd.Series(result)
 
@@ -304,6 +304,24 @@ class Segmentation:
         return pd.Series(result)
 
 
+    def predefined_color(id):
+        # source: https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12 (removing red)
+        colors = [ (166/255, 206/255, 227/255),
+                   (31/255, 120/255, 180/255),
+                   (178/255, 223/255, 138/255),
+                   (51/255, 160/255, 44/255),
+                   (251/255, 154/255, 153/255),
+                   (253/255, 191/255, 111/255),
+                   (255/255, 127/255, 0/255),
+                   (202/255, 178/255, 214/255),
+                   (106/255, 61/255, 154/255),
+                   (255/255, 255/255, 153/255),
+                   (177/255, 89/255, 40/255)]
+        if id < len(colors):
+            return colors[id]
+        else:
+            return Segmentation.random_color()
+
     def random_color(only_bg = False):
         r1 = math.pi * random.random()
         r2 = math.pi * random.random()
@@ -317,13 +335,15 @@ class Segmentation:
     # return edge colors using one random color per label
     def get_edge_random_colors_by_attr(G, label, values = {}):
         result = {}
+        i = 0
         for e in G.edges:
             tag = G[e[0]][e[1]][e[2]][label]
             if not tag in values:
                 if tag == -1:
                     values[tag] = (0.5, 0.5, 0.5, 0.5)
                 else:
-                    values[tag] = Segmentation.random_color()
+                    values[tag] = Segmentation.predefined_color(i)
+                    i += 1
             result[e] = values[tag]
         return pd.Series(result)
         
@@ -411,6 +431,7 @@ class Segmentation:
 
     def get_nodes_regions_colors(self):
         result = {}
+        i = 0
         for n in self.G.nodes:
             if len(list(self.G.neighbors(n))) <= 2:
                 result[n] = (0, 0, 0, 0)
@@ -421,7 +442,7 @@ class Segmentation:
                 else:
                     nb_edge_in_region = len([nb for nb in self.G[n] if self.G[n][nb][0][rg.Region.label_region] == label])
                     if nb_edge_in_region == 0:
-                        result[n] = Segmentation.random_color()
+                        result[n] = Segmentation.predefined_color(i)
                     else:
                         result[n] = (0, 0, 0, 0)
 
@@ -444,7 +465,7 @@ class Segmentation:
                 else:
                     tag = maxID + bid + 1
                     if not tag in color:
-                        color[tag] = Segmentation.random_color()
+                        color[tag] = Segmentation.predefined_color(len(color))
                     result[e] = color[tag]
             else:
                 ncrs = len([ c for c in cr if c.has_edge(e) ])
