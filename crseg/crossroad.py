@@ -45,6 +45,11 @@ class Crossroad(r.Region):
     def __repr__(self):
         return "id: %s, center: %s, #nodes: %s" % (self.id, self.center, len(self.nodes))
 
+
+    def get_geometric_center(self):
+        bn = self.boundary_nodes()
+        return [sum([self.G.nodes[i]["x"] for i in bn])/ len(bn), sum([self.G.nodes[i]["y"] for i in bn])/ len(bn)]
+
     def get_center(self):
         return self.center
 
@@ -126,7 +131,7 @@ class Crossroad(r.Region):
         # build the path starting from this edge
         path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
 
-        angle = u.Util.bearing(self.G, self.get_center(), path[-1])
+        angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[1])
 
         name = e["name"] if "name" in e else None
         if name == None:
@@ -540,7 +545,6 @@ class Crossroad(r.Region):
         self.build_lanes_description()
 
     def compute_branches(self):
-
         self.branches = []
         
         # for each lane

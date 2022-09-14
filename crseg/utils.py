@@ -49,10 +49,18 @@ class Util:
         return ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=y2, lng2=x2)
 
     def bearing(G, node1, node2):
-        x1 = G.nodes[node1]["x"]
-        y1 = G.nodes[node1]["y"]
-        x2 = G.nodes[node2]["x"]
-        y2 = G.nodes[node2]["y"]
+        if isinstance(node1, int):
+            x1 = G.nodes[node1]["x"]
+            y1 = G.nodes[node1]["y"]
+        else:
+            x1 = node1[0]
+            y1 = node1[1]
+        if isinstance(node2, int):
+            x2 = G.nodes[node2]["x"]
+            y2 = G.nodes[node2]["y"]
+        else:
+            x2 = node2[0]
+            y2 = node2[1]
         return ox.bearing.calculate_bearing(y1, x1, y2, x2)
 
     def length(G, path):
