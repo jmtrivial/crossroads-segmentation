@@ -148,17 +148,19 @@ class Crossroad(r.Region):
                 # consider the last node of this path
                 end = path[-1]
                 # and check if it exists other paths between this end and the crossroad
-                other_paths = []
+                other_names = []
                 for nb in self.G.neighbors(end):
                     op = u.Util.get_path_to_biffurcation(self.G, end, nb)
                     if self.has_node(op[-1]):
                         # TODO: check if they are parallel
-                        other_paths.append(op)
+                        o_e = self.G[op[0]][op[1]][0]
+                        name = o_e["name"] if "name" in o_e else None
+                        if not name is None:
+                            other_names.append(name)
                 # if only one path exists
-                if len(other_paths) == 1:
-                    o_e = self.G[other_paths[0][0]][other_paths[0][1]][0]
+                if len(other_names) == 1:
                     # if yes, the current edge has probably the same name
-                    name = o_e["name"] if "name" in o_e else None
+                    name = other_names[0]
         return ld.LaneDescription(angle, name, edge)
 
     def get_lanes_description_from_node(self, border):
