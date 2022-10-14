@@ -498,27 +498,12 @@ class Segmentation:
 
     # return a list of crossroads (main crossroad and possibly contained crossroads)
     def get_crossroad(self, longitude, latitude, multiscale = False):
-        distance = -1
-        middle = -1
-        for rid in self.regions:
-            if self.regions[rid].is_crossroad():
-                region = self.regions[rid]
-                x1 = self.G.nodes[region.get_center()]["x"]
-                y1 = self.G.nodes[region.get_center()]["y"]
-                d = ox.distance.great_circle_vec(lat1=y1, lng1=x1, lat2=latitude, lng2=longitude)
-                if distance < 0 or d < distance:
-                    distance = d
-                    middle = rid
+        middle_id = min([rid for rid in self.regions.keys() if self.regions[rid].is_crossroad()], key=lambda k: self.regions[k].distance_to(latitude, longitude))
 
         if multiscale:
-            result = []
-            result.append(self.regions[middle])
-            for rid in self.inner_regions:
-                if self.regions[middle].contains(self.inner_regions[rid]):
-                    result.append(self.inner_regions[rid])
-            return result
+            return [self.inner_regions[rid] for rid in self.inner_regions if rid == middle_id or self.regions[middle_id].contains(self.inner_regions[rid])]
         else:
-            return [self.regions[middle]]
+            return [self.regions[middle_id]]
 
     def to_text(self, longitude, latitude, multiscale = False):
         cs = self.get_crossroad(longitude, latitude, multiscale)
@@ -591,5 +576,4 @@ class Segmentation:
 
         # save graph
         ox.io.save_graph_geopackage(self.G, filename)
-
 
