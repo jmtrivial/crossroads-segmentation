@@ -131,7 +131,10 @@ class Crossroad(r.Region):
         # build the path starting from this edge
         path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
 
-        angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[1])
+        if len(self.boundary_nodes()) == 1:
+            angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[0])
+        else:
+            angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[1])
 
         name = e["name"] if "name" in e else None
         if name == None:
