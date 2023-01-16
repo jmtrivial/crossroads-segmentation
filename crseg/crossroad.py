@@ -126,15 +126,15 @@ class Crossroad(r.Region):
  
 
 
-    def get_lane_description_from_edge(self, edge):
+    def get_lane_description_from_edge(self, edge, use_inner_node):
         e = self.G[edge[0]][edge[1]][0]
         # build the path starting from this edge
         path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
 
-        if len(self.boundary_nodes()) == 1:
-            angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[0])
-        else:
+        if use_inner_node:
             angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[1])
+        else:
+            angle = u.Util.bearing(self.G, self.get_geometric_center(), edge[0])
 
         name = e["name"] if "name" in e else None
         if name == None:
@@ -168,7 +168,7 @@ class Crossroad(r.Region):
 
     def get_lanes_description_from_node(self, border):
         edges = [(border, nb) for nb in self.G.neighbors(border) if not self.has_edge((nb, border))]
-        return [self.get_lane_description_from_edge(e) for e in edges]
+        return [self.get_lane_description_from_edge(e, len(edges) == 1) for e in edges]
 
     # estimate the width of the given edge, and deduce the maximum
     # distance from the center of a crossroad to the boundary of the crossroad
@@ -218,7 +218,7 @@ class Crossroad(r.Region):
                 # and add the corresponding lanes
                 open_lanes = self.get_open_paths(center, radius)
                 for ol in open_lanes:
-                    self.lanes.append(self.get_lane_description_from_edge((ol[1], ol[0])))
+                    self.lanes.append(self.get_lane_description_from_edge((ol[1], ol[0]), False))
         
 
     def build_crossroads(G, scale):
