@@ -15,13 +15,14 @@ from . import crossroad_connections as cc
 
 class Segmentation:
 
-    def __init__(self, G, init=True, C0 = 2, C1 = 2.5, C2 = 4, max_cycle_elements = 10):
+    def __init__(self, G, init=True, selection=None, C0 = 2, C1 = 2.5, C2 = 4, max_cycle_elements = 10):
         self.G = G
         self.regions = {}
         self.C0 = C0
         self.C1 = C1
         self.C2 = C2
         self.max_cycle_elements = max_cycle_elements
+        self.selection = selection
         random.seed()
         if init:
             rel.Reliability.init_attr(self.G)
@@ -46,45 +47,91 @@ class Segmentation:
                     self.G[e[0]][e[1]][0][rg.Region.label_region] = rid
                 
 
-
-    def process(self):
+    def set_tags_from_selection(self):
+        import geopandas as gp
+        from shapely.geometry import Point, Polygon
 
         # init flags
         rg.Region.init_attr(self.G)
 
-        self.regions = {}
+        # load polygons
+        file = open(self.selection)
+        df = gp.read_file(file)
 
-        # first build crossroads
-        crossroads = cr.Crossroad.build_crossroads(self.G, self.C0)
-        for c in crossroads:
-            self.regions[c.id] = c
+        # create point geoseries
+        points = gp.GeoSeries([Point(self.G.nodes[n]["x"], self.G.nodes[n]["y"]) for n in self.G.nodes])
+        pointIds = [n for n in self.G.nodes]
 
-        # group subparts of crossroads together if they are part of the same crossing (using street names)
-        clusters = cr.Crossroad.get_clusters(crossroads, self.C1)
+        # for each polygon in the selection
+        for idPoly, polygon in df.iterrows():
+            self.G.graph[rg.Region.regiontag_prefix + str(idPoly)] = "crossroad"
 
-        # for each cluster
-        for cluster in clusters:
-            # merge them
-            if len(cluster) > 1:
-                cluster[0].merge(cluster[1:])
-            for o in cluster[1:]:
-                del self.regions[o.id]
+            poly = gp.GeoSeries(polygon)
+            intersections = points.intersects(poly[0]) # TODO: improve this double conversion
 
-        # maximum length for missing maths
-        scale_missing = self.C0
-        # add inner paths and missing boundaries
-        self.add_missing_paths(scale = scale_missing)
+            # set point flags
+            for idPoint, inside in intersections.items():
+                if inside:
+                    self.G.nodes[pointIds[idPoint]][rg.Region.label_region] = idPoly
+
+            # set segment flags according to segments
+            for n in self.G.nodes:
+                if self.G.nodes[n][rg.Region.label_region] >= 0:
+                    for nb in self.G.neighbors(n):
+                        if self.G.nodes[nb][rg.Region.label_region] == self.G.nodes[n][rg.Region.label_region]:
+                            self.G[n][nb][0][rg.Region.label_region] = self.G.nodes[n][rg.Region.label_region]
+
+
         
-        # build links between regions
-        links = rf.RegionFactory.build_links_between_crossings(self.G, self.regions)
-        self.regions.update(links)
-        self.set_tags_only_regions()
 
-        # merge crossings
-        self.merge_linked_crossroads()
+    def process(self):
 
-        # add inner paths and missing boundaries (again)
-        self.add_missing_paths(scale = scale_missing, boundaries = False)
+        if self.selection != None:
+            self.set_tags_from_selection()
+            
+            self.inner_regions = {}
+            self.regions = rf.RegionFactory.rebuild_regions_from_tags(self.G)
+
+            for rid in self.regions:
+                region = self.regions[rid]
+                region.build_lanes_description()
+        else:
+            # init flags
+            rg.Region.init_attr(self.G)
+
+            self.regions = {}
+
+            # first build crossroads
+            crossroads = cr.Crossroad.build_crossroads(self.G, self.C0)
+            for c in crossroads:
+                self.regions[c.id] = c
+
+            # group subparts of crossroads together if they are part of the same crossing (using street names)
+            clusters = cr.Crossroad.get_clusters(crossroads, self.C1)
+
+            # for each cluster
+            for cluster in clusters:
+                # merge them
+                if len(cluster) > 1:
+                    cluster[0].merge(cluster[1:])
+                for o in cluster[1:]:
+                    del self.regions[o.id]
+
+            # maximum length for missing maths
+            scale_missing = self.C0
+            # add inner paths and missing boundaries
+            self.add_missing_paths(scale = scale_missing)
+            
+            # build links between regions
+            links = rf.RegionFactory.build_links_between_crossings(self.G, self.regions)
+            self.regions.update(links)
+            self.set_tags_only_regions()
+
+            # merge crossings
+            self.merge_linked_crossroads()
+
+            # add inner paths and missing boundaries (again)
+            self.add_missing_paths(scale = scale_missing, boundaries = False)
 
         # create branch regions
         for rid in self.regions:

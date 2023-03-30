@@ -223,3 +223,14 @@ class Util:
             open(tmp.name, 'wb').write(r.content)
             G = ox.graph_from_xml(tmp.name, simplify=False, retain_all=True)
         return G
+
+
+    def get_surrouding_region(filename):
+        file = open(filename)
+        df = gp.read_file(file)
+        minx, miny, maxx, maxy = df.total_bounds
+        cx = (minx + maxx) / 2
+        cy = (miny + maxy) / 2
+        radius = Util.coords_distance([miny, minx], [cy, cx]) * 2
+
+        return cy, cx, radius

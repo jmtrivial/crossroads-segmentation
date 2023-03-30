@@ -99,6 +99,20 @@ class Crossroad(r.Region):
 
         return data
 
+    def updateProperties(self):
+        # update inner properties
+
+        # the center is the node closest to the mean of the node coordinates
+        center = u.Util.centroid(self.G, self.nodes)
+        distance = -1
+        self.center = None
+        for n in self.nodes:
+            d = u.Util.distance_to(self.G, n, center)
+            if distance < 0 or d < distance:
+                distance = d
+                self.center = n
+
+
     def set_graph_attributes(self, crossroad_attr, branch_attr = None):
         rid = self.id
         # set crossroad attribute

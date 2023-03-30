@@ -34,6 +34,7 @@ def get_crossroad_segmentation_command():
     group_input = parser.add_argument_group('Input region', "Define the input region from OSM by coordinates or from a local file")
     input_params = group_input.add_mutually_exclusive_group(required=True)
     input_params.add_argument('--by-coordinates', nargs=2, help='Load input from OSM using the given latitude', type=float)
+    input_params.add_argument('--by-selection', help='Load an input file (geoJSON) that contains predefined regions (polylines) corresponding to the inner part of the intersection, and use it to load the corresponding OSM data.', type=argparse.FileType('r'))
 
     input_params.add_argument('--from-graphml', help='Load road graph from a GraphML file', type=argparse.FileType('r'))
     input_params.add_argument('--from-osmxml', help='Load road graph from an OSM XML file', type=argparse.FileType('r'))
@@ -83,6 +84,10 @@ def get_crossroad_segmentation_command():
 
     # set input parameters
     radius = args.radius
+    if args.by_selection:
+        # set radius, latitude and longitude from the input selection
+        latitude, longitude, radius = u.Util.get_surrouding_region(args.by_selection.name)
+
     verbose = args.verbose
 
     display = args.display
@@ -167,7 +172,10 @@ def get_crossroad_segmentation_command():
             print("=== INITIALISATION ===")
 
         # segment it using topology and semantic
-        seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements)
+        if byselection:
+            seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements, selection = byselection.name)
+        else:
+            seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements)
 
     if display_reliability:
         print("=== RENDERING RELIABILITY ===")
