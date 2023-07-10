@@ -8,7 +8,7 @@ class LaneDescription:
         self.name = name
         self.edge = edge
 
-    def is_similar(self, bd, angle_similarity = 45):
+    def is_similar(self, bd, angle_similarity = 60):
         if self.name == None or bd.name == None:
             return False
         if self.name != bd.name:
@@ -16,10 +16,9 @@ class LaneDescription:
 
         if u.Util.angular_distance(self.angle, bd.angle) < angle_similarity:
             return True
-
         return False
 
-    def is_orthogonal(self, angle, epsilon = 45):
+    def is_orthogonal(self, angle, epsilon = 60):
         diff = u.Util.angular_distance(self.angle, angle)
         if diff >= 90 - epsilon and diff <= 90 + epsilon:
             return True

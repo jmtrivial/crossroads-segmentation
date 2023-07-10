@@ -50,6 +50,7 @@ parser.add_argument('--C0', help='First parameter to drive the boundary detectio
 parser.add_argument('--C1', help='Second parameter to drive the first merge. Length distance is computed by multiplying this parameter by the width of the streets. Default: 2.', type=float, default=2)
 parser.add_argument('--C2', help='Third parameter to drive the final merge (2: small intensiy, 7: strong intensity). Default: 4.', type=float, default=4)
 parser.add_argument('--max-cycle-elements', help='Maximum number of small crossroads to be combined as a ring in a large crossroad. Default: 10.', type=int, default=10)
+parser.add_argument('--similar-direction-angle', help='Maximum angle for lanes to be considered inside the same branch (in degree). Default: 60.', type=int, default=60)
 parser.add_argument('-v', '--verbose', help='Verbose messages', action='store_true')
 
 parser.add_argument('--skip-processing', help="Do not compute segmentation (can be useful to store OSM data without modification, or to use result of a previous run by loading a GraphML.", action='store_true')
@@ -118,6 +119,7 @@ C0 = args.C0
 C1 = args.C1
 C2 = args.C2
 max_cycle_elements = args.max_cycle_elements
+similar_direction_angle = args.similar_direction_angle
 
 # load data
 
@@ -184,9 +186,9 @@ else:
 
     # segment it using topology and semantic
     if byselection:
-        seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements, selection = byselection.name)
+        seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements, selection = byselection.name, similar_direction_angle=similar_direction_angle)
     else:
-        seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements)
+        seg = cs.Segmentation(G, C0 = C0, C1 = C1, C2 = C2, max_cycle_elements = max_cycle_elements, similar_direction_angle=similar_direction_angle)
 
 if display_reliability:
     print("=== RENDERING RELIABILITY ===")

@@ -141,6 +141,7 @@ class Crossroad(r.Region):
 
 
     def get_lane_description_from_edge(self, edge, use_inner_node):
+
         e = self.G[edge[0]][edge[1]][0]
         # build the path starting from this edge
         path = u.Util.get_path_to_biffurcation(self.G, edge[0], edge[1])
@@ -563,7 +564,7 @@ class Crossroad(r.Region):
         # finally rebuild the branch descriptions
         self.build_lanes_description()
 
-    def compute_branches(self):
+    def compute_branches(self, similar_direction_angle = 60):
         self.branches = []
         
         # for each lane
@@ -572,7 +573,7 @@ class Crossroad(r.Region):
 
             # check if it's similar to a lane already in a built branch
             for i, branch in enumerate(self.branches):
-                nb = len([l for l in branch if l.is_similar(lane)])
+                nb = len([l for l in branch if l.is_similar(lane, similar_direction_angle)])
                 if nb > 0:
                     mbranches.append(i)
             # if not, create a new branch

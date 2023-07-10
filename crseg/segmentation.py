@@ -15,7 +15,7 @@ from . import crossroad_connections as cc
 
 class Segmentation:
 
-    def __init__(self, G, init=True, selection=None, C0 = 2, C1 = 2.5, C2 = 4, max_cycle_elements = 10):
+    def __init__(self, G, init=True, selection=None, C0 = 2, C1 = 2.5, C2 = 4, max_cycle_elements = 10, similar_direction_angle = 60):
         self.G = G
         self.regions = {}
         self.C0 = C0
@@ -23,6 +23,7 @@ class Segmentation:
         self.C2 = C2
         self.max_cycle_elements = max_cycle_elements
         self.selection = selection
+        self.similar_direction_angle = similar_direction_angle
         random.seed()
         if init:
             rel.Reliability.init_attr(self.G)
@@ -136,10 +137,10 @@ class Segmentation:
         # create branch regions
         for rid in self.regions:
             if self.regions[rid].is_crossroad():
-                self.regions[rid].compute_branches()
+                self.regions[rid].compute_branches(self.similar_direction_angle)
         
         for rid in self.inner_regions:
-            self.inner_regions[rid].compute_branches()
+            self.inner_regions[rid].compute_branches(self.similar_direction_angle)
             
 
     def merge_linked_crossroads(self):
