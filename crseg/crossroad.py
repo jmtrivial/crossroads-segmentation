@@ -46,10 +46,6 @@ class Crossroad(r.Region):
         return "id: %s, center: %s, #nodes: %s" % (self.id, self.center, len(self.nodes))
 
 
-    def get_geometric_center(self):
-        bn = self.boundary_nodes()
-        return [sum([self.G.nodes[i]["x"] for i in bn])/ len(bn), sum([self.G.nodes[i]["y"] for i in bn])/ len(bn)]
-
     def get_center(self):
         return self.center
 
@@ -512,6 +508,46 @@ class Crossroad(r.Region):
                     if path[len(path) - 1] in points and u.Util.length_with_shortcut(self.G, path) < self.diameter():
                         self.add_path(path)
 
+    
+    # return the connected component outside of the current region
+    # starting from p, and only if it stays inside the disc (center, radius)
+    # and to not reach another region.
+    # Otherwise, it returns None
+    def compute_connected_component_if_inside(self, p, center, radius):
+        result = []
+
+        open = [p]
+        seen = []
+        while len(open) != 0:
+            pt = open.pop()
+            seen.append(pt)
+            for nb in self.G.neighbors(pt):
+                if not nb in seen and not self.has_edge((pt, nb)):
+                    if self.G[pt][nb][0][r.Region.label_region] == -1:
+                        nb_coord = (self.G.nodes[nb]["x"], self.G.nodes[nb]["y"])
+                        if u.Util.coords_distance(center, nb_coord) >= radius:
+                            return None
+                        else:
+                            result.append((pt, nb))
+                            open.append(nb)
+                    else:
+                        return None
+
+        return result
+
+    def add_inner_regions(self):
+        center = self.get_geometric_center()
+        radius = self.get_geometric_radius()
+
+        bnodes = self.boundary_nodes()
+        # for each boundary point, compute the connected component starting from it. 
+        # if it stays inside the area, consider adding it to the intersection.
+        for point in bnodes:
+            component = self.compute_connected_component_if_inside(point, center, radius)
+            if component != None:
+                for edge in component:
+                    self.add_edge(edge)
+
     # merge all given regions with the current one
     def merge(self, regions):
         # add nodes and edges from the other regions
@@ -544,6 +580,10 @@ class Crossroad(r.Region):
 
     # add missing paths (inner paths and paths to boundaries)
     def add_missing_paths(self, scale = 2, boundaries = True):
+
+        # add inner regions
+        self.add_inner_regions()
+
         # add inner paths
         self.add_direct_paths_between_nodes(self.nodes)
 

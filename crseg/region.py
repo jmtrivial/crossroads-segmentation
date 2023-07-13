@@ -110,6 +110,20 @@ class Region:
         nbEdgesInside = len([e for e in self.edges if e[0] == n or e[1] == n])
         return nbnb != nbEdgesInside
 
+    def get_geometric_center(self):
+        bn = self.boundary_nodes()
+        return [sum([self.G.nodes[i]["x"] for i in bn])/ len(bn), sum([self.G.nodes[i]["y"] for i in bn])/ len(bn)]
+
+    def get_geometric_radius(self):
+        center = self.get_geometric_center()
+        result = 0
+        for node in self.nodes:
+                d = u.Util.coords_distance(center, (self.G.nodes[node]["x"], self.G.nodes[node]["y"]))
+                if d > result:
+                    result = d
+        return result
+
+
     def centroid(self):
         return u.Util.centroid(self.G, self.nodes)
 
