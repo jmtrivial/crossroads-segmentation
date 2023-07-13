@@ -13,6 +13,8 @@ class LaneDescription:
             return False
         if self.name != bd.name:
             return False
+        if self.name.lower().startswith("place") or self.name.lower().startswith("square"):
+            return False
 
         if u.Util.angular_distance(self.angle, bd.angle) < angle_similarity:
             return True
