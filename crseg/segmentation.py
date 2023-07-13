@@ -266,6 +266,13 @@ class Segmentation:
                     to_remove.append((u, v))
         G.remove_edges_from(to_remove)
 
+    def prepare_network_remove_construction(G):
+        to_remove = []
+        for u, v, a in G.edges(data=True):
+            if "highway" in a and a["highway"] in ["construction"]:
+                # remove construction ways
+                to_remove.append((u, v))
+        G.remove_edges_from(to_remove)
 
     def get_score_from_tags(tags):
         score = len(tags)
@@ -311,6 +318,8 @@ class Segmentation:
             Segmentation.prepare_network_remove_small_ways(G, remove_parking_aisle, remove_footways, remove_cycleways)
 
         Segmentation.prepare_network_remove_supplementary_highways(G)
+
+        Segmentation.prepare_network_remove_construction(G)
 
         G = ox.utils_graph.remove_isolated_nodes(G)
         if not keep_all_components and len(G.nodes) != 0:
